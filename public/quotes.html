@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+  <title>Quotations & Offers | TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+  <link rel="stylesheet" href="form-helpers.css"/>
+  <style>
+    .form-container .form-row { margin-top: 0; }
+    .form-container .form-row + .form-row { margin-top: var(--space-4); }
+    .search-bar { margin: var(--space-4) 0; }
+  </style>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu">
+    <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>
+    </button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+    <a href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg></span>Dashboard</a>
+    <a href="products.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7.2 12 12l8.7-4.8"/><path d="M12 22V12"/></svg></span>Products</a>
+    <a href="supplier.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 2v5h-5z"/><path d="M7 17a2 2 0 1 0 4 0"/><path d="M17 17a2 2 0 1 0 4 0"/></svg></span>Suppliers</a>
+    <a href="clients.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M2 21a8 8 0 0 1 20 0"/></svg></span>Clients</a>
+    <a href="mail.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>Mail</a>
+    <a href="quotes.html" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg></span>Quotations &amp; Offers</a>
+    <a href="sales-contract.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>Sales Contract</a>
+    <a href="indent.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>Indent</a>
+    <a href="sessions.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg></span>Sessions</a>
+    <a href="reports.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17V9"/><path d="M12 17V7"/><path d="M16 17v-4"/></svg></span>Reports</a>
+    <a href="admin.html" id="adminNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a8 8 0 0 0 .1-1l2-1.2-2-3.4-2.3.6a7.9 7.9 0 0 0-1.7-1L15 6h-6l-.5 2a7.9 7.9 0 0 0-1.7 1L4 8.4 2 11.8 4 13a8 8 0 0 0 .1 1L2 15.2l2 3.4 2.3-.6a7.9 7.9 0 0 0 1.7 1L9 22h6l.5-2a7.9 7.9 0 0 0 1.7-1l2.3.6 2-3.4-2.1-1.2Z"/></svg></span>Admin Panel</a>
+    <a href="settings.html" id="settingsNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a8 8 0 0 0 .1-1l2-1.2-2-3.4-2.3.6a7.9 7.9 0 0 0-1.7-1L15 6h-6l-.5 2a7.9 7.9 0 0 0-1.7 1L4 8.4 2 11.8 4 13a8 8 0 0 0 .1 1L2 15.2l2 3.4 2.3-.6a7.9 7.9 0 0 0 1.7 1L9 22h6l.5-2a7.9 7.9 0 0 0 1.7-1l2.3.6 2-3.4-2.1-1.2Z"/></svg></span>Settings</a>
+    <a href="#" id="logoutLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg></span>Logout</a>
+  </div>
+
+  <div class="main">
+    <header class="page-header">
+      <h1>Quotations &amp; Offers</h1>
+      <button type="button" class="btn" id="toggleQuoteFormBtn">New quotation</button>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-target="quotationsSection">Quotations</button>
+      <button class="tab-btn" data-target="offersSection">Offers</button>
+    </div>
+
+    <!-- QUOTATIONS SECTION -->
+    <div id="quotationsSection" class="section active">
+      <div class="form-container is-collapsed" id="quotationFormWrap">
+        <h2 style="margin-bottom: 12px;">Create Quotation</h2>
+        <form id="quotationForm">
+          <div class="form-row">
+            <div>
+              <label>Product</label>
+              <select id="quotationProduct" required></select>
+            </div>
+            <div class="quotation-client-box">
+              <label>Client(s) – select one or more</label>
+              <input type="text" id="quotationClientSearch" class="quotation-client-search" placeholder="Search clients…" />
+              <div class="client-select-wrap" id="quotationClientWrap">
+                <div class="select-all-row">
+                  <input type="checkbox" id="quotationSelectAllClients" />
+                  <label for="quotationSelectAllClients">Select all clients</label>
+                </div>
+                <div id="quotationClientCheckboxes"></div>
+              </div>
+              <div class="client-actions">
+                <button type="button" class="action-btn" id="addNewClientBtn" title="Add new client (full details)"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>New client</button>
+              </div>
+            </div>
+            <div>
+              <label>Link to Offer (optional)</label>
+              <select id="quotationOffer"></select>
+              <small style="color:#888; display:block; margin-top:4px;">Link to a supplier offer for reference</small>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top: 16px;">
+            <div>
+              <label>Supplier–Product (optional cost reference)</label>
+              <select id="quotationSupplierProduct"></select>
+            </div>
+            <div>
+              <label>Base cost (reference)</label>
+              <input type="number" id="quotationBaseCost" step="0.01" placeholder="Optional" />
+            </div>
+            <div>
+              <label>Final price</label>
+              <input type="number" id="quotationFinalPrice" required step="0.01" />
+            </div>
+            <div>
+              <label>Margin (%) – auto-calculated</label>
+              <input type="text" id="quotationMargin" readonly placeholder="—" class="input-readonly" />
+            </div>
+          </div>
+          <div class="form-row" style="margin-top: 16px;">
+            <div>
+              <label>HS Code</label>
+              <input type="text" id="quotationHsCode" placeholder="Auto-filled from product if empty" />
+            </div>
+            <div>
+              <label>Duties</label>
+              <input type="text" id="quotationDuties" placeholder="e.g. Import 5%, Sales 10%" />
+            </div>
+          </div>
+          <div class="email-check-row">
+            <input type="checkbox" id="quotationSendEmail" checked />
+            <label for="quotationSendEmail">Email quotation to selected client(s)</label>
+          </div>
+          <button type="submit" class="btn" id="sendQuotationBtn">Save Quotation</button>
+        </form>
+      </div>
+
+      <div class="search-bar">
+        <label for="quotationSearch">Search Quotations</label>
+        <input type="text" id="quotationSearch" placeholder="Search by product, client, HS code, duties..." />
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Client</th>
+              <th>Base cost</th>
+              <th>Margin</th>
+              <th>Final price</th>
+              <th>HS Code</th>
+              <th>Duties</th>
+              <th>Linked offer</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="quotationsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Add new client modal (full details) -->
+    <div id="newClientModal" class="view-modal-overlay" style="display:none;">
+      <div class="view-modal-box">
+        <div class="view-modal-header">
+          <h3>Add new client</h3>
+          <button type="button" class="btn" id="newClientModalClose"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>Close</button>
+        </div>
+        <form id="newClientForm" class="view-modal-body">
+          <label>Company name *</label>
+          <input type="text" id="ncCompanyName" required />
+          <label>Contact person(s) – one per line</label>
+          <textarea id="ncContactPersons" style="min-height:50px;"></textarea>
+          <label>Address</label>
+          <input type="text" id="ncAddress" />
+          <div class="form-row">
+            <div><label>Post code</label><input type="text" id="ncPostCode" /></div>
+            <div><label>City</label><input type="text" id="ncCity" /></div>
+            <div><label>Province</label><input type="text" id="ncProvince" /></div>
+            <div><label>Country</label><input type="text" id="ncCountry" /></div>
+          </div>
+          <label>Tel</label>
+          <input type="text" id="ncTel" />
+          <label>Mobile</label>
+          <input type="text" id="ncMobile" />
+          <label>Email *</label>
+          <input type="email" id="ncEmail" required />
+          <label>Web</label>
+          <input type="text" id="ncWeb" />
+          <label>WeChat / Facebook / Whatsapp / Others</label>
+          <input type="text" id="ncWechat" placeholder="WeChat" />
+          <input type="text" id="ncFacebook" placeholder="Facebook" />
+          <input type="text" id="ncWhatsapp" placeholder="Whatsapp" />
+          <textarea id="ncOthers" placeholder="Others" style="min-height:40px;"></textarea>
+          <div class="view-modal-btn-group" style="margin-top:12px;">
+            <button type="submit" class="btn">Add client &amp; select</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- OFFERS SECTION -->
+    <div id="offersSection" class="section">
+      <div style="margin-bottom:12px;">
+        <button type="button" class="btn" id="toggleOfferFormBtn">New offer request</button>
+      </div>
+      <div class="form-container is-collapsed" id="offerFormWrap">
+        <h2 style="margin-bottom: 12px;">Request Offer</h2>
+        <form id="offerForm">
+          <div class="form-row">
+            <div>
+              <label>Product</label>
+              <select id="offerProduct" required></select>
+            </div>
+            <div>
+              <label>Supplier</label>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <select id="offerSupplier" required style="flex:1;"></select>
+                <button type="button" class="action-btn" id="addNewSupplierBtn" title="Add new supplier"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>New</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top: 16px;">
+            <div>
+              <label>Notes / Requirements</label>
+              <textarea id="offerNotes" placeholder="Add any specific requirements or notes for this offer request"></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn" id="sendOfferBtn">Request Offer</button>
+        </form>
+      </div>
+
+      <div class="search-bar">
+        <label for="offerSearch">Search Offers</label>
+        <input type="text" id="offerSearch" placeholder="Search by product, supplier, notes..." />
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Supplier</th>
+              <th>Notes</th>
+              <th>Received price</th>
+              <th>Created At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="offersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="form-helpers.js"></script>
+  <script src="mail-compose.js"></script>
+  <script>
+    (function initMobileNav() {
+      var overlay = document.getElementById('sidebarOverlay');
+      var menuBtn = document.querySelector('.menu-toggle');
+      var closeBtn = document.querySelector('.sidebar-close');
+      function openSidebar() { document.body.classList.add('sidebar-open'); }
+      function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+      if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+      document.querySelectorAll('.sidebar a').forEach(function(a) { a.addEventListener('click', closeSidebar); });
+    })();
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.target).classList.add('active');
+      });
+    });
+
+    let allProducts = [], allClients = [], allSuppliers = [];
+
+    async function loadDropdowns() {
+      try {
+        const [productsRes, clientsRes, suppliersRes] = await Promise.all([
+          fetch('/api/products'),
+          fetch('/api/clients'),
+          fetch('/api/suppliers')
+        ]);
+        allProducts = await productsRes.json();
+        allClients = await clientsRes.json();
+        allSuppliers = await suppliersRes.json();
+
+        const quotationProduct = document.getElementById('quotationProduct');
+        const quotationClientCheckboxes = document.getElementById('quotationClientCheckboxes');
+        const quotationSelectAllClients = document.getElementById('quotationSelectAllClients');
+        const offerProduct = document.getElementById('offerProduct');
+        const offerSupplier = document.getElementById('offerSupplier');
+
+        quotationProduct.innerHTML = '<option value="">Select product</option>' + allProducts.map(p => `<option value="${p._id}">${p.name}</option>`).join('');
+        offerProduct.innerHTML = '<option value="">Select product</option>' + allProducts.map(p => `<option value="${p._id}">${p.name}</option>`).join('');
+        offerSupplier.innerHTML = '<option value="">Select supplier</option>' + allSuppliers.map(s => `<option value="${s._id}">${s.companyName}</option>`).join('');
+
+        function renderClientCheckboxes() {
+          quotationClientCheckboxes.innerHTML = '';
+          allClients.forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'client-checkbox-item';
+            div.dataset.search = (c.companyName || '').toLowerCase();
+            const id = 'client-cb-' + c._id;
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.id = id;
+            cb.value = c._id;
+            cb.className = 'quotation-client-cb';
+            const label = document.createElement('label');
+            label.htmlFor = id;
+            label.textContent = c.companyName;
+            div.appendChild(cb);
+            div.appendChild(label);
+            quotationClientCheckboxes.appendChild(div);
+          });
+          quotationSelectAllClients.checked = false;
+          quotationSelectAllClients.indeterminate = false;
+          filterQuotationClients();
+        }
+        function filterQuotationClients() {
+          const q = (document.getElementById('quotationClientSearch').value || '').trim().toLowerCase();
+          quotationClientCheckboxes.querySelectorAll('.client-checkbox-item').forEach(el => {
+            const match = !q || (el.dataset.search || '').includes(q);
+            el.classList.toggle('quotation-client-hidden', !match);
+          });
+          updateSelectAllState();
+        }
+        function updateSelectAllState() {
+          const visible = quotationClientCheckboxes.querySelectorAll('.client-checkbox-item:not(.quotation-client-hidden) .quotation-client-cb');
+          const checked = quotationClientCheckboxes.querySelectorAll('.client-checkbox-item:not(.quotation-client-hidden) .quotation-client-cb:checked');
+          if (visible.length === 0) {
+            quotationSelectAllClients.checked = false;
+            quotationSelectAllClients.indeterminate = false;
+          } else {
+            quotationSelectAllClients.checked = checked.length === visible.length;
+            quotationSelectAllClients.indeterminate = checked.length > 0 && checked.length < visible.length;
+          }
+        }
+        renderClientCheckboxes();
+        document.getElementById('quotationClientSearch').addEventListener('input', filterQuotationClients);
+        quotationSelectAllClients.addEventListener('change', function () {
+          quotationClientCheckboxes.querySelectorAll('.client-checkbox-item:not(.quotation-client-hidden) .quotation-client-cb').forEach(cb => {
+            cb.checked = quotationSelectAllClients.checked;
+          });
+          quotationSelectAllClients.indeterminate = false;
+          updateSelectAllState();
+        });
+        quotationClientCheckboxes.addEventListener('change', updateSelectAllState);
+
+        const quotationOfferSelect = document.getElementById('quotationOffer');
+        const loadOffersForProduct = async (productId) => {
+          const res = await fetch('/api/offers');
+          const offers = await res.json();
+          quotationOfferSelect.innerHTML = '<option value="">None</option>';
+          const toShow = productId ? offers.filter(o => o.product?._id === productId || o.product === productId) : offers;
+          toShow.forEach(o => {
+            const opt = document.createElement('option');
+            opt.value = o._id;
+            opt.dataset.receivedPrice = o.receivedPrice != null ? String(o.receivedPrice) : '';
+            opt.textContent = `${o.supplier?.companyName || 'Supplier'} – ${o.product?.name || 'Product'} (${new Date(o.createdAt).toLocaleDateString()})`;
+            quotationOfferSelect.appendChild(opt);
+          });
+          // When user selects an offer, fill base cost from received price
+        };
+        quotationOfferSelect.addEventListener('change', function () {
+          const opt = this.options[this.selectedIndex];
+          const baseCostEl = document.getElementById('quotationBaseCost');
+          if (opt && opt.value && opt.dataset.receivedPrice) {
+            baseCostEl.value = opt.dataset.receivedPrice;
+            updateQuotationMargin();
+          } else if (opt && !opt.value) {
+            baseCostEl.value = '';
+            updateQuotationMargin();
+          }
+        });
+
+        quotationProduct.addEventListener('change', async () => {
+          const productId = quotationProduct.value;
+          const product = allProducts.find(p => p._id === productId);
+          if (product && product.hsCode) document.getElementById('quotationHsCode').value = product.hsCode;
+          const spSelect = document.getElementById('quotationSupplierProduct');
+          spSelect.innerHTML = '<option value="">None</option>';
+          if (productId) {
+            const res = await fetch(`/api/supplier-products?productId=${productId}`);
+            const links = await res.json();
+            links.forEach(sp => {
+              const opt = document.createElement('option');
+              opt.value = sp._id;
+              opt.textContent = `${sp.supplierId?.companyName || ''} – ${sp.supplierPrice ?? ''} ${sp.currency || ''}`;
+              spSelect.appendChild(opt);
+            });
+            await loadOffersForProduct(productId);
+          } else {
+            quotationOfferSelect.innerHTML = '<option value="">None</option>';
+          }
+        });
+
+        document.getElementById('addNewClientBtn').addEventListener('click', () => {
+          document.getElementById('newClientModal').style.display = 'flex';
+        });
+        document.getElementById('newClientModalClose').addEventListener('click', () => {
+          document.getElementById('newClientModal').style.display = 'none';
+        });
+        document.getElementById('newClientForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const rawContacts = document.getElementById('ncContactPersons').value || '';
+          const contactPersons = rawContacts.split(/\n/).map(s => s.trim()).filter(Boolean);
+          const payload = {
+            companyName: document.getElementById('ncCompanyName').value.trim(),
+            contactPersons: JSON.stringify(contactPersons),
+            address: document.getElementById('ncAddress').value.trim(),
+            postCode: document.getElementById('ncPostCode').value.trim(),
+            city: document.getElementById('ncCity').value.trim(),
+            province: document.getElementById('ncProvince').value.trim(),
+            country: document.getElementById('ncCountry').value.trim(),
+            tel: document.getElementById('ncTel').value.trim(),
+            mobile: document.getElementById('ncMobile').value.trim(),
+            email: document.getElementById('ncEmail').value.trim(),
+            web: document.getElementById('ncWeb').value.trim(),
+            wechat: document.getElementById('ncWechat').value.trim(),
+            facebook: document.getElementById('ncFacebook').value.trim(),
+            whatsapp: document.getElementById('ncWhatsapp').value.trim(),
+            others: document.getElementById('ncOthers').value.trim(),
+            skipDuplicateCheck: false
+          };
+          try {
+            const res = await fetch('/api/clients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (res.status === 409) {
+              alert('A client with this company name already exists. Select it from the list.');
+              const existing = allClients.find(c => c._id === data.existingId);
+              if (!existing) { allClients.push({ _id: data.existingId, companyName: payload.companyName }); renderClientCheckboxes(); }
+              const cb = quotationClientCheckboxes.querySelector(`.quotation-client-cb[value="${data.existingId}"]`);
+              if (cb) cb.checked = true;
+              updateSelectAllState();
+              document.getElementById('newClientModal').style.display = 'none';
+              return;
+            }
+            if (!res.ok) throw new Error(data.error || 'Failed');
+            allClients.push(data.client);
+            renderClientCheckboxes();
+            const newCb = quotationClientCheckboxes.querySelector(`.quotation-client-cb[value="${data.client._id}"]`);
+            if (newCb) newCb.checked = true;
+            updateSelectAllState();
+            document.getElementById('newClientModal').style.display = 'none';
+            document.getElementById('newClientForm').reset();
+            alert('Client added and selected.');
+          } catch (err) {
+            alert(err.message);
+          }
+        });
+
+        function updateQuotationMargin() {
+          const base = parseFloat(document.getElementById('quotationBaseCost').value);
+          const final = parseFloat(document.getElementById('quotationFinalPrice').value);
+          const marginEl = document.getElementById('quotationMargin');
+          if (base != null && !isNaN(base) && base > 0 && final != null && !isNaN(final)) {
+            const margin = ((final - base) / base * 100).toFixed(2);
+            marginEl.value = margin + '%';
+          } else {
+            marginEl.value = '';
+          }
+        }
+        document.getElementById('quotationBaseCost').addEventListener('input', updateQuotationMargin);
+        document.getElementById('quotationFinalPrice').addEventListener('input', updateQuotationMargin);
+
+        document.getElementById('addNewSupplierBtn').addEventListener('click', async () => {
+          const companyName = prompt('New supplier – Company name:');
+          if (!companyName || !companyName.trim()) return;
+          const email = prompt('Contact email (optional):');
+          try {
+            const res = await fetch('/api/suppliers', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                companyName: companyName.trim(),
+                contactPersons: JSON.stringify([{ name: '', email: (email || '').trim() }]),
+                skipDuplicateCheck: false
+              })
+            });
+            const data = await res.json();
+            if (res.status === 409) {
+              alert('A supplier with this name already exists. Select it from the list.');
+              const sel = document.getElementById('offerSupplier');
+              const opt = sel.querySelector(`option[value="${data.existingId}"]`);
+              if (opt) opt.selected = true; else { const o = document.createElement('option'); o.value = data.existingId; o.textContent = companyName; sel.appendChild(o); sel.value = data.existingId; }
+              return;
+            }
+            if (!res.ok) throw new Error(data.error || 'Failed');
+            allSuppliers.push(data.supplier);
+            const o = document.createElement('option');
+            o.value = data.supplier._id;
+            o.textContent = data.supplier.companyName;
+            offerSupplier.appendChild(o);
+            offerSupplier.value = data.supplier._id;
+            alert('Supplier added and selected.');
+          } catch (err) {
+            alert(err.message);
+          }
+        });
+      } catch (err) {
+        console.error('Failed to load dropdowns:', err);
+        alert('Failed to load products/clients/suppliers');
+      }
+    }
+
+    async function loadQuotations() {
+      try {
+        const res = await fetch('/api/quotations');
+        const data = await res.json();
+        const quotations = Array.isArray(data) ? data : (data.items || []);
+        const tbody = document.getElementById('quotationsTableBody');
+        tbody.innerHTML = '';
+        quotations.forEach(q => {
+          const tr = document.createElement('tr');
+          const fp = q.finalPrice ?? q.price;
+          const offerLabel = q.offer ? (q.offer.supplier?.companyName || 'Offer') : '';
+          tr.innerHTML = `
+            <td contenteditable="false">${q.product?.name || ''}</td>
+            <td contenteditable="false">${q.client?.companyName || ''}</td>
+            <td contenteditable="false" data-field="baseCost">${q.baseCost ?? ''}</td>
+            <td contenteditable="false" data-field="margin">${q.margin ?? ''}</td>
+            <td contenteditable="false" data-field="finalPrice">${fp ?? ''}</td>
+            <td contenteditable="false" data-field="hsCode">${q.hsCode || ''}</td>
+            <td contenteditable="false" data-field="duties">${q.duties || ''}</td>
+            <td>${offerLabel}</td>
+            <td>${new Date(q.createdAt).toLocaleString()}</td>
+            <td>
+              <button class="action-btn quotation-pdf" data-id="${q._id}">PDF</button>
+              <button class="action-btn quotation-edit" data-id="${q._id}"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg></span>Edit</button>
+              <button class="action-btn quotation-save" data-id="${q._id}" style="display:none;">Save</button>
+              <button class="action-btn quotation-delete" data-id="${q._id}"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 16h10l1-16"/></svg></span>Delete</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error('Failed to load quotations:', err);
+        alert('Failed to load quotations');
+      }
+    }
+
+    // Load offers
+    async function loadOffers() {
+      try {
+        const res = await fetch('/api/offers');
+        const data = await res.json();
+        const offers = Array.isArray(data) ? data : (data.items || []);
+        const tbody = document.getElementById('offersTableBody');
+        tbody.innerHTML = '';
+
+        offers.forEach(o => {
+          const tr = document.createElement('tr');
+          const supplierName = o.supplier?.companyName || '';
+          tr.innerHTML = `
+            <td contenteditable="false">${o.product?.name || ''}</td>
+            <td contenteditable="false">${supplierName}</td>
+            <td contenteditable="false" data-field="notes">${o.notes || ''}</td>
+            <td contenteditable="false" data-field="receivedPrice">${o.receivedPrice ?? ''}</td>
+            <td>${new Date(o.createdAt).toLocaleString()}</td>
+            <td>
+              <button class="action-btn offer-edit" data-id="${o._id}"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg></span>Edit</button>
+              <button class="action-btn offer-save" data-id="${o._id}" style="display:none;">Save</button>
+              <button class="action-btn offer-delete" data-id="${o._id}"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 16h10l1-16"/></svg></span>Delete</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error('Failed to load offers:', err);
+        alert('Failed to load offers');
+      }
+    }
+
+    document.getElementById('quotationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('sendQuotationBtn');
+      btn.disabled = true;
+      const clientIds = Array.from(document.querySelectorAll('.quotation-client-cb:checked')).map(cb => cb.value);
+      if (!clientIds.length) { alert('Select at least one client'); btn.disabled = false; return; }
+      const finalPrice = parseFloat(document.getElementById('quotationFinalPrice').value);
+      if (isNaN(finalPrice)) { alert('Final price is required'); btn.disabled = false; return; }
+      const marginRaw = document.getElementById('quotationMargin').value;
+      const marginNum = marginRaw ? parseFloat(String(marginRaw).replace('%', '')) : undefined;
+      const payload = {
+        productId: document.getElementById('quotationProduct').value,
+        clientIds,
+        supplierProductId: document.getElementById('quotationSupplierProduct').value || undefined,
+        offerId: document.getElementById('quotationOffer').value || undefined,
+        baseCost: document.getElementById('quotationBaseCost').value ? parseFloat(document.getElementById('quotationBaseCost').value) : undefined,
+        margin: marginNum,
+        finalPrice,
+        hsCode: document.getElementById('quotationHsCode').value || undefined,
+        duties: document.getElementById('quotationDuties').value || undefined,
+        sendEmail: document.getElementById('quotationSendEmail').checked,
+      };
+      try {
+        const res = await fetch('/api/quotations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Failed to create quotation');
+        alert(result.message || 'Quotation(s) created');
+        e.target.reset();
+        document.getElementById('quotationMargin').value = '';
+        document.getElementById('quotationSupplierProduct').innerHTML = '<option value="">None</option>';
+        document.getElementById('quotationOffer').innerHTML = '<option value="">None</option>';
+        document.getElementById('quotationSendEmail').checked = true;
+        await loadQuotations();
+      } catch (err) {
+        alert(err.message);
+      } finally { btn.disabled = false; }
+    });
+
+    // Offer form submit
+    document.getElementById('offerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('sendOfferBtn');
+      btn.disabled = true;
+
+      const payload = {
+        productId: document.getElementById('offerProduct').value,
+        supplierId: document.getElementById('offerSupplier').value,
+        notes: document.getElementById('offerNotes').value || undefined,
+      };
+
+      try {
+        const res = await fetch('/api/offers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Failed to create offer');
+
+        alert(result.message || 'Offer request created successfully');
+        e.target.reset();
+        await loadOffers();
+      } catch (err) {
+        console.error('Create offer failed:', err);
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Edit / Save / Delete handlers for quotations
+    document.getElementById('quotationsTableBody').addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('.quotation-edit');
+      const saveBtn = e.target.closest('.quotation-save');
+      const deleteBtn = e.target.closest('.quotation-delete');
+      const pdfBtn = e.target.closest('.quotation-pdf');
+
+      if (pdfBtn) {
+        window.open('/api/quotations/' + pdfBtn.dataset.id + '/pdf', '_blank');
+        return;
+      }
+
+      if (editBtn) {
+        const row = editBtn.closest('tr');
+        const cells = row.querySelectorAll('td');
+        [2,3,4,5,6].forEach(idx => {
+          cells[idx].contentEditable = true;
+          // Keep edit mode readable in light theme
+          cells[idx].style.backgroundColor = 'var(--bg-input)';
+          cells[idx].style.color = 'var(--text-primary)';
+        });
+        editBtn.style.display = 'none';
+        row.querySelector('.quotation-save').style.display = 'inline-block';
+      }
+
+      if (saveBtn) {
+        const id = saveBtn.dataset.id;
+        const row = saveBtn.closest('tr');
+        const cells = row.querySelectorAll('td');
+        const baseCost = cells[2].textContent.trim();
+        const margin = cells[3].textContent.trim();
+        const finalPrice = parseFloat(cells[4].textContent.trim()) || 0;
+        const hsCode = cells[5].textContent.trim();
+        const duties = cells[6].textContent.trim();
+
+        try {
+          const res = await fetch(`/api/quotations/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              baseCost: baseCost ? parseFloat(baseCost) : undefined,
+              margin: margin ? parseFloat(String(margin).replace('%', '')) : undefined,
+              finalPrice,
+              hsCode: hsCode || undefined,
+              duties: duties || undefined,
+            }),
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Failed to update quotation');
+
+          alert(result.message || 'Quotation updated');
+          await loadQuotations();
+        } catch (err) {
+          console.error('Update quotation failed:', err);
+          alert(err.message);
+        }
+      }
+
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        if (!confirm('Delete this quotation?')) return;
+        try {
+          const res = await fetch(`/api/quotations/${id}`, { method: 'DELETE' });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Failed to delete quotation');
+          alert(result.message || 'Quotation deleted');
+          await loadQuotations();
+        } catch (err) {
+          console.error('Delete quotation failed:', err);
+          alert(err.message);
+        }
+      }
+    });
+
+    // Edit / Save / Delete handlers for offers
+    document.getElementById('offersTableBody').addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('.offer-edit');
+      const saveBtn = e.target.closest('.offer-save');
+      const deleteBtn = e.target.closest('.offer-delete');
+
+      if (editBtn) {
+        const row = editBtn.closest('tr');
+        const cells = row.querySelectorAll('td');
+        cells[2].contentEditable = true;
+        // Keep edit mode readable in light theme
+        cells[2].style.backgroundColor = 'var(--bg-input)';
+        cells[2].style.color = 'var(--text-primary)';
+        cells[3].contentEditable = true;
+        // Keep edit mode readable in light theme
+        cells[3].style.backgroundColor = 'var(--bg-input)';
+        cells[3].style.color = 'var(--text-primary)';
+        editBtn.style.display = 'none';
+        row.querySelector('.offer-save').style.display = 'inline-block';
+      }
+
+      if (saveBtn) {
+        const id = saveBtn.dataset.id;
+        const row = saveBtn.closest('tr');
+        const cells = row.querySelectorAll('td');
+        const notes = cells[2].textContent.trim();
+        const receivedPriceRaw = cells[3].textContent.trim();
+        const receivedPrice = receivedPriceRaw === '' ? undefined : parseFloat(receivedPriceRaw);
+
+        try {
+          const res = await fetch(`/api/offers/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes, receivedPrice: receivedPriceRaw === '' ? '' : receivedPrice }),
+          });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Failed to update offer');
+
+          alert(result.message || 'Offer updated');
+          await loadOffers();
+        } catch (err) {
+          console.error('Update offer failed:', err);
+          alert(err.message);
+        }
+      }
+
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        if (!confirm('Delete this offer?')) return;
+        try {
+          const res = await fetch(`/api/offers/${id}`, { method: 'DELETE' });
+          const result = await res.json();
+          if (!res.ok) throw new Error(result.error || 'Failed to delete offer');
+          alert(result.message || 'Offer deleted');
+          await loadOffers();
+        } catch (err) {
+          console.error('Delete offer failed:', err);
+          alert(err.message);
+        }
+      }
+    });
+
+    // Search filtering
+    document.getElementById('quotationSearch').addEventListener('input', () => {
+      const filter = document.getElementById('quotationSearch').value.toLowerCase();
+      const rows = document.querySelectorAll('#quotationsTableBody tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+      });
+    });
+
+    document.getElementById('offerSearch').addEventListener('input', () => {
+      const filter = document.getElementById('offerSearch').value.toLowerCase();
+      const rows = document.querySelectorAll('#offersTableBody tr');
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+      });
+    });
+
+    // Initial load
+    (async function init() {
+      await loadDropdowns();
+      if (window.TriForm) {
+        TriForm.initSearchableSelect(document.getElementById('quotationProduct'), {
+          placeholder: 'Select product',
+          searchPlaceholder: 'Search products…',
+          showEmptyOption: true,
+        });
+        TriForm.initSearchableSelect(document.getElementById('offerProduct'), {
+          placeholder: 'Select product',
+          searchPlaceholder: 'Search products…',
+          showEmptyOption: true,
+        });
+        TriForm.initSearchableSelect(document.getElementById('offerSupplier'), {
+          placeholder: 'Select supplier',
+          searchPlaceholder: 'Search suppliers…',
+          showEmptyOption: true,
+        });
+      }
+      document.getElementById('toggleQuoteFormBtn').addEventListener('click', function() {
+        var wrap = document.getElementById('quotationFormWrap');
+        var open = wrap.classList.toggle('is-collapsed') === false;
+        this.textContent = open ? 'Close form' : 'New quotation';
+      });
+      document.getElementById('toggleOfferFormBtn').addEventListener('click', function() {
+        var wrap = document.getElementById('offerFormWrap');
+        var open = wrap.classList.toggle('is-collapsed') === false;
+        this.textContent = open ? 'Close form' : 'New offer request';
+      });
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('new') === '1') {
+        document.getElementById('quotationFormWrap').classList.remove('is-collapsed');
+        document.getElementById('toggleQuoteFormBtn').textContent = 'Close form';
+      }
+      await loadQuotations();
+      await loadOffers();
+    })();
+  </script>
+</body>
+</html>
+

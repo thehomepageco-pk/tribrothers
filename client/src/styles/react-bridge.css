@@ -1,0 +1,367 @@
+/**
+ * React SPA bridge — only what the original CSS does not cover.
+ * Prefer original class names from style.css / responsive.css / form-helpers.css.
+ */
+
+/* Let body.app-layout / body.login-page flex children as in the HTML app */
+body.app-layout #root,
+body.login-page #root {
+  display: contents;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Secondary / ghost button aliases → action-btn look */
+.btn-secondary,
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 8px 14px;
+  min-height: 36px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.btn-secondary:hover,
+.btn-ghost:hover {
+  background: var(--bg-input);
+  border-color: var(--border-strong);
+}
+
+.btn-sm {
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+}
+
+.btn-danger {
+  background: var(--error);
+  color: #fff;
+  border-color: transparent;
+}
+
+.btn-danger:hover {
+  filter: brightness(0.95);
+}
+
+/* Page header actions cluster (React convenience; HTML puts btn next to h1) */
+.page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-left: auto;
+}
+
+/* Generic toolbar alias → products-toolbar layout */
+.toolbar,
+.products-toolbar,
+.suppliers-toolbar,
+.clients-toolbar,
+.quotes-toolbar,
+.sales-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  margin-bottom: var(--space-5);
+}
+
+.toolbar .field,
+.toolbar .toolbar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+.toolbar input[type="search"],
+.toolbar input[type="text"],
+.toolbar select {
+  min-width: 180px;
+}
+
+/* React form field grid (HTML uses stacked labels; keep usable for SPA forms) */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+.field label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  font: inherit;
+  color: var(--text-primary);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-muted);
+  background: #fff;
+}
+
+.field textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.form-grid .span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+  .form-grid .span-2 {
+    grid-column: span 1;
+  }
+}
+
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.panel-title {
+  font-size: 0.95rem;
+  font-weight: 650;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+}
+
+.loading-block {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 650;
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+}
+
+.badge-success { background: var(--success-soft); color: var(--success); }
+.badge-warning { background: var(--warning-soft); color: var(--warning); }
+.badge-error { background: var(--error-soft); color: var(--error); }
+.badge-accent { background: var(--accent-soft); color: var(--accent); }
+.badge-new {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #0a84ff;
+  color: #fff;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg-muted);
+  border-radius: 12px;
+  width: fit-content;
+  margin-bottom: 16px;
+}
+
+.tab {
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: #fff;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+.line-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Modal footer for React Modal component using view-modal-* */
+.view-modal-footer {
+  padding: var(--space-4) var(--space-6);
+  border-top: 1px solid var(--border-default);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.view-modal-box.view-modal-lg {
+  max-width: 1100px;
+}
+
+/* Highlight deep-linked rows */
+tr.is-highlight,
+tr.is-selected {
+  background: var(--accent-soft) !important;
+}
+
+/* Checkbox / pick lists inside React forms */
+.category-checkboxes,
+.form-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 8px 0 12px;
+  padding: 12px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.category-checkboxes label,
+.form-checkbox-list label {
+  display: flex !important;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  margin: 0 !important;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.category-checkboxes label:last-child,
+.form-checkbox-list label:last-child {
+  border-bottom: none;
+}
+
+.category-checkboxes input[type="checkbox"],
+.form-checkbox-list input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px;
+  min-width: 18px;
+  margin: 2px 0 0 !important;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.category-new-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.category-new-row input {
+  flex: 1;
+  min-width: 160px;
+}
+
+.product-form-section-title {
+  margin: 1.5rem 0 0.5rem;
+  padding-bottom: 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.form-hint {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.8125rem;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.address-fields-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+/* Sidebar logout as <button> styled like original #logoutLink */
+.sidebar a#logoutLink,
+.sidebar button#logoutLink {
+  margin-top: 12px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  padding-top: 14px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.sidebar button#logoutLink:hover {
+  color: var(--text-primary);
+  background: var(--bg-muted);
+}

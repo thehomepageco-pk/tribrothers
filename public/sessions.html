@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+  <title>Sessions | TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu">
+    <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>
+    </button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+    <a href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg></span>Dashboard</a>
+    <a href="products.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7.2 12 12l8.7-4.8"/><path d="M12 22V12"/></svg></span>Products</a>
+    <a href="supplier.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 2v5h-5z"/><path d="M7 17a2 2 0 1 0 4 0"/><path d="M17 17a2 2 0 1 0 4 0"/></svg></span>Suppliers</a>
+    <a href="clients.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M2 21a8 8 0 0 1 20 0"/></svg></span>Clients</a>
+    <a href="mail.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>Mail</a>
+    <a href="quotes.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg></span>Quotations &amp; Offers</a>
+    <a href="sales-contract.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>Sales Contract</a>
+    <a href="indent.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>Indent</a>
+    <a href="sessions.html" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg></span>Sessions</a>
+    <a href="reports.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17V9"/><path d="M12 17V7"/><path d="M16 17v-4"/></svg></span>Reports</a>
+    <a href="admin.html" id="adminNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a8 8 0 0 0 .1-1l2-1.2-2-3.4-2.3.6a7.9 7.9 0 0 0-1.7-1L15 6h-6l-.5 2a7.9 7.9 0 0 0-1.7 1L4 8.4 2 11.8 4 13a8 8 0 0 0 .1 1L2 15.2l2 3.4 2.3-.6a7.9 7.9 0 0 0 1.7 1L9 22h6l.5-2a7.9 7.9 0 0 0 1.7-1l2.3.6 2-3.4-2.1-1.2Z"/></svg></span>Admin Panel</a>
+    <a href="settings.html" id="settingsNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a8 8 0 0 0 .1-1l2-1.2-2-3.4-2.3.6a7.9 7.9 0 0 0-1.7-1L15 6h-6l-.5 2a7.9 7.9 0 0 0-1.7 1L4 8.4 2 11.8 4 13a8 8 0 0 0 .1 1L2 15.2l2 3.4 2.3-.6a7.9 7.9 0 0 0 1.7 1L9 22h6l.5-2a7.9 7.9 0 0 0 1.7-1l2.3.6 2-3.4-2.1-1.2Z"/></svg></span>Settings</a>
+    <a href="#" id="logoutLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg></span>Logout</a>
+  </div>
+
+  <div class="main">
+    <h1>Activity &amp; Sessions</h1>
+    <p style="margin-bottom: 16px; color: var(--text-secondary); font-size: 0.9rem;">
+      Recent logins and changes made by users. Only visible to admin.
+    </p>
+
+    <div class="table-wrap">
+      <table class="clients-table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>User</th>
+            <th>Role</th>
+            <th>What happened</th>
+          </tr>
+        </thead>
+        <tbody id="sessionsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="session-activity.js"></script>
+  <script>
+    (function initMobileNav() {
+      var overlay = document.getElementById('sidebarOverlay');
+      var menuBtn = document.querySelector('.menu-toggle');
+      var closeBtn = document.querySelector('.sidebar-close');
+      function openSidebar() { document.body.classList.add('sidebar-open'); }
+      function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+      if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+      document.querySelectorAll('.sidebar a').forEach(function(a) { a.addEventListener('click', closeSidebar); });
+    })();
+
+    // Light-only: no theme toggle
+
+    // Auth guard: only allow users with sessions permission
+    window.triAuthReady.then(function(user) {
+      if (!user) return;
+      if (user.role !== 'admin' && !(user.permissions && user.permissions.sessions)) {
+        alert('You do not have permission to view sessions.');
+        window.location.href = '/index.html';
+      } else {
+        loadSessions();
+      }
+    });
+
+    async function loadSessions() {
+      try {
+        const res = await fetch('/api/sessions');
+        if (!res.ok) {
+          console.error('Failed to load sessions');
+          return;
+        }
+        const events = await res.json();
+        const tbody = document.getElementById('sessionsTableBody');
+        tbody.innerHTML = '';
+        if (!events.length) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = '<td colspan="4" style="text-align:center;color:var(--text-secondary);padding:16px 0;">No activity yet.</td>';
+          tbody.appendChild(tr);
+          return;
+        }
+        events.forEach(function(ev) {
+          const tr = document.createElement('tr');
+          const createdAt = ev.createdAt ? new Date(ev.createdAt) : null;
+          const when = createdAt ? createdAt.toLocaleString() : '';
+          const userName = (ev.username || (ev.userId && ev.userId.username) || '—');
+          const role = (ev.role || (ev.userId && ev.userId.role) || 'user');
+          const summary = (window.TriSessionActivity && TriSessionActivity.formatSessionActivity)
+            ? TriSessionActivity.formatSessionActivity(ev)
+            : (ev.action || '—');
+          tr.innerHTML = `
+            <td>${when}</td>
+            <td>${userName}</td>
+            <td>${role}</td>
+            <td>${summary}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error('Error loading sessions:', err);
+      }
+    }
+
+    (function initLogout() {
+      var link = document.getElementById('logoutLink');
+      if (!link) return;
+      link.addEventListener('click', async function(e) {
+        e.preventDefault();
+        try {
+          await fetch('/logout', { method: 'POST' });
+        } catch (_) {}
+        window.location.href = '/login.html';
+      });
+    })();
+  </script>
+</body>
+</html>
+

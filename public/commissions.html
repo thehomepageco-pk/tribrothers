@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+  <title>Commissions | TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+  <link rel="stylesheet" href="form-helpers.css"/>
+  <style>
+    .com-kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-5); }
+    .com-kpi { padding: var(--space-4); background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); }
+    .com-kpi-label { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 4px; }
+    .com-kpi-value { font-size: 1.25rem; font-weight: 700; }
+    .com-toolbar { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-end; margin-bottom: var(--space-4); }
+    .com-toolbar .toolbar-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.8125rem; }
+    .com-type-badge, .com-status-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+    .com-type-client { background: #dbeafe; color: #1e40af; }
+    .com-type-supplier { background: #dcfce7; color: #166534; }
+    .com-status-unpaid { background: #fee2e2; color: #991b1b; }
+    .com-status-partial { background: #fef3c7; color: #92400e; }
+    .com-status-paid { background: #dcfce7; color: #166534; }
+    .com-status-cancelled { background: #f3f4f6; color: #6b7280; }
+    .pay-modal-overlay {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      padding: var(--space-4); background: rgba(148, 163, 184, 0.35); z-index: 1000;
+    }
+    .pay-modal-box {
+      background: var(--bg-surface); border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl); max-width: 520px; width: 100%;
+      box-shadow: var(--shadow-lg); overflow: hidden; max-height: 90vh; overflow-y: auto;
+    }
+    .pay-modal-header {
+      padding: var(--space-5) var(--space-6); border-bottom: 1px solid var(--border-default);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .pay-modal-header h2 { margin: 0; font-size: 1.125rem; font-weight: 600; }
+    .pay-modal-body { padding: var(--space-6); }
+    .pay-modal-body label { display: block; margin: 12px 0 6px; font-weight: 600; font-size: 0.8125rem; }
+    .pay-modal-body label:first-child { margin-top: 0; }
+    .pay-modal-body input, .pay-modal-body select, .pay-modal-body textarea { width: 100%; box-sizing: border-box; }
+    .pay-modal-actions { display: flex; gap: var(--space-3); margin-top: var(--space-5); }
+    .com-payments-list { margin-top: 12px; font-size: 0.875rem; }
+    .com-payments-list li { margin: 6px 0; display: flex; justify-content: space-between; gap: 8px; }
+  </style>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu">
+    <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>
+    </button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+  </div>
+
+  <div class="main">
+    <header class="page-header">
+      <h1>Commissions</h1>
+      <button type="button" id="syncBtn" class="btn">Sync from contracts &amp; indents</button>
+    </header>
+
+    <div class="com-kpi-row" id="kpiRow">
+      <div class="com-kpi"><div class="com-kpi-label">Total outstanding</div><div class="com-kpi-value" id="kpiOutstanding">—</div></div>
+      <div class="com-kpi"><div class="com-kpi-label">Total paid</div><div class="com-kpi-value" id="kpiPaid">—</div></div>
+      <div class="com-kpi"><div class="com-kpi-label">Unpaid records</div><div class="com-kpi-value" id="kpiUnpaid">—</div></div>
+      <div class="com-kpi"><div class="com-kpi-label">Partially paid</div><div class="com-kpi-value" id="kpiPartial">—</div></div>
+    </div>
+
+    <div class="com-toolbar products-toolbar">
+      <div class="toolbar-group">
+        <label for="comSearchInput">Search</label>
+        <input type="text" id="comSearchInput" placeholder="Commission #, party, contract, indent…" />
+      </div>
+      <div class="toolbar-group">
+        <label for="comTypeFilter">Type</label>
+        <select id="comTypeFilter">
+          <option value="">All types</option>
+          <option value="client">Client margin</option>
+          <option value="supplier">Supplier commission</option>
+        </select>
+      </div>
+      <div class="toolbar-group">
+        <label for="comStatusFilter">Status</label>
+        <select id="comStatusFilter">
+          <option value="">All statuses</option>
+          <option value="Unpaid">Unpaid</option>
+          <option value="Partially paid">Partially paid</option>
+          <option value="Paid">Paid</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Type</th>
+            <th>Source</th>
+            <th>Party</th>
+            <th>Qty (MT)</th>
+            <th>Rate/MT</th>
+            <th>Amount</th>
+            <th>Paid</th>
+            <th>Balance</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="comTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script>
+    (function initMobileNav() {
+      var overlay = document.getElementById('sidebarOverlay');
+      document.querySelector('.menu-toggle')?.addEventListener('click', function() { document.body.classList.add('sidebar-open'); });
+      document.querySelector('.sidebar-close')?.addEventListener('click', function() { document.body.classList.remove('sidebar-open'); });
+      overlay?.addEventListener('click', function() { document.body.classList.remove('sidebar-open'); });
+      document.querySelectorAll('.sidebar a').forEach(function(a) { a.addEventListener('click', function() { document.body.classList.remove('sidebar-open'); }); });
+    })();
+
+    function esc(s) {
+      if (s == null) return '';
+      var d = document.createElement('div');
+      d.textContent = String(s);
+      return d.innerHTML;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      var d = new Date(iso);
+      return isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+    }
+
+    function formatMoney(amount, code) {
+      var n = Number(amount);
+      if (Number.isNaN(n)) return '—';
+      code = code || 'USD';
+      try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: code }).format(n);
+      } catch (_) {
+        return code + ' ' + n.toFixed(2);
+      }
+    }
+
+    function typeBadge(type) {
+      var label = type === 'supplier' ? 'Supplier' : 'Client margin';
+      var cls = type === 'supplier' ? 'com-type-supplier' : 'com-type-client';
+      return '<span class="com-type-badge ' + cls + '">' + label + '</span>';
+    }
+
+    function statusClass(status) {
+      if (status === 'Partially paid') return 'com-status-partial';
+      if (status === 'Paid') return 'com-status-paid';
+      if (status === 'Cancelled') return 'com-status-cancelled';
+      return 'com-status-unpaid';
+    }
+
+    function statusBadge(status) {
+      var s = status || 'Unpaid';
+      return '<span class="com-status-badge ' + statusClass(s) + '">' + esc(s) + '</span>';
+    }
+
+    function sourceCell(c) {
+      var parts = [];
+      if (c.indent && c.indent.indentNumber) {
+        parts.push('<a href="indent.html">' + esc(c.indent.indentNumber) + '</a>');
+      }
+      if (c.salesContract && c.salesContract.contractNumber) {
+        parts.push('<a href="sales-contract.html">' + esc(c.salesContract.contractNumber) + '</a>');
+      }
+      return parts.length ? parts.join(' · ') : '—';
+    }
+
+    var allCommissions = [];
+
+    function getFiltered() {
+      var q = (document.getElementById('comSearchInput').value || '').trim().toLowerCase();
+      var type = document.getElementById('comTypeFilter').value;
+      var status = document.getElementById('comStatusFilter').value;
+      return allCommissions.filter(function(c) {
+        if (type && c.type !== type) return false;
+        if (status && c.status !== status) return false;
+        if (!q) return true;
+        var hay = [
+          c.commissionNumber, c.partyLabel, c.description,
+          c.salesContract && c.salesContract.contractNumber,
+          c.indent && c.indent.indentNumber,
+        ].filter(Boolean).join(' ').toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    function renderSummary(summary) {
+      var cur = (summary.currencies && summary.currencies[0]) || null;
+      document.getElementById('kpiOutstanding').textContent = cur ? formatMoney(cur.balance, cur.currency) : '—';
+      document.getElementById('kpiPaid').textContent = cur ? formatMoney(cur.paid, cur.currency) : '—';
+      document.getElementById('kpiUnpaid').textContent = cur ? String(cur.unpaid) : '0';
+      document.getElementById('kpiPartial').textContent = cur ? String(cur.partial) : '0';
+    }
+
+    function renderTable() {
+      var list = getFiltered();
+      var tbody = document.getElementById('comTableBody');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:16px;color:var(--text-secondary);">No commissions yet. Save indents/contracts with commission rates, then click Sync.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(function(c) {
+        var cur = c.currency || 'USD';
+        var paid = c.paidAmount != null ? Number(c.paidAmount) : 0;
+        var balance = c.balance != null ? Number(c.balance) : Math.max(0, (Number(c.amount) || 0) - paid);
+        return '<tr>' +
+          '<td class="cell-nowrap">' + esc(c.commissionNumber) + '</td>' +
+          '<td>' + typeBadge(c.type) + '</td>' +
+          '<td class="cell-nowrap">' + sourceCell(c) + '</td>' +
+          '<td>' + esc(c.partyLabel || '—') + '</td>' +
+          '<td class="cell-nowrap">' + esc(Number(c.quantityMt || 0).toFixed(3)) + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatMoney(c.ratePerMt, cur)) + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatMoney(c.amount, cur)) + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatMoney(paid, cur)) + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatMoney(balance, cur)) + '</td>' +
+          '<td>' + statusBadge(c.status) + '</td>' +
+          '<td class="cell-actions">' +
+            '<button type="button" class="action-btn com-pay-btn" data-id="' + esc(c._id) + '" data-balance="' + esc(balance) + '" data-currency="' + esc(cur) + '">Record payment</button> ' +
+            '<button type="button" class="action-btn com-detail-btn" data-id="' + esc(c._id) + '">Details</button>' +
+          '</td></tr>';
+      }).join('');
+
+      tbody.querySelectorAll('.com-pay-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          openPaymentModal(btn.getAttribute('data-id'), btn.getAttribute('data-balance'), btn.getAttribute('data-currency'));
+        });
+      });
+      tbody.querySelectorAll('.com-detail-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { openDetailModal(btn.getAttribute('data-id')); });
+      });
+    }
+
+    async function loadCommissions() {
+      var res = await fetch('/api/commissions');
+      allCommissions = res.ok ? await res.json() : [];
+      renderTable();
+    }
+
+    async function loadSummary() {
+      var res = await fetch('/api/commissions/summary');
+      if (res.ok) renderSummary(await res.json());
+    }
+
+    async function syncCommissions() {
+      var btn = document.getElementById('syncBtn');
+      btn.disabled = true;
+      btn.textContent = 'Syncing…';
+      try {
+        var res = await fetch('/api/commissions/sync', { method: 'POST' });
+        var r = await res.json();
+        if (!res.ok) { alert(r.error || 'Sync failed'); return; }
+        if (window.triToast) triToast('Synced ' + (r.synced || 0) + ' commission records', 'success');
+        await Promise.all([loadCommissions(), loadSummary()]);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sync from contracts & indents';
+      }
+    }
+
+    function openPaymentModal(commissionId, balance, currency) {
+      var existing = document.getElementById('comPaymentModal');
+      if (existing) existing.remove();
+      var modal = document.createElement('div');
+      modal.id = 'comPaymentModal';
+      modal.className = 'pay-modal-overlay';
+      modal.innerHTML =
+        '<div class="pay-modal-box" role="dialog">' +
+          '<div class="pay-modal-header"><h2>Record commission payment</h2><button type="button" class="action-btn" id="comPayClose">Close</button></div>' +
+          '<div class="pay-modal-body">' +
+            '<p class="form-hint">Outstanding balance: <strong>' + esc(formatMoney(balance, currency)) + '</strong></p>' +
+            '<label for="comPayAmount">Amount *</label>' +
+            '<input type="number" id="comPayAmount" min="0.01" step="0.01" value="' + esc(Number(balance) > 0 ? balance : '') + '" />' +
+            '<label for="comPayDate">Payment date *</label>' +
+            '<input type="date" id="comPayDate" value="' + esc(new Date().toISOString().slice(0, 10)) + '" />' +
+            '<label for="comPayMethod">Method *</label>' +
+            '<select id="comPayMethod"><option value="TT">TT</option><option value="Cash">Cash</option><option value="Cheque">Cheque</option><option value="LC">LC</option><option value="Other">Other</option></select>' +
+            '<label for="comPayReference">Reference</label>' +
+            '<input type="text" id="comPayReference" placeholder="Transaction / cheque ref" />' +
+            '<label for="comPayNotes">Notes</label>' +
+            '<textarea id="comPayNotes" rows="2"></textarea>' +
+            '<div class="pay-modal-actions">' +
+              '<button type="button" class="btn" id="comPaySubmit">Save payment</button>' +
+              '<button type="button" class="action-btn" id="comPayCancel">Cancel</button>' +
+            '</div></div></div>';
+      document.body.appendChild(modal);
+      function close() { modal.remove(); }
+      modal.querySelector('#comPayClose').addEventListener('click', close);
+      modal.querySelector('#comPayCancel').addEventListener('click', close);
+      modal.addEventListener('click', function(e) { if (e.target === modal) close(); });
+      modal.querySelector('#comPaySubmit').addEventListener('click', async function() {
+        var amount = parseFloat(document.getElementById('comPayAmount').value);
+        if (!amount || amount <= 0) { alert('Enter a valid amount.'); return; }
+        var res = await fetch('/api/commissions/' + encodeURIComponent(commissionId) + '/payments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: amount,
+            paymentDate: document.getElementById('comPayDate').value,
+            method: document.getElementById('comPayMethod').value,
+            reference: document.getElementById('comPayReference').value.trim(),
+            notes: document.getElementById('comPayNotes').value.trim(),
+            currency: currency,
+          }),
+        });
+        var r = await res.json();
+        if (!res.ok) { alert(r.error || 'Payment failed'); return; }
+        close();
+        await Promise.all([loadCommissions(), loadSummary()]);
+        if (window.triToast) triToast('Payment recorded', 'success');
+      });
+    }
+
+    function openDetailModal(commissionId) {
+      var c = allCommissions.find(function(x) { return String(x._id) === String(commissionId); });
+      if (!c) return;
+      var existing = document.getElementById('comDetailModal');
+      if (existing) existing.remove();
+      var cur = c.currency || 'USD';
+      var payments = c.payments || [];
+      var payList = payments.length
+        ? '<ul class="com-payments-list">' + payments.map(function(p) {
+            return '<li><span>' + esc(formatDate(p.paymentDate)) + ' · ' + esc(p.method) +
+              (p.reference ? ' · ' + esc(p.reference) : '') + '</span><span>' + esc(formatMoney(p.amount, cur)) +
+              ' <button type="button" class="action-btn com-del-pay" data-id="' + esc(p._id) + '" style="font-size:0.75rem;padding:2px 6px;">Remove</button></span></li>';
+          }).join('') + '</ul>'
+        : '<p class="form-hint">No payments recorded yet.</p>';
+
+      var modal = document.createElement('div');
+      modal.id = 'comDetailModal';
+      modal.className = 'pay-modal-overlay';
+      modal.innerHTML =
+        '<div class="pay-modal-box" role="dialog">' +
+          '<div class="pay-modal-header"><h2>' + esc(c.commissionNumber) + '</h2><button type="button" class="action-btn" id="comDetailClose">Close</button></div>' +
+          '<div class="pay-modal-body">' +
+            '<p><strong>Type:</strong> ' + (c.type === 'supplier' ? 'Supplier commission' : 'Client margin') + '</p>' +
+            '<p><strong>Party:</strong> ' + esc(c.partyLabel || '—') + '</p>' +
+            '<p><strong>Description:</strong> ' + esc(c.description || '—') + '</p>' +
+            '<p><strong>Amount:</strong> ' + esc(formatMoney(c.amount, cur)) + ' · <strong>Paid:</strong> ' + esc(formatMoney(c.paidAmount, cur)) + ' · <strong>Balance:</strong> ' + esc(formatMoney(c.balance, cur)) + '</p>' +
+            '<p><strong>Earned:</strong> ' + esc(formatDate(c.earnedDate)) + '</p>' +
+            '<label for="comDueDate">Due date</label>' +
+            '<input type="date" id="comDueDate" value="' + esc(c.dueDate ? new Date(c.dueDate).toISOString().slice(0, 10) : '') + '" />' +
+            '<label for="comNotes">Notes</label>' +
+            '<textarea id="comNotes" rows="3">' + esc(c.notes || '') + '</textarea>' +
+            '<h3 style="font-size:1rem;margin:16px 0 8px;">Payment history</h3>' + payList +
+            '<div class="pay-modal-actions">' +
+              '<button type="button" class="btn" id="comSaveNotes">Save notes</button>' +
+              (c.status !== 'Cancelled' ? '<button type="button" class="action-btn" id="comCancelCommission">Mark cancelled</button>' : '') +
+            '</div></div></div>';
+      document.body.appendChild(modal);
+      function close() { modal.remove(); }
+      modal.querySelector('#comDetailClose').addEventListener('click', close);
+      modal.addEventListener('click', function(e) { if (e.target === modal) close(); });
+      modal.querySelector('#comSaveNotes').addEventListener('click', async function() {
+        var res = await fetch('/api/commissions/' + encodeURIComponent(commissionId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dueDate: document.getElementById('comDueDate').value || null,
+            notes: document.getElementById('comNotes').value.trim(),
+          }),
+        });
+        var r = await res.json();
+        if (!res.ok) { alert(r.error || 'Save failed'); return; }
+        close();
+        await loadCommissions();
+        if (window.triToast) triToast('Commission updated', 'success');
+      });
+      modal.querySelector('#comCancelCommission')?.addEventListener('click', async function() {
+        if (!confirm('Mark this commission as cancelled?')) return;
+        var res = await fetch('/api/commissions/' + encodeURIComponent(commissionId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Cancelled' }),
+        });
+        if (!res.ok) { alert((await res.json()).error || 'Failed'); return; }
+        close();
+        await Promise.all([loadCommissions(), loadSummary()]);
+      });
+      modal.querySelectorAll('.com-del-pay').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+          if (!confirm('Remove this payment?')) return;
+          var res = await fetch('/api/commission-payments/' + encodeURIComponent(btn.getAttribute('data-id')), { method: 'DELETE' });
+          if (!res.ok) { alert((await res.json()).error || 'Delete failed'); return; }
+          close();
+          await Promise.all([loadCommissions(), loadSummary()]);
+        });
+      });
+    }
+
+    document.getElementById('syncBtn').addEventListener('click', syncCommissions);
+    document.getElementById('comSearchInput').addEventListener('input', renderTable);
+    document.getElementById('comTypeFilter').addEventListener('change', renderTable);
+    document.getElementById('comStatusFilter').addEventListener('change', renderTable);
+
+    window.triAuthReady.then(async function(user) {
+      if (!user) return;
+      await syncCommissions();
+      await loadSummary();
+    });
+
+    document.getElementById('logoutLink')?.addEventListener('click', async function(e) {
+      e.preventDefault();
+      try { await fetch('/logout', { method: 'POST' }); } catch (_) {}
+      window.location.href = '/login.html';
+    });
+  </script>
+</body>
+</html>

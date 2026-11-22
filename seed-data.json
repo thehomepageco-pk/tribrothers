@@ -1,0 +1,49 @@
+{
+  "products": [
+    { "category": "Industrial Chemicals", "name": "Stearic Acid", "hsCode": "2915.70", "specs": "Triple Pressed, 99% min", "packing": "25 kg bags / 500 kg pallet", "specification": "Industrial grade", "importDuty": 10, "incomeTax": 2, "salesTax": 17 },
+    { "category": "Industrial Chemicals", "name": "CMC", "hsCode": "3912.31", "specs": "Carboxymethyl Cellulose, viscosity 800-1200 cps", "packing": "25 kg bags", "specification": "Food grade / Industrial", "importDuty": 12, "incomeTax": 2, "salesTax": 17 },
+    { "category": "Industrial Chemicals", "name": "Ammonium BiCarbonate", "hsCode": "2836.99", "specs": "Food grade, 99% min", "packing": "25 kg bags / 50 kg drums", "specification": "Baking / Leavening", "importDuty": 8, "incomeTax": 2, "salesTax": 17 },
+    { "category": "Industrial Chemicals", "name": "SAPP", "hsCode": "2835.39", "specs": "Sodium Acid Pyrophosphate, food grade", "packing": "25 kg bags", "specification": "Leavening / Baking", "importDuty": 10, "incomeTax": 2, "salesTax": 17 },
+    { "category": "Industrial Chemicals", "name": "Citric Mono", "hsCode": "2918.14", "specs": "Citric Acid Monohydrate, 99.5% min", "packing": "25 kg bags", "specification": "Food grade", "importDuty": 10, "incomeTax": 2, "salesTax": 17 }
+  ],
+  "suppliers": [
+    { "companyName": "Li Hong", "contactPersons": [{ "name": "David Chen", "email": "sales@lihongchem.com", "mobile": "+86 138 0000 1001", "wechat": "lihong_chem" }], "address": "Industrial Zone A", "city": "Shanghai", "province": "Shanghai", "country": "China", "web": "https://lihongchem.com" },
+    { "companyName": "Xingfa", "contactPersons": [{ "name": "Michael Wang", "email": "export@xingfagroup.com", "mobile": "+86 139 0000 2002", "tel": "+86 21 1234 5678" }], "address": "Chemical Park B", "city": "Wuhan", "province": "Hubei", "country": "China", "web": "https://xingfagroup.com" },
+    { "companyName": "TTCA", "contactPersons": [{ "name": "Sarah Liu", "email": "info@ttcachem.com", "mobile": "+86 137 0000 3003", "whatsapp": "+86 137 0000 3003" }], "address": "Export Zone C", "city": "Qingdao", "province": "Shandong", "country": "China", "web": "https://ttcachem.com" },
+    { "companyName": "Hubei Fir", "contactPersons": [{ "name": "James Zhang", "email": "sales@hubeifir.com", "mobile": "+86 136 0000 4004", "wechat": "hubei_fir" }], "address": "Hubei Chemical Industrial Park", "city": "Yichang", "province": "Hubei", "country": "China", "web": "https://hubeifir.com" },
+    { "companyName": "Yi Hua", "contactPersons": [{ "name": "Emily Zhao", "email": "export@yihuachem.com", "mobile": "+86 135 0000 5005", "tel": "+86 10 8765 4321" }], "address": "Beijing Economic Zone", "city": "Beijing", "province": "Beijing", "country": "China", "web": "https://yihuachem.com" }
+  ],
+  "clients": [
+    { "companyName": "New Madina", "contactPersons": ["Ahmed Khan", "Salman Mahmood"], "address": "Plot 45, SITE Industrial Area", "city": "Karachi", "province": "Sindh", "country": "Pakistan", "email": "purchase@newmadina.com.pk", "tel": "+92 21 3456 7890", "mobile": "+92 300 1234567", "notes": "Regular buyer of stearic acid and CMC. Payment terms: 30 days." },
+    { "companyName": "Humayun Chemicals", "contactPersons": ["Humayun Ali", "Farhan Rashid"], "address": "Ferozepur Road", "city": "Lahore", "province": "Punjab", "country": "Pakistan", "email": "orders@humayunchemicals.com", "tel": "+92 42 3789 0123", "mobile": "+92 321 7654321", "notes": "Bulk orders for baking ingredients. Prefers SAPP and ammonium bicarbonate." },
+    { "companyName": "Shahid Brothers", "contactPersons": ["Shahid Hussain", "Imran Shahid"], "address": "Korangi Industrial Area", "city": "Karachi", "province": "Sindh", "country": "Pakistan", "email": "procurement@shahidbrothers.com.pk", "tel": "+92 21 4567 8901", "mobile": "+92 333 9876543", "notes": "Food and industrial chemicals. Quarterly contracts." },
+    { "companyName": "Wazir Sons", "contactPersons": ["Wazir Ahmed", "Bilal Wazir"], "address": "Sector 7, Industrial Estate", "city": "Faisalabad", "province": "Punjab", "country": "Pakistan", "email": "sales@wazirsons.com", "tel": "+92 41 265 4321", "mobile": "+92 300 5551234", "notes": "Textile and chemical supplies. Citric acid and CMC." },
+    { "companyName": "Summer Dyes", "contactPersons": ["Rashid Malik", "Sana Rashid"], "address": "Dyeing Zone, Hattar", "city": "Haripur", "province": "KPK", "country": "Pakistan", "email": "purchase@summerdyes.com.pk", "tel": "+92 995 612345", "mobile": "+92 345 8887766", "notes": "Dyes and auxiliaries. Also uses citric acid and CMC." }
+  ],
+  "supplierProducts": [
+    { "productIndex": 0, "supplierIndex": 0, "supplierPrice": 1.85, "currency": "USD", "MOQ": "5 MT", "leadTime": "2-3 weeks", "notes": "Stearic acid triple pressed" },
+    { "productIndex": 0, "supplierIndex": 1, "supplierPrice": 1.92, "currency": "USD", "MOQ": "10 MT", "leadTime": "3 weeks", "notes": "Alternative source" },
+    { "productIndex": 1, "supplierIndex": 0, "supplierPrice": 2.10, "currency": "USD", "MOQ": "2 MT", "leadTime": "2 weeks", "notes": "CMC food grade" },
+    { "productIndex": 1, "supplierIndex": 2, "supplierPrice": 2.05, "currency": "USD", "MOQ": "3 MT", "leadTime": "2-3 weeks", "notes": "CMC industrial grade" },
+    { "productIndex": 2, "supplierIndex": 1, "supplierPrice": 0.45, "currency": "USD", "MOQ": "10 MT", "leadTime": "3 weeks", "notes": "Ammonium bicarbonate food grade" },
+    { "productIndex": 2, "supplierIndex": 3, "supplierPrice": 0.42, "currency": "USD", "MOQ": "15 MT", "leadTime": "4 weeks", "notes": "Bulk supplier" },
+    { "productIndex": 3, "supplierIndex": 1, "supplierPrice": 1.35, "currency": "USD", "MOQ": "5 MT", "leadTime": "3 weeks", "notes": "SAPP food grade" },
+    { "productIndex": 3, "supplierIndex": 4, "supplierPrice": 1.38, "currency": "USD", "MOQ": "3 MT", "leadTime": "2 weeks", "notes": "SAPP leavening" },
+    { "productIndex": 4, "supplierIndex": 2, "supplierPrice": 0.95, "currency": "USD", "MOQ": "5 MT", "leadTime": "2 weeks", "notes": "Citric acid monohydrate" },
+    { "productIndex": 4, "supplierIndex": 4, "supplierPrice": 0.98, "currency": "USD", "MOQ": "3 MT", "leadTime": "2-3 weeks", "notes": "Citric mono food grade" }
+  ],
+  "productClients": [
+    { "productIndex": 0, "clientIndex": 0, "notes": "Main stearic acid supply" },
+    { "productIndex": 0, "clientIndex": 2, "notes": "Industrial grade" },
+    { "productIndex": 1, "clientIndex": 0, "notes": "CMC for formulations" },
+    { "productIndex": 1, "clientIndex": 3, "notes": "Textile grade CMC" },
+    { "productIndex": 1, "clientIndex": 4, "notes": "Auxiliary" },
+    { "productIndex": 2, "clientIndex": 1, "notes": "Baking ingredient" },
+    { "productIndex": 2, "clientIndex": 2, "notes": "Food grade" },
+    { "productIndex": 3, "clientIndex": 1, "notes": "Leavening agent" },
+    { "productIndex": 3, "clientIndex": 2, "notes": "SAPP regular" },
+    { "productIndex": 4, "clientIndex": 2, "notes": "Citric acid food" },
+    { "productIndex": 4, "clientIndex": 3, "notes": "Industrial use" },
+    { "productIndex": 4, "clientIndex": 4, "notes": "Dyeing process" }
+  ]
+}

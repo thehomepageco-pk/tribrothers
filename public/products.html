@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+  <title>Product Management</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+  <link rel="stylesheet" href="form-helpers.css"/>
+  <style>
+    .form-container { display: none; }
+    .form-container.show { display: block; }
+    td.edit-image-cell { vertical-align: top; min-width: 120px; }
+    .edit-image-wrap { font-size: 12px; }
+    .edit-image-wrap .edit-image-preview { margin-bottom: 4px; }
+    .edit-image-wrap input[type="file"] { padding: 4px; font-size: 12px; }
+
+    /* Add-product form: light panels (no dark fallbacks) + checkbox rows that aren’t stretched by global form input { width:100% } */
+    #productForm .product-form-section-title {
+      margin: 1.5rem 0 0.5rem;
+      padding-bottom: 0.35rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-default);
+    }
+    #productForm .product-form-section-title:first-of-type { margin-top: 0.75rem; }
+
+    #productForm .category-checkboxes {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      margin: 8px 0 12px;
+      padding: 12px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    #productForm .category-checkboxes label {
+      display: flex !important;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 10px;
+      width: 100%;
+      margin: 0 !important;
+      padding: 8px 4px;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+    }
+    #productForm .category-checkboxes label:last-child { border-bottom: none; }
+    #productForm .category-checkboxes input[type="checkbox"] {
+      width: 18px !important;
+      height: 18px;
+      min-width: 18px;
+      margin: 2px 0 0 !important;
+      flex-shrink: 0;
+      accent-color: var(--accent);
+    }
+
+    #productForm .category-new-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    #productForm .category-new-row input { flex: 1; min-width: 160px; }
+
+    #productForm .form-composer-card {
+      padding: 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    #productForm .form-composer-card > label {
+      display: block !important;
+      margin-top: 14px !important;
+      margin-bottom: 6px !important;
+      color: var(--text-primary) !important;
+      font-weight: 600;
+      font-size: 0.8125rem;
+    }
+    #productForm .form-checkbox-list {
+      max-height: 220px;
+      overflow-y: auto;
+      margin: 0 0 12px;
+      padding: 8px 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+    }
+    #productForm .form-checkbox-list label.form-pick-row {
+      display: flex !important;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      width: 100%;
+      margin: 0 !important;
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-primary) !important;
+      font-size: 0.9375rem;
+    }
+    #productForm .form-checkbox-list label.form-pick-row:last-child { border-bottom: none; }
+    #productForm .form-checkbox-list input[type="checkbox"] {
+      width: 18px !important;
+      height: 18px;
+      min-width: 18px;
+      margin: 0 !important;
+      flex-shrink: 0;
+      accent-color: var(--accent);
+    }
+    #productForm .form-checkbox-list label.form-pick-row.is-already-added {
+      opacity: 0.72;
+      cursor: not-allowed;
+      background: var(--bg-surface);
+    }
+    #productForm .form-checkbox-list label.form-pick-row.is-already-added .form-pick-name {
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+      color: var(--text-muted);
+    }
+    #productForm .form-checkbox-list label.form-pick-row.is-already-added input[type="checkbox"] {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+    #productForm .form-checkbox-list .form-pick-name {
+      flex: 1;
+      min-width: 0;
+      line-height: 1.35;
+    }
+
+    #productForm .form-composer-save-row {
+      display: flex;
+      justify-content: stretch;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-default);
+    }
+    #productForm .form-composer-save-row .btn {
+      width: 100%;
+      margin: 0;
+      box-sizing: border-box;
+      justify-content: center;
+    }
+
+    #productForm .form-composer-card input[type="file"] {
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    #productForm .inline-entity-form {
+      margin-top: 12px;
+      padding: 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+    }
+    #productForm .inline-entity-form h4 {
+      margin: 0 0 10px;
+      font-size: 0.9375rem;
+      color: var(--text-primary);
+    }
+    #productForm .inline-entity-form label {
+      display: block;
+      margin-top: 10px;
+      color: var(--text-secondary);
+    }
+    #productForm .inline-entity-form input,
+    #productForm .inline-entity-form textarea { width: 100%; }
+
+    #productForm .form-inline-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+    #productForm .form-drafts-list { margin-bottom: 10px; }
+    #productForm .form-drafts-list .draft-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      margin: 4px 8px 4px 0;
+      background: var(--bg-input);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    #productForm .form-hint { color: var(--text-muted); }
+
+    .badge-new { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background: #0a84ff; color: #fff; margin-right: 6px; vertical-align: middle; }
+    .btn-dismiss-new { font-size: 11px; padding: 2px 6px; margin-left: 4px; vertical-align: middle; }
+  </style>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu">
+    <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>
+    </button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+    <a href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg></span>Dashboard</a>
+    <a href="products.html" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7.2 12 12l8.7-4.8"/><path d="M12 22V12"/></svg></span>Products</a>
+    <a href="supplier.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 2v5h-5z"/><path d="M7 17a2 2 0 1 0 4 0"/><path d="M17 17a2 2 0 1 0 4 0"/></svg></span>Suppliers</a>
+    <a href="clients.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M2 21a8 8 0 0 1 20 0"/></svg></span>Clients</a>
+    <a href="mail.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>Mail</a>
+    <a href="quotes.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg></span>Quotations &amp; Offers</a>
+    <a href="sales-contract.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>Sales Contract</a>
+    <a href="indent.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>Indent</a>
+    <a href="sessions.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg></span>Sessions</a>
+    <a href="reports.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17V9"/><path d="M12 17V7"/><path d="M16 17v-4"/></svg></span>Reports</a>
+    <a href="admin.html" id="adminNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a8 8 0 0 0 .1-1l2-1.2-2-3.4-2.3.6a7.9 7.9 0 0 0-1.7-1L15 6h-6l-.5 2a7.9 7.9 0 0 0-1.7 1L4 8.4 2 11.8 4 13a8 8 0 0 0 .1 1L2 15.2l2 3.4 2.3-.6a7.9 7.9 0 0 0 1.7 1L9 22h6l.5-2a7.9 7.9 0 0 0 1.7-1l2.3.6 2-3.4-2.1-1.2Z"/></svg></span>Admin Panel</a>
+    <a href="settings.html" id="settingsNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a8 8 0 0 0 .1-1l2-1.2-2-3.4-2.3.6a7.9 7.9 0 0 0-1.7-1L15 6h-6l-.5 2a7.9 7.9 0 0 0-1.7 1L4 8.4 2 11.8 4 13a8 8 0 0 0 .1 1L2 15.2l2 3.4 2.3-.6a7.9 7.9 0 0 0 1.7 1L9 22h6l.5-2a7.9 7.9 0 0 0 1.7-1l2.3.6 2-3.4-2.1-1.2Z"/></svg></span>Settings</a>
+    <a href="#" id="logoutLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg></span>Logout</a>
+  </div>
+
+  <div class="main">
+    <header class="page-header">
+      <h1>Products</h1>
+      <button onclick="toggleForm()" class="btn" id="toggleFormBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>Add Product</button>
+    </header>
+
+    <!-- Bulk actions toolbar -->
+    <div class="bulk-actions" id="bulkActionsToolbar">
+      <button id="editSelectedBtn" class="btn" disabled><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg></span>Edit Selected</button>
+      <button id="deleteSelectedBtn" class="btn" disabled><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 16h10l1-16"/></svg></span>Delete Selected</button>
+      <button id="emailSelectedBtn" class="btn" disabled data-action="email"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>Email…</button>
+      <div class="selected-count" id="selectedCount">Selected: 0</div>
+    </div>
+
+    <div class="form-container" id="productFormContainer">
+      <form id="productForm" enctype="multipart/form-data">
+        <label>Categories <span class="form-hint">(select any number; saved for next time)</span></label>
+        <div id="productCategoriesCheckboxes" class="category-checkboxes"></div>
+        <div class="category-new-row">
+          <input type="text" id="productNewCategoryInput" placeholder="New category name" />
+          <button type="button" class="action-btn" id="productAddCategoryBtn">Add to list</button>
+        </div>
+
+        <label>HS Code</label>
+        <input type="text" name="hsCode" id="productFormHsCode" list="hsCodeList" placeholder="Type or select from list" required />
+        <datalist id="hsCodeList"></datalist>
+
+        <label>Product Name</label>
+        <input type="text" name="name" id="productNameInput" required autocomplete="off" aria-describedby="productNameDuplicateHint" />
+        <div id="productNameDuplicateHint" class="duplicate-company-hint" role="alert" aria-live="polite"></div>
+
+        <label>Packing</label>
+        <input type="text" name="packing" required />
+
+        <label>Product note <span class="form-hint">(shown in the products table)</span></label>
+        <textarea name="productNote" id="productFormProductNote" rows="2" placeholder="Optional internal note"></textarea>
+
+        <label>Other documents</label>
+        <input type="file" name="otherDocuments" id="productFormOtherDocs" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" />
+        <div id="productExistingDocsHint" class="existing-files-hint" style="display:none;"></div>
+
+        <label>Import Duty (%)</label>
+        <input type="number" name="importDuty" required step="0.01" />
+
+        <label>Income Tax (%)</label>
+        <input type="number" name="incomeTax" required step="0.01" />
+
+        <label>Sales Tax (%)</label>
+        <input type="number" name="salesTax" required step="0.01" />
+
+        <h3 class="product-form-section-title">Supplier links (optional)</h3>
+        <p class="form-hint">Select one supplier, attach product specs and packing picture, then save before adding the next.</p>
+        <div id="formExistingSupplierLinksList" class="form-saved-links-list"></div>
+        <div id="formSupplierDraftsList" class="form-drafts-list"></div>
+        <div id="formSupplierComposer" class="form-composer-card">
+          <div id="formSupplierCheckboxList" class="form-checkbox-list"></div>
+          <button type="button" class="action-btn" id="formToggleInlineSupplier">Add new supplier (full form)</button>
+          <div id="formInlineNewSupplier" class="inline-entity-form" style="display:none;">
+            <h4>Add new supplier</h4>
+            <label>Company Name *</label>
+            <input type="text" id="ifsCompanyName" autocomplete="organization" />
+            <label>Contact person(s)</label>
+            <div id="ifsContactsWidget"></div>
+            <label>Department</label>
+            <input type="text" id="ifsDepartment" />
+            <label>Address</label>
+            <textarea id="ifsAddress" rows="2"></textarea>
+            <div class="address-fields-row">
+              <div><label>Post Code</label><input type="text" id="ifsPostCode" list="suppliers-postcodes" placeholder="Post Code" /></div>
+              <div><label>City</label><input type="text" id="ifsCity" list="suppliers-cities" placeholder="City" /></div>
+              <div><label>Province</label><input type="text" id="ifsProvince" list="suppliers-provinces" placeholder="Province" /></div>
+            </div>
+            <label>Country</label>
+            <input type="text" id="ifsCountry" autocomplete="off" />
+            <label>Tel / Mobile / Web</label>
+            <input type="text" id="ifsTel" placeholder="Tel" />
+            <input type="text" id="ifsMobile" placeholder="Mobile" />
+            <input type="text" id="ifsWeb" placeholder="Web" />
+            <label>WeChat / Facebook / Whatsapp / Other</label>
+            <input type="text" id="ifsWechat" placeholder="WeChat" />
+            <input type="text" id="ifsFacebook" placeholder="Facebook" />
+            <input type="text" id="ifsWhatsapp" placeholder="Whatsapp" />
+            <textarea id="ifsOthers" placeholder="Other" rows="2"></textarea>
+            <label>Product specs (upload scan)</label>
+            <input type="file" id="ifsSpecScan" accept="image/*,.pdf" />
+            <div class="form-inline-actions">
+              <button type="button" class="btn" id="ifsSaveSupplier">Create supplier</button>
+              <button type="button" class="action-btn" id="ifsCancelSupplier">Cancel</button>
+            </div>
+          </div>
+          <label>Product specs (document)</label>
+          <div id="supplierSpecsFields" class="supplier-specs-fields">
+            <input type="file" id="formComposerSupplierDoc" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" />
+            <label>Packing picture</label>
+            <input type="file" id="formComposerSupplierPack" accept="image/*" />
+          </div>
+          <div class="form-composer-save-row">
+            <button type="button" class="btn" id="formSaveSupplierDraft">Save this supplier link</button>
+          </div>
+        </div>
+        <button type="button" class="action-btn" id="formAddAnotherSupplier" style="display:none;">Add another supplier link</button>
+
+        <h3 class="product-form-section-title">Client links (optional)</h3>
+        <p class="form-hint">Select one client and save before adding the next.</p>
+        <div id="formExistingClientLinksList" class="form-saved-links-list"></div>
+        <div id="formClientDraftsList" class="form-drafts-list"></div>
+        <div id="formClientComposer" class="form-composer-card">
+          <div id="formClientCheckboxList" class="form-checkbox-list"></div>
+          <button type="button" class="action-btn" id="formToggleInlineClient">Add new client (full form)</button>
+          <div id="formInlineNewClient" class="inline-entity-form" style="display:none;">
+            <h4>Add new client</h4>
+            <label>Company Name *</label>
+            <input type="text" id="ifcCompanyName" autocomplete="organization" />
+            <label>Contact person(s)</label>
+            <div id="ifcContactsWidget"></div>
+            <label>Address</label>
+            <textarea id="ifcAddress" rows="2"></textarea>
+            <div class="address-fields-row">
+              <div><label>Post Code</label><input type="text" id="ifcPostCode" list="clients-postcodes" placeholder="Post Code" /></div>
+              <div><label>City</label><input type="text" id="ifcCity" list="clients-cities" placeholder="City" /></div>
+              <div><label>Province</label><input type="text" id="ifcProvince" list="clients-provinces" placeholder="Province" /></div>
+            </div>
+            <label>Country</label>
+            <input type="text" id="ifcCountry" autocomplete="off" />
+            <label>Tel / Mobile / Web</label>
+            <input type="text" id="ifcTel" placeholder="Tel" />
+            <input type="text" id="ifcMobile" placeholder="Mobile" />
+            <input type="text" id="ifcWeb" placeholder="Web" />
+            <label>WeChat / Facebook / Whatsapp / Others</label>
+            <input type="text" id="ifcWechat" placeholder="WeChat" />
+            <input type="text" id="ifcFacebook" placeholder="Facebook" />
+            <input type="text" id="ifcWhatsapp" placeholder="Whatsapp" />
+            <textarea id="ifcOthers" placeholder="Others" rows="2"></textarea>
+            <label>NTN (upload file)</label>
+            <input type="file" id="ifcNtnFile" />
+            <div class="form-inline-actions">
+              <button type="button" class="btn" id="ifcSaveClient">Create client</button>
+              <button type="button" class="action-btn" id="ifcCancelClient">Cancel</button>
+            </div>
+          </div>
+          <div class="form-composer-save-row">
+            <button type="button" class="btn" id="formSaveClientDraft">Save this client link</button>
+          </div>
+        </div>
+        <button type="button" class="action-btn" id="formAddAnotherClient" style="display:none;">Add another client link</button>
+
+        <div class="form-actions">
+          <button type="submit" class="btn" id="productSubmitBtn">Add Product</button>
+          <button type="button" class="action-btn" id="productCancelEditBtn" style="display:none;">Cancel edit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="products-toolbar">
+      <div class="toolbar-row">
+        <div class="toolbar-group">
+          <label for="searchInput">Search</label>
+          <input type="text" id="searchInput" placeholder="Name, category, HS code…" />
+        </div>
+        <div class="toolbar-group">
+          <label for="filterCategory">Category</label>
+          <select id="filterCategory">
+            <option value="">All categories</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <label for="sortProducts">Sort by</label>
+          <select id="sortProducts">
+            <option value="name-asc">Name A–Z</option>
+            <option value="name-desc">Name Z–A</option>
+            <option value="category">Category</option>
+            <option value="hsCode">HS Code</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="checkbox-col"><input type="checkbox" id="selectAllCheckbox" title="Select all" /></th>
+            <th>Name</th>
+            <th>Categories</th>
+            <th>Packing</th>
+            <th>HS Code</th>
+            <th>Taxes</th>
+            <th>Note</th>
+            <th>Other docs</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Suppliers modal -->
+  <div id="productDetailModalSuppliers" class="view-modal-overlay" style="display:none;">
+    <div class="view-modal-box">
+      <div class="view-modal-header">
+        <h2 id="productDetailTitleSuppliers">Product – Suppliers</h2>
+        <button type="button" class="btn" id="closeProductDetailSuppliersBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>Close</button>
+      </div>
+      <div class="view-modal-body">
+        <div class="view-modal-section-title">Linked suppliers</div>
+        <div id="productDetailSuppliers"></div>
+        <div class="view-modal-actions">
+          <button type="button" class="btn" id="addSupplierLinkBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>Add supplier link</button>
+        </div>
+        <div id="addSupplierLinkForm" class="view-modal-form-card" style="display:none;">
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <label style="margin:0;">Supplier</label>
+            <select id="modalSupplierSelect" style="flex:1;"></select>
+            <button type="button" class="action-btn" id="modalNewSupplierBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>New supplier</button>
+          </div>
+          <div id="modalNewSupplierForm" class="view-modal-form-card" style="display:none; margin-bottom:12px;">
+            <h4 style="margin-bottom:10px;">Add new supplier</h4>
+            <label>Company Name *</label>
+            <input type="text" id="nsCompanyName" />
+            <label>Contact Person(s) – one per line</label>
+            <textarea id="nsContactPersons" style="min-height:50px;"></textarea>
+            <label>Department / Address / Post Code / City / Province / Country</label>
+            <input type="text" id="nsDepartment" placeholder="Department" />
+            <textarea id="nsAddress" placeholder="Address"></textarea>
+            <input type="text" id="nsPostCode" placeholder="Post Code" />
+            <input type="text" id="nsCity" placeholder="City" />
+            <input type="text" id="nsProvince" placeholder="Province" />
+            <input type="text" id="nsCountry" placeholder="Country" />
+            <label>Tel / Mobile / Email / Web</label>
+            <input type="text" id="nsTel" placeholder="Tel" />
+            <input type="text" id="nsMobile" placeholder="Mobile" />
+            <input type="email" id="nsEmail" placeholder="Email" />
+            <input type="text" id="nsWeb" placeholder="Web" />
+            <label>WeChat / Facebook / Whatsapp / Other</label>
+            <input type="text" id="nsWechat" placeholder="WeChat" />
+            <input type="text" id="nsFacebook" placeholder="Facebook" />
+            <input type="text" id="nsWhatsapp" placeholder="Whatsapp" />
+            <textarea id="nsOthers" placeholder="Other"></textarea>
+            <label>Product Specs (Upload Scan)</label>
+            <input type="file" id="nsSpecScan" />
+            <div class="view-modal-btn-group" style="margin-top:8px;">
+              <button type="button" class="btn" id="modalSaveNewSupplierBtn">Add supplier</button>
+              <button type="button" class="action-btn" id="modalCancelNewSupplierBtn">Cancel</button>
+            </div>
+          </div>
+          <label>Product info document</label>
+          <input type="file" id="modalProductInfoFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" />
+          <small class="form-hint">Saved as [product name]-[supplier name].ext</small>
+          <label style="margin-top:8px; display:block;">Product packing image</label>
+          <input type="file" id="modalPackingImage" accept="image/*" />
+          <div class="view-modal-btn-group">
+            <button type="button" class="btn" id="modalSaveSupplierLink">Save link</button>
+            <button type="button" class="action-btn" id="modalCancelSupplierLink">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clients modal -->
+  <div id="productDetailModalClients" class="view-modal-overlay" style="display:none;">
+    <div class="view-modal-box">
+      <div class="view-modal-header">
+        <h2 id="productDetailTitleClients">Product – Clients</h2>
+        <button type="button" class="btn" id="closeProductDetailClientsBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>Close</button>
+      </div>
+      <div class="view-modal-body">
+        <div class="view-modal-section-title">Linked clients</div>
+        <div id="productDetailClients"></div>
+        <div class="view-modal-actions">
+          <button type="button" class="btn" id="addClientLinkBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>Add client link</button>
+        </div>
+        <div id="addClientLinkForm" class="view-modal-form-card" style="display:none;">
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+            <label style="margin:0; ">Client</label>
+            <select id="modalClientSelect" style="flex:1; padding:8px; "></select>
+            <button type="button" class="action-btn" id="modalNewClientBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>New client</button>
+          </div>
+          <div id="modalNewClientForm" style="display:none; padding:12px; margin-bottom:12px;">
+            <h4 style="margin-bottom:10px;">Add new client</h4>
+            <label style="display:block; margin-bottom:4px; ">Company Name *</label>
+            <input type="text" id="ncCompanyName"  />
+            <label style="display:block; margin-bottom:4px; ">Contact person(s) – one per line</label>
+            <textarea id="ncContactPersons" style="min-height:50px;"></textarea>
+            <label style="display:block; margin-bottom:4px; ">Address / Post Code / City / Province / Country</label>
+            <textarea id="ncAddress" ></textarea>
+            <input type="text" id="ncPostCode" placeholder="Post Code"  />
+            <input type="text" id="ncCity" placeholder="City"  />
+            <input type="text" id="ncProvince" placeholder="Province"  />
+            <input type="text" id="ncCountry" placeholder="Country"  />
+            <label style="display:block; margin-bottom:4px; ">Tel / Mobile / Email / Web</label>
+            <input type="text" id="ncTel" placeholder="Tel"  />
+            <input type="text" id="ncMobile" placeholder="Mobile"  />
+            <input type="email" id="ncEmail" placeholder="Email"  />
+            <input type="text" id="ncWeb" placeholder="Web"  />
+            <label style="display:block; margin-bottom:4px; ">WeChat / Facebook / Whatsapp / Others</label>
+            <input type="text" id="ncWechat" placeholder="WeChat"  />
+            <input type="text" id="ncFacebook" placeholder="Facebook"  />
+            <input type="text" id="ncWhatsapp" placeholder="Whatsapp"  />
+            <textarea id="ncOthers" placeholder="Others" ></textarea>
+            <label style="display:block; margin-bottom:4px; ">NTN (Upload file)</label>
+            <input type="file" id="ncNtnFile"  />
+            <button type="button" class="btn" id="modalSaveNewClientBtn">Add client</button>
+            <button type="button" class="action-btn" id="modalCancelNewClientBtn">Cancel</button>
+          </div>
+          <div class="view-modal-btn-group">
+            <button type="button" class="btn" id="modalSaveClientLink">Save link</button>
+            <button type="button" class="action-btn" id="modalCancelClientLink">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="form-helpers.js"></script>
+  <script src="entity-detail.js"></script>
+  <script src="entity-form-edit.js"></script>
+  <script src="new-entry.js"></script>
+  <script src="mail-compose.js"></script>
+  <script>
+    (function initMobileNav() {
+      var overlay = document.getElementById('sidebarOverlay');
+      var menuBtn = document.querySelector('.menu-toggle');
+      var closeBtn = document.querySelector('.sidebar-close');
+      function openSidebar() { document.body.classList.add('sidebar-open'); }
+      function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+      if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+      document.querySelectorAll('.sidebar a').forEach(function(a) { a.addEventListener('click', closeSidebar); });
+    })();
+
+    // Light-only: no theme toggle
+
+    const ifsContactsWidget = TriForm.createContactPersonsWidget(document.getElementById('ifsContactsWidget'), { showTelMobile: true });
+    const ifcContactsWidget = TriForm.createContactPersonsWidget(document.getElementById('ifcContactsWidget'), { showTelMobile: false });
+    TriForm.initCountryPicker(document.getElementById('ifsCountry'));
+    TriForm.initCountryPicker(document.getElementById('ifcCountry'));
+    TriForm.bindDialCodeToPhones(document.getElementById('ifsCountry'), [document.getElementById('ifsTel'), document.getElementById('ifsMobile')]);
+    TriForm.bindDialCodeToPhones(document.getElementById('ifcCountry'), [document.getElementById('ifcTel'), document.getElementById('ifcMobile')]);
+    TriForm.initDuplicateCompanyCheck(document.getElementById('ifsCompanyName'), 'suppliers');
+    TriForm.initDuplicateCompanyCheck(document.getElementById('ifcCompanyName'), 'clients');
+    const productNameDupCheck = TriForm.initDuplicateNameCheck(
+      document.getElementById('productNameInput'),
+      'products',
+      document.getElementById('productNameDuplicateHint')
+    );
+    TriForm.wireSupplierSpecsOnSelect('#formSupplierCheckboxList', '#supplierSpecsFields');
+
+    async function wireInlineEntityForms() {
+      const supData = await TriForm.loadAddressSuggestions('suppliers');
+      const cliData = await TriForm.loadAddressSuggestions('clients');
+      function setList(el, listId, values) {
+        if (!el) return;
+        let list = document.getElementById(listId);
+        if (!list) { list = document.createElement('datalist'); list.id = listId; document.body.appendChild(list); }
+        list.innerHTML = (values || []).map(v => `<option value="${TriForm.escapeHtml(v)}">`).join('');
+        el.setAttribute('list', listId);
+      }
+      ['ifsPostCode','ifsCity','ifsProvince'].forEach((id, i) => {
+        setList(document.getElementById(id), 'suppliers-' + ['postcodes','cities','provinces'][i], supData[['postCodes','cities','provinces'][i]]);
+      });
+      ['ifcPostCode','ifcCity','ifcProvince'].forEach((id, i) => {
+        setList(document.getElementById(id), 'clients-' + ['postcodes','cities','provinces'][i], cliData[['postCodes','cities','provinces'][i]]);
+      });
+    }
+    wireInlineEntityForms();
+
+    function toggleForm() {
+      const container = document.getElementById('productFormContainer');
+      const visible = container.classList.toggle('show');
+      if (visible) {
+        loadHsCodesDatalist();
+        loadProductCategoriesCheckboxes();
+      } else if (!TriFormEdit.getEditingId(document.getElementById('productForm'))) {
+        resetProductAddForm();
+      }
+    }
+
+    function resetProductAddForm() {
+      const form = document.getElementById('productForm');
+      TriFormEdit.resetFormToAdd(form, {
+        submitBtn: document.getElementById('productSubmitBtn'),
+        cancelBtn: document.getElementById('productCancelEditBtn'),
+        nameInput: document.getElementById('productNameInput'),
+        addLabel: 'Add Product',
+        fileState: productFileState,
+        onReset: () => {
+          productFileState = null;
+          if (productNameDupCheck) productNameDupCheck.clearDuplicateState();
+          formSupplierDrafts = [];
+          formClientDrafts = [];
+          savedSupplierLinks = [];
+          savedClientLinks = [];
+          existingSupplierLinkIds = new Set();
+          existingClientLinkIds = new Set();
+          renderSavedSupplierLinks();
+          renderSavedClientLinks();
+          renderFormSupplierDrafts();
+          renderFormClientDrafts();
+          updateSupplierComposerVisibility();
+          updateClientComposerVisibility();
+        },
+      });
+    }
+    async function loadHsCodesDatalist() {
+      try {
+        const res = await fetch('/api/products/hs-codes/list');
+        const codes = await res.json();
+        const list = document.getElementById('hsCodeList');
+        list.innerHTML = codes.map(c => `<option value="${escapeHtml(c)}">`).join('');
+      } catch (e) { /* ignore */ }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    async function loadProductCategoriesCheckboxes(selected) {
+      const wrap = document.getElementById('productCategoriesCheckboxes');
+      if (!wrap) return;
+      try {
+        const res = await fetch('/api/product-categories');
+        const names = await res.json();
+        const seen = new Set();
+        const unique = (names || []).filter(n => {
+          const k = (n || '').trim().toLowerCase();
+          if (!k || seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+        const selectedSet = new Set((selected || []).map(c => String(c).trim().toLowerCase()).filter(Boolean));
+        wrap.innerHTML = unique.map(n => `
+          <label><input type="checkbox" class="category-cb" value="${escapeHtml(n)}" /> ${escapeHtml(n)}</label>
+        `).join('');
+        wrap.querySelectorAll('.category-cb').forEach(cb => {
+          if (selectedSet.has(cb.value.toLowerCase())) cb.checked = true;
+        });
+      } catch (e) {
+        wrap.innerHTML = '<p class="form-hint">Could not load categories.</p>';
+      }
+    }
+
+    function getSelectedCategoryNames() {
+      return Array.from(document.querySelectorAll('#productCategoriesCheckboxes input.category-cb:checked')).map(cb => cb.value);
+    }
+
+    function displayProductCategories(p) {
+      if (p.categories && p.categories.length) return p.categories.join(', ');
+      return p.category || '';
+    }
+
+    function productMatchesFilterCategory(p, catLower) {
+      if (!catLower) return true;
+      if (p.categories && p.categories.length) {
+        return p.categories.some(c => (c || '').toLowerCase() === catLower);
+      }
+      return (p.category || '').toLowerCase() === catLower;
+    }
+
+    const form = document.getElementById('productForm');
+    const tableBody = document.getElementById('productTableBody');
+
+    // Selection state
+    let selectedIds = new Set();
+
+    // Bulk buttons
+    const editSelectedBtn = document.getElementById('editSelectedBtn');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const emailSelectedBtn = document.getElementById('emailSelectedBtn');
+    const selectedCountEl = document.getElementById('selectedCount');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+    async function loadDropdowns() {
+      // No buyer/seller dropdowns; links managed via SupplierProduct and Quotations
+    }
+
+    loadDropdowns();
+    loadHsCodesDatalist();
+
+    document.getElementById('searchInput').addEventListener('input', () => { renderProductsTable(getFilteredAndSortedProducts()); });
+    document.getElementById('filterCategory').addEventListener('change', () => { renderProductsTable(getFilteredAndSortedProducts()); });
+    document.getElementById('sortProducts').addEventListener('change', () => { renderProductsTable(getFilteredAndSortedProducts()); });
+
+    let formSupplierList = [];
+    let formClientList = [];
+    let formSupplierDrafts = [];
+    let formClientDrafts = [];
+    let existingSupplierLinkIds = new Set();
+    let existingClientLinkIds = new Set();
+    let savedSupplierLinks = [];
+    let savedClientLinks = [];
+    let productFileState = null;
+
+    async function removeSupplierLink(linkId) {
+      const res = await fetch(`/api/supplier-products/${linkId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Failed to remove supplier link');
+        return false;
+      }
+      savedSupplierLinks = savedSupplierLinks.filter((l) => String(l._id) !== String(linkId));
+      existingSupplierLinkIds = new Set(savedSupplierLinks.map((l) => String(l.supplierId?._id || l.supplierId)).filter(Boolean));
+      renderSavedSupplierLinks();
+      renderSupplierCheckboxList();
+      return true;
+    }
+
+    async function removeClientLink(linkId) {
+      const res = await fetch(`/api/product-clients/${linkId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Failed to remove client link');
+        return false;
+      }
+      savedClientLinks = savedClientLinks.filter((l) => String(l._id) !== String(linkId));
+      existingClientLinkIds = new Set(savedClientLinks.map((l) => String(l.clientId?._id || l.clientId)).filter(Boolean));
+      renderSavedClientLinks();
+      renderClientCheckboxList();
+      return true;
+    }
+
+    function renderSavedSupplierLinks() {
+      const el = document.getElementById('formExistingSupplierLinksList');
+      if (!el) return;
+      if (!savedSupplierLinks.length) {
+        el.innerHTML = '';
+        return;
+      }
+      el.innerHTML = `
+        <p class="form-hint saved-links-label">Linked suppliers (saved):</p>
+        ${savedSupplierLinks.map((l) => {
+          const name = l.supplierId?.companyName || 'Supplier';
+          const extras = [l.notes, l.productInfoFile, l.packingImage].filter(Boolean).length
+            ? ' <span class="form-hint">(has specs/files)</span>' : '';
+          return `<span class="draft-chip is-saved">${escapeHtml(name)}${extras} <button type="button" class="action-btn form-remove-saved-sup" data-id="${l._id}">Remove</button></span>`;
+        }).join('')}
+      `;
+      el.querySelectorAll('.form-remove-saved-sup').forEach((btn) => {
+        btn.onclick = async () => {
+          if (!confirm('Remove this supplier link?')) return;
+          await removeSupplierLink(btn.dataset.id);
+        };
+      });
+    }
+
+    function renderSavedClientLinks() {
+      const el = document.getElementById('formExistingClientLinksList');
+      if (!el) return;
+      if (!savedClientLinks.length) {
+        el.innerHTML = '';
+        return;
+      }
+      el.innerHTML = `
+        <p class="form-hint saved-links-label">Linked clients (saved):</p>
+        ${savedClientLinks.map((l) => {
+          const name = l.clientId?.companyName || 'Client';
+          const note = l.notes ? ` — ${escapeHtml(l.notes)}` : '';
+          return `<span class="draft-chip is-saved">${escapeHtml(name)}${note} <button type="button" class="action-btn form-remove-saved-cli" data-id="${l._id}">Remove</button></span>`;
+        }).join('')}
+      `;
+      el.querySelectorAll('.form-remove-saved-cli').forEach((btn) => {
+        btn.onclick = async () => {
+          if (!confirm('Remove this client link?')) return;
+          await removeClientLink(btn.dataset.id);
+        };
+      });
+    }
+
+    function updateSupplierComposerVisibility() {
+      const composer = document.getElementById('formSupplierComposer');
+      const addBtn = document.getElementById('formAddAnotherSupplier');
+      if (!composer || !addBtn) return;
+      if (formSupplierDrafts.length === 0) {
+        composer.style.display = 'block';
+        addBtn.style.display = 'none';
+        addBtn.dataset.wantsNext = '';
+      } else if (addBtn.dataset.wantsNext === '1') {
+        composer.style.display = 'block';
+        addBtn.style.display = 'none';
+      } else {
+        composer.style.display = 'none';
+        addBtn.style.display = 'inline-block';
+      }
+    }
+
+    function updateClientComposerVisibility() {
+      const composer = document.getElementById('formClientComposer');
+      const addBtn = document.getElementById('formAddAnotherClient');
+      if (!composer || !addBtn) return;
+      if (formClientDrafts.length === 0) {
+        composer.style.display = 'block';
+        addBtn.style.display = 'none';
+        addBtn.dataset.wantsNext = '';
+      } else if (addBtn.dataset.wantsNext === '1') {
+        composer.style.display = 'block';
+        addBtn.style.display = 'none';
+      } else {
+        composer.style.display = 'none';
+        addBtn.style.display = 'inline-block';
+      }
+    }
+
+    function renderFormSupplierDrafts() {
+      const el = document.getElementById('formSupplierDraftsList');
+      if (!el) return;
+      if (!formSupplierDrafts.length) { el.innerHTML = ''; }
+      else {
+        el.innerHTML = formSupplierDrafts.map((d, i) => {
+          const name = (formSupplierList.find(s => String(s._id) === String(d.supplierId)) || {}).companyName || d.supplierId;
+          return `<span class="draft-chip">${escapeHtml(name)} <button type="button" class="action-btn form-remove-sup" data-i="${i}">Remove</button></span>`;
+        }).join('');
+        el.querySelectorAll('.form-remove-sup').forEach(btn => {
+          btn.onclick = () => {
+            formSupplierDrafts.splice(Number(btn.dataset.i), 1);
+            renderFormSupplierDrafts();
+            updateSupplierComposerVisibility();
+          };
+        });
+      }
+      renderSupplierCheckboxList();
+    }
+
+    function renderFormClientDrafts() {
+      const el = document.getElementById('formClientDraftsList');
+      if (!el) return;
+      if (!formClientDrafts.length) { el.innerHTML = ''; }
+      else {
+        el.innerHTML = formClientDrafts.map((d, i) => {
+          const name = (formClientList.find(c => String(c._id) === String(d.clientId)) || {}).companyName || d.clientId;
+          return `<span class="draft-chip">${escapeHtml(name)} <button type="button" class="action-btn form-remove-cli" data-i="${i}">Remove</button></span>`;
+        }).join('');
+        el.querySelectorAll('.form-remove-cli').forEach(btn => {
+          btn.onclick = () => {
+            formClientDrafts.splice(Number(btn.dataset.i), 1);
+            renderFormClientDrafts();
+            updateClientComposerVisibility();
+          };
+        });
+      }
+      renderClientCheckboxList();
+    }
+
+    function renderSupplierCheckboxList() {
+      const box = document.getElementById('formSupplierCheckboxList');
+      if (!box) return;
+      const addedIds = new Set([
+        ...formSupplierDrafts.map(d => String(d.supplierId)),
+        ...existingSupplierLinkIds,
+      ]);
+      box.innerHTML = formSupplierList.map(s => {
+        const id = String(s._id);
+        const already = addedIds.has(id);
+        const rowClass = already ? 'form-pick-row is-already-added' : 'form-pick-row';
+        const disabledAttr = already ? ' disabled' : '';
+        const titleAttr = already ? ' title="Already saved for this product — remove from the list above to select again"' : '';
+        return `<label class="${rowClass}"${titleAttr}><input type="checkbox" class="sup-pick-cb" name="supPick" value="${escapeHtml(id)}"${disabledAttr} /><span class="form-pick-name">${escapeHtml(s.companyName)}</span></label>`;
+      }).join('');
+      box.querySelectorAll('.sup-pick-cb').forEach(cb => {
+        cb.addEventListener('change', () => {
+          if (cb.disabled) return;
+          if (cb.checked) {
+            box.querySelectorAll('.sup-pick-cb').forEach(o => {
+              if (o !== cb && !o.disabled) o.checked = false;
+            });
+          }
+        });
+      });
+    }
+
+    function renderClientCheckboxList() {
+      const box = document.getElementById('formClientCheckboxList');
+      if (!box) return;
+      const addedIds = new Set([
+        ...formClientDrafts.map(d => String(d.clientId)),
+        ...existingClientLinkIds,
+      ]);
+      box.innerHTML = formClientList.map(c => {
+        const id = String(c._id);
+        const already = addedIds.has(id);
+        const rowClass = already ? 'form-pick-row is-already-added' : 'form-pick-row';
+        const disabledAttr = already ? ' disabled' : '';
+        const titleAttr = already ? ' title="Already saved for this product — remove from the list above to select again"' : '';
+        return `<label class="${rowClass}"${titleAttr}><input type="checkbox" class="cli-pick-cb" name="cliPick" value="${escapeHtml(id)}"${disabledAttr} /><span class="form-pick-name">${escapeHtml(c.companyName)}</span></label>`;
+      }).join('');
+      box.querySelectorAll('.cli-pick-cb').forEach(cb => {
+        cb.addEventListener('change', () => {
+          if (cb.disabled) return;
+          if (cb.checked) {
+            box.querySelectorAll('.cli-pick-cb').forEach(o => {
+              if (o !== cb && !o.disabled) o.checked = false;
+            });
+          }
+        });
+      });
+    }
+
+    function clearSupplierComposerInputs() {
+      const box = document.getElementById('formSupplierCheckboxList');
+      if (box) box.querySelectorAll('.sup-pick-cb:not(:disabled)').forEach(cb => { cb.checked = false; });
+      const d = document.getElementById('formComposerSupplierDoc');
+      const p = document.getElementById('formComposerSupplierPack');
+      if (d) d.value = '';
+      if (p) p.value = '';
+    }
+
+    function clearClientComposerInputs() {
+      const box = document.getElementById('formClientCheckboxList');
+      if (box) box.querySelectorAll('.cli-pick-cb:not(:disabled)').forEach(cb => { cb.checked = false; });
+    }
+
+    async function initAddProductFormLinks() {
+      const [suppliers, clients] = await Promise.all([
+        fetch('/api/suppliers').then(r => r.json()),
+        fetch('/api/clients').then(r => r.json()),
+      ]);
+      formSupplierList = suppliers;
+      formClientList = clients;
+      renderFormSupplierDrafts();
+      renderFormClientDrafts();
+
+      document.getElementById('formSaveSupplierDraft').onclick = () => {
+        const picked = document.querySelector('#formSupplierCheckboxList .sup-pick-cb:checked');
+        if (!picked || picked.disabled) { alert('Select a supplier using the checkbox.'); return; }
+        const doc = document.getElementById('formComposerSupplierDoc').files[0];
+        const pack = document.getElementById('formComposerSupplierPack').files[0];
+        if (!doc) { alert('Attach the product specs document.'); return; }
+        if (!pack) { alert('Attach the packing picture.'); return; }
+        formSupplierDrafts.push({ supplierId: picked.value, docFile: doc, packFile: pack });
+        clearSupplierComposerInputs();
+        document.getElementById('formAddAnotherSupplier').dataset.wantsNext = '';
+        renderFormSupplierDrafts();
+        updateSupplierComposerVisibility();
+      };
+
+      document.getElementById('formAddAnotherSupplier').onclick = () => {
+        document.getElementById('formAddAnotherSupplier').dataset.wantsNext = '1';
+        updateSupplierComposerVisibility();
+      };
+
+      document.getElementById('formSaveClientDraft').onclick = () => {
+        const picked = document.querySelector('#formClientCheckboxList .cli-pick-cb:checked');
+        if (!picked || picked.disabled) { alert('Select a client using the checkbox.'); return; }
+        formClientDrafts.push({ clientId: picked.value });
+        clearClientComposerInputs();
+        document.getElementById('formAddAnotherClient').dataset.wantsNext = '';
+        renderFormClientDrafts();
+        updateClientComposerVisibility();
+      };
+
+      document.getElementById('formAddAnotherClient').onclick = () => {
+        document.getElementById('formAddAnotherClient').dataset.wantsNext = '1';
+        updateClientComposerVisibility();
+      };
+
+      updateSupplierComposerVisibility();
+      updateClientComposerVisibility();
+
+      document.getElementById('formToggleInlineSupplier').onclick = () => {
+        const el = document.getElementById('formInlineNewSupplier');
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      };
+      document.getElementById('ifsCancelSupplier').onclick = () => {
+        document.getElementById('formInlineNewSupplier').style.display = 'none';
+      };
+      document.getElementById('ifsSaveSupplier').onclick = async () => {
+        const companyName = document.getElementById('ifsCompanyName').value.trim();
+        if (!companyName) { alert('Company name is required'); return; }
+        if (document.getElementById('ifsCompanyName').dataset.duplicateId) {
+          alert('A supplier with this company name is already added.');
+          return;
+        }
+        const contactPersons = ifsContactsWidget.getContacts();
+        if (!contactPersons.length) { alert('Add at least one contact person.'); return; }
+        const first = contactPersons[0];
+        if (document.getElementById('ifsDepartment').value) first.department = document.getElementById('ifsDepartment').value;
+        if (document.getElementById('ifsTel').value) first.tel = document.getElementById('ifsTel').value;
+        if (document.getElementById('ifsMobile').value) first.mobile = document.getElementById('ifsMobile').value;
+        first.wechat = document.getElementById('ifsWechat').value || '';
+        first.facebook = document.getElementById('ifsFacebook').value || '';
+        first.whatsapp = document.getElementById('ifsWhatsapp').value || '';
+        first.otherSocial = document.getElementById('ifsOthers').value || '';
+        const fd = new FormData();
+        fd.append('companyName', companyName);
+        fd.append('contactPersons', JSON.stringify(contactPersons));
+        fd.append('address', document.getElementById('ifsAddress').value || '');
+        fd.append('postCode', document.getElementById('ifsPostCode').value || '');
+        fd.append('city', document.getElementById('ifsCity').value || '');
+        fd.append('province', document.getElementById('ifsProvince').value || '');
+        fd.append('country', document.getElementById('ifsCountry').value || '');
+        fd.append('web', document.getElementById('ifsWeb').value || '');
+        const specScan = document.getElementById('ifsSpecScan');
+        if (specScan.files && specScan.files[0]) fd.append('productSpecsFile', specScan.files[0]);
+        const res = await fetch('/api/suppliers', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (res.status === 409) {
+          alert(result.error || 'Supplier already exists.');
+          formSupplierList = await fetch('/api/suppliers').then(r => r.json());
+          renderSupplierCheckboxList();
+          if (result.existingId) {
+            const cb = document.querySelector('#formSupplierCheckboxList .sup-pick-cb[value="' + String(result.existingId) + '"]');
+            if (cb) { cb.checked = true; document.querySelectorAll('#formSupplierCheckboxList .sup-pick-cb').forEach(o => { if (o !== cb) o.checked = false; }); }
+            document.getElementById('supplierSpecsFields').classList.add('visible');
+          }
+          return;
+        }
+        if (!res.ok) { alert(result.error || 'Failed'); return; }
+        formSupplierList = await fetch('/api/suppliers').then(r => r.json());
+        renderSupplierCheckboxList();
+        const newId = String(result.supplier._id);
+        const cb = document.querySelector('#formSupplierCheckboxList .sup-pick-cb[value="' + newId + '"]');
+        if (cb) {
+          cb.checked = true;
+          document.querySelectorAll('#formSupplierCheckboxList .sup-pick-cb').forEach(o => { if (o !== cb) o.checked = false; });
+          document.getElementById('supplierSpecsFields').classList.add('visible');
+        }
+        document.getElementById('formInlineNewSupplier').style.display = 'none';
+        document.getElementById('ifsCompanyName').value = '';
+        ifsContactsWidget.reset();
+        document.getElementById('ifsDepartment').value = '';
+        document.getElementById('ifsAddress').value = '';
+        document.getElementById('ifsPostCode').value = '';
+        document.getElementById('ifsCity').value = '';
+        document.getElementById('ifsProvince').value = '';
+        document.getElementById('ifsCountry').value = '';
+        document.getElementById('ifsTel').value = '';
+        document.getElementById('ifsMobile').value = '';
+        document.getElementById('ifsWeb').value = '';
+        document.getElementById('ifsWechat').value = '';
+        document.getElementById('ifsFacebook').value = '';
+        document.getElementById('ifsWhatsapp').value = '';
+        document.getElementById('ifsOthers').value = '';
+        specScan.value = '';
+        wireInlineEntityForms();
+        alert('Supplier created. Attach product specs and packing picture, then click Save this supplier link.');
+      };
+
+      document.getElementById('formToggleInlineClient').onclick = () => {
+        const el = document.getElementById('formInlineNewClient');
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      };
+      document.getElementById('ifcCancelClient').onclick = () => {
+        document.getElementById('formInlineNewClient').style.display = 'none';
+      };
+      document.getElementById('ifcSaveClient').onclick = async () => {
+        const companyName = document.getElementById('ifcCompanyName').value.trim();
+        if (!companyName) { alert('Company name is required'); return; }
+        if (document.getElementById('ifcCompanyName').dataset.duplicateId) {
+          alert('A client with this company name is already added.');
+          return;
+        }
+        const contactPersons = ifcContactsWidget.getContacts();
+        if (!contactPersons.length) { alert('Add at least one contact person.'); return; }
+        const fd = new FormData();
+        fd.append('companyName', companyName);
+        fd.append('contactPersons', JSON.stringify(contactPersons));
+        fd.append('address', document.getElementById('ifcAddress').value || '');
+        fd.append('postCode', document.getElementById('ifcPostCode').value || '');
+        fd.append('city', document.getElementById('ifcCity').value || '');
+        fd.append('province', document.getElementById('ifcProvince').value || '');
+        fd.append('country', document.getElementById('ifcCountry').value || '');
+        fd.append('tel', document.getElementById('ifcTel').value || '');
+        fd.append('mobile', document.getElementById('ifcMobile').value || '');
+        fd.append('web', document.getElementById('ifcWeb').value || '');
+        fd.append('wechat', document.getElementById('ifcWechat').value || '');
+        fd.append('facebook', document.getElementById('ifcFacebook').value || '');
+        fd.append('whatsapp', document.getElementById('ifcWhatsapp').value || '');
+        fd.append('others', document.getElementById('ifcOthers').value || '');
+        const ntn = document.getElementById('ifcNtnFile');
+        if (ntn.files && ntn.files[0]) fd.append('ntnFile', ntn.files[0]);
+        const res = await fetch('/api/clients', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (res.status === 409) {
+          alert(result.error || 'Client exists');
+          formClientList = await fetch('/api/clients').then(r => r.json());
+          renderClientCheckboxList();
+          if (result.existingId) {
+            const cb = document.querySelector('#formClientCheckboxList .cli-pick-cb[value="' + String(result.existingId) + '"]');
+            if (cb) {
+              cb.checked = true;
+              document.querySelectorAll('#formClientCheckboxList .cli-pick-cb').forEach(o => { if (o !== cb) o.checked = false; });
+            }
+          }
+          return;
+        }
+        if (!res.ok) { alert(result.error || 'Failed'); return; }
+        formClientList = await fetch('/api/clients').then(r => r.json());
+        renderClientCheckboxList();
+        const newId = String(result.client._id);
+        const cb = document.querySelector('#formClientCheckboxList .cli-pick-cb[value="' + newId + '"]');
+        if (cb) {
+          cb.checked = true;
+          document.querySelectorAll('#formClientCheckboxList .cli-pick-cb').forEach(o => { if (o !== cb) o.checked = false; });
+        }
+        document.getElementById('formInlineNewClient').style.display = 'none';
+        document.getElementById('ifcCompanyName').value = '';
+        ifcContactsWidget.reset();
+        ['ifcAddress','ifcPostCode','ifcCity','ifcProvince','ifcCountry','ifcTel','ifcMobile','ifcWeb','ifcWechat','ifcFacebook','ifcWhatsapp','ifcOthers'].forEach(id => { const n = document.getElementById(id); if (n) n.value = ''; });
+        ntn.value = '';
+        wireInlineEntityForms();
+        alert('Client created. Click Save this client link.');
+      };
+    }
+    initAddProductFormLinks();
+
+    document.getElementById('productAddCategoryBtn').onclick = () => {
+      const inp = document.getElementById('productNewCategoryInput');
+      const v = (inp.value || '').trim();
+      if (!v) return;
+      const wrap = document.getElementById('productCategoriesCheckboxes');
+      const existingCb = Array.from(wrap.querySelectorAll('input.category-cb')).find(cb => (cb.value || '').toLowerCase() === v.toLowerCase());
+      if (existingCb) {
+        existingCb.checked = true;
+        inp.value = '';
+        return;
+      }
+      const label = document.createElement('label');
+      label.innerHTML = `<input type="checkbox" class="category-cb" value="${escapeHtml(v)}" checked /> ${escapeHtml(v)}`;
+      wrap.appendChild(label);
+      inp.value = '';
+      [...wrap.querySelectorAll('label')].sort((a, b) => (a.textContent || '').localeCompare(b.textContent || '')).forEach(l => wrap.appendChild(l));
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const selectedCats = getSelectedCategoryNames();
+      if (!selectedCats.length) {
+        alert('Select at least one category');
+        return;
+      }
+      const nameInput = document.getElementById('productNameInput');
+        if (nameInput && nameInput.dataset.duplicateId) {
+        alert('Product "' + (nameInput.value || '').trim() + '" is already added.');
+        return;
+      }
+      const editingId = TriFormEdit.getEditingId(form);
+      const formData = new FormData(form);
+      formData.set('categories', JSON.stringify(selectedCats));
+
+      if (productFileState && productFileState.getRemovedFiles().length) {
+        formData.append('removeOtherDocuments', JSON.stringify(productFileState.getRemovedFiles()));
+      }
+
+      try {
+        const url = editingId ? `/api/products/${editingId}` : '/api/products';
+        const method = editingId ? 'PUT' : 'POST';
+        const res = await fetch(url, { method, body: formData });
+        const result = await res.json();
+        if (res.status === 409) {
+          alert(result.error || 'A product with this name already exists.');
+          return;
+        }
+        if (!res.ok) {
+          alert(result.error || (editingId ? 'Update failed' : 'Failed to add product'));
+          return;
+        }
+        const productId = editingId || result.product?._id || result._id;
+        if (!productId) {
+          alert(editingId ? 'Product updated but could not get ID' : 'Product added but could not get ID');
+          loadProducts();
+          return;
+        }
+        for (const d of formSupplierDrafts) {
+          const fd = new FormData();
+          fd.append('productId', productId);
+          fd.append('supplierId', d.supplierId);
+          fd.append('notes', '');
+          fd.append('productInfoFile', d.docFile);
+          fd.append('packingImage', d.packFile);
+          await fetch('/api/supplier-products', { method: 'POST', body: fd });
+        }
+        for (const d of formClientDrafts) {
+          await fetch('/api/product-clients', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, clientId: d.clientId, notes: '' })
+          });
+        }
+        alert(editingId ? 'Product updated successfully!' : 'Product and links added successfully!');
+        resetProductAddForm();
+        form.reset();
+        document.getElementById('productFormContainer').classList.remove('show');
+        if (!editingId && window.TriNewEntry) TriNewEntry.notifyNewEntry('product');
+        loadProducts();
+      } catch (err) {
+        alert('An error occurred');
+        console.error(err);
+      }
+    });
+
+    document.getElementById('productCancelEditBtn').addEventListener('click', () => {
+      resetProductAddForm();
+      document.getElementById('productForm').reset();
+      document.getElementById('productFormContainer').classList.remove('show');
+    });
+
+    async function openProductEditForm(id) {
+      const res = await fetch(`/api/products/${id}`);
+      const p = await res.json();
+      if (!res.ok) { alert(p.error || 'Failed to load product'); return; }
+
+      const cats = (p.categories && p.categories.length) ? p.categories : (p.category ? [p.category] : []);
+      await loadProductCategoriesCheckboxes(cats);
+      form.hsCode.value = p.hsCode || '';
+      form.name.value = p.name || '';
+      form.packing.value = p.packing || '';
+      form.productNote.value = p.productNote || '';
+      form.importDuty.value = p.importDuty != null ? p.importDuty : '';
+      form.incomeTax.value = p.incomeTax != null ? p.incomeTax : '';
+      form.salesTax.value = p.salesTax != null ? p.salesTax : '';
+
+      productFileState = TriFormEdit.bindExistingFiles(
+        document.getElementById('productExistingDocsHint'),
+        p.otherDocuments || [],
+        { single: false }
+      );
+
+      const [supLinks, cliLinks] = await Promise.all([
+        fetch(`/api/products/${id}/linked-suppliers`).then(r => r.ok ? r.json() : []),
+        fetch(`/api/products/${id}/linked-clients`).then(r => r.ok ? r.json() : []),
+      ]);
+      savedSupplierLinks = supLinks;
+      savedClientLinks = cliLinks;
+      existingSupplierLinkIds = new Set(savedSupplierLinks.map((l) => String(l.supplierId?._id || l.supplierId)).filter(Boolean));
+      existingClientLinkIds = new Set(savedClientLinks.map((l) => String(l.clientId?._id || l.clientId)).filter(Boolean));
+      formSupplierDrafts = [];
+      formClientDrafts = [];
+      renderSavedSupplierLinks();
+      renderSavedClientLinks();
+      renderFormSupplierDrafts();
+      renderFormClientDrafts();
+      updateSupplierComposerVisibility();
+      updateClientComposerVisibility();
+
+      TriFormEdit.setEditMode(form, {
+        editingId: id,
+        submitBtn: document.getElementById('productSubmitBtn'),
+        cancelBtn: document.getElementById('productCancelEditBtn'),
+        nameInput: document.getElementById('productNameInput'),
+        submitLabel: 'Save changes',
+        addLabel: 'Add Product',
+      });
+      if (productNameDupCheck) productNameDupCheck.runCheck();
+      document.getElementById('productFormContainer').classList.add('show');
+      loadHsCodesDatalist();
+      TriFormEdit.scrollToForm(document.getElementById('productFormContainer'));
+    }
+
+    let allProductsCache = [];
+    function getFilteredAndSortedProducts() {
+      const search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const category = (document.getElementById('filterCategory').value || '').toLowerCase();
+      const sortVal = (document.getElementById('sortProducts').value || 'name-asc');
+      let list = allProductsCache.filter(p => {
+        const catStr = displayProductCategories(p).toLowerCase();
+        const matchSearch = !search || (p.name || '').toLowerCase().includes(search) || catStr.includes(search) || (p.hsCode || '').toLowerCase().includes(search);
+        const matchCat = productMatchesFilterCategory(p, category);
+        return matchSearch && matchCat;
+      });
+      if (sortVal === 'name-asc') list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      else if (sortVal === 'name-desc') list.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+      else if (sortVal === 'category') list.sort((a, b) => displayProductCategories(a).localeCompare(displayProductCategories(b)));
+      else if (sortVal === 'hsCode') list.sort((a, b) => (a.hsCode || '').localeCompare(b.hsCode || ''));
+      return list;
+    }
+    function renderProductsTable(products) {
+      if (window.TriForm && TriForm.closeAllRowActionsMenus) TriForm.closeAllRowActionsMenus();
+      tableBody.innerHTML = '';
+      products.forEach(p => {
+        const row = document.createElement('tr');
+        if (p.showAsNew) row.classList.add('row-is-new');
+        const otherDocs = (p.otherDocuments || []).length
+          ? (p.otherDocuments || []).map(fn => `<a href="/uploads/${escapeHtml(fn)}" target="_blank" rel="noopener">${escapeHtml(fn)}</a>`).join('<br/>')
+          : '—';
+        row.innerHTML = `
+          <td class="checkbox-col">
+            <button type="button" class="row-toggle" aria-label="Toggle details"></button>
+            <input class="row-checkbox" type="checkbox" data-id="${p._id}" />
+          </td>
+          <td data-label="Name" contenteditable="false">${escapeHtml(p.name || '')}</td>
+          <td data-label="Categories" contenteditable="false">${escapeHtml(displayProductCategories(p))}</td>
+          <td data-label="Packing" contenteditable="false">${escapeHtml(p.packing || '')}</td>
+          <td data-label="HS Code" contenteditable="false">${escapeHtml(p.hsCode || '')}</td>
+          <td data-label="Taxes" contenteditable="false">
+            Import: ${p.importDuty ?? ''}%<br/>
+            Income: ${p.incomeTax ?? ''}%<br/>
+            Sales: ${p.salesTax ?? ''}%
+          </td>
+          <td data-label="Note" contenteditable="false">${escapeHtml((p.productNote || '').slice(0, 120))}${(p.productNote || '').length > 120 ? '…' : ''}</td>
+          <td data-label="Other docs" class="cell-docs" contenteditable="false">${otherDocs}</td>
+          <td class="table-actions-cell" data-label="Actions">
+            <details class="row-actions-menu">
+              <summary class="action-btn">Actions</summary>
+              <div class="row-actions-dropdown" data-actions-page="products">
+                <button type="button" class="action-btn edit-btn" data-id="${p._id}">Edit</button>
+                <button type="button" class="action-btn compose-email-btn" data-id="${p._id}">Email…</button>
+                <button type="button" class="action-btn view-suppliers-btn" data-id="${p._id}">Links — suppliers</button>
+                <button type="button" class="action-btn view-clients-btn" data-id="${p._id}">Links — clients</button>
+                <button type="button" class="action-btn view-all-btn" data-id="${p._id}">View all</button>
+                <button type="button" class="action-btn duplicate-btn" data-id="${p._id}">Duplicate</button>
+                <button type="button" class="action-btn delete-btn" data-id="${p._id}">Delete</button>
+              </div>
+            </details>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+      tableBody.querySelectorAll('.row-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tr = btn.closest('tr');
+          if (tr) tr.classList.toggle('row-open');
+        });
+      });
+      updateBulkUI();
+      updateSelectAllState();
+    }
+    async function loadProducts() {
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          fetch('/api/products'),
+          fetch('/api/product-categories'),
+        ]);
+        const products = await productsRes.json();
+        const categoriesRaw = categoriesRes.ok ? await categoriesRes.json() : [];
+        const catSeen = new Set();
+        const categories = categoriesRaw.filter((c) => {
+          const k = (c || '').trim().toLowerCase();
+          if (!k || catSeen.has(k)) return false;
+          catSeen.add(k);
+          return true;
+        });
+        allProductsCache = products;
+        selectedIds = new Set();
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+
+        const filterCat = document.getElementById('filterCategory');
+        const prevVal = filterCat.value;
+        filterCat.innerHTML = '<option value="">All categories</option>' + categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+        const prevMatch = prevVal ? categories.find((x) => x.toLowerCase() === prevVal.toLowerCase()) : '';
+        filterCat.value = prevMatch || '';
+
+        const list = getFilteredAndSortedProducts();
+        renderProductsTable(list);
+      } catch (err) {
+        console.error('Failed to fetch products', err);
+      }
+    }
+
+    loadProducts();
+    window.loadProducts = loadProducts;
+    if (window.TriNewEntry) {
+      TriNewEntry.registerViewHandler('products', async (info) => {
+        const ids = new Set((info.ids || []).map(String));
+        document.querySelectorAll('#productTableBody tr').forEach((tr) => {
+          const cb = tr.querySelector('.row-checkbox');
+          if (cb && ids.has(String(cb.dataset.id))) tr.classList.add('row-is-new');
+        });
+        const first = document.querySelector('#productTableBody tr.row-is-new');
+        if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        else if (ids.size) alert('New product(s) are in the list (highlighted in yellow).');
+      });
+      TriNewEntry.checkNewEntries(['products']);
+    }
+
+    // Logout
+    (function initLogout() {
+      var link = document.getElementById('logoutLink');
+      if (!link) return;
+      link.addEventListener('click', async function(e) {
+        e.preventDefault();
+        try {
+          await fetch('/logout', { method: 'POST' });
+        } catch (_) {}
+        window.location.href = '/login.html';
+      });
+    })();
+
+    // --- Helpers for selection/bulk UI ---
+    function updateBulkUI() {
+      const count = selectedIds.size;
+      selectedCountEl.textContent = `Selected: ${count}`;
+      const enabled = count > 0;
+      deleteSelectedBtn.disabled = !enabled;
+      emailSelectedBtn.disabled = !enabled;
+      // Edit only enabled if exactly one selected
+      editSelectedBtn.disabled = (count !== 1);
+    }
+
+    function updateSelectAllState() {
+      const allBoxes = document.querySelectorAll('.row-checkbox');
+      if (allBoxes.length === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+        return;
+      }
+      const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+      selectAllCheckbox.checked = (checkedBoxes.length === allBoxes.length);
+      selectAllCheckbox.indeterminate = (checkedBoxes.length > 0 && checkedBoxes.length < allBoxes.length);
+    }
+
+    // delegate checkbox change events
+    tableBody.addEventListener('change', (e) => {
+      if (e.target && e.target.classList.contains('row-checkbox')) {
+        const id = e.target.dataset.id;
+        if (e.target.checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+        updateBulkUI();
+        updateSelectAllState();
+      }
+    });
+
+    // select all checkbox handler
+    selectAllCheckbox.addEventListener('change', (e) => {
+      const checked = e.target.checked;
+      document.querySelectorAll('.row-checkbox').forEach(cb => {
+        cb.checked = checked;
+        const id = cb.dataset.id;
+        if (checked) selectedIds.add(id);
+        else selectedIds.delete(id);
+      });
+      updateBulkUI();
+    });
+
+    // Delegate action clicks at document level (dropdown is portaled to body when open)
+    document.addEventListener('click', (e) => {
+      if (!document.getElementById('productTableBody')) return;
+      const btn = e.target.closest('button.action-btn, a.action-btn');
+      if (!btn || !btn.dataset.id) return;
+      if (!btn.closest('#productTableBody') && !(btn.closest('.row-actions-dropdown') && btn.closest('.row-actions-dropdown').getAttribute('data-actions-page') === 'products')) return;
+
+      const id = btn.dataset.id;
+      if (btn.classList.contains('view-suppliers-btn')) {
+        openProductDetailSuppliers(id);
+      } else if (btn.classList.contains('view-clients-btn')) {
+        openProductDetailClients(id);
+      } else if (btn.classList.contains('edit-btn')) {
+        openProductEditForm(id);
+      } else if (btn.classList.contains('delete-btn')) {
+        deleteProduct(id);
+      } else if (btn.classList.contains('duplicate-btn')) {
+        duplicateProduct(id);
+      } else if (btn.classList.contains('compose-email-btn')) {
+        TriMail.product(id);
+      } else if (btn.classList.contains('view-all-btn')) {
+        TriDetail.viewProduct(id);
+      }
+    });
+
+    async function duplicateProduct(productId) {
+      try {
+        const res = await fetch(`/api/products/${productId}/duplicate`, { method: 'POST' });
+        const result = await res.json();
+        if (!res.ok) alert(result.error || 'Failed to duplicate');
+        else {
+          alert(result.message || 'Product duplicated');
+          loadProducts();
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Failed to duplicate');
+      }
+    }
+
+    async function dismissNewProduct(productId) {
+      try {
+        const res = await fetch(`/api/products/${productId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ showAsNew: false }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          alert(err.error || 'Could not update');
+          return;
+        }
+        loadProducts();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    let currentDetailProductId = null;
+
+    function printUploadUrl(url) {
+      if (!url) return;
+      const w = window.open(url, '_blank', 'noopener,noreferrer');
+      if (!w) { alert('Pop-up blocked. Allow pop-ups to print.'); return; }
+      const done = () => { try { w.focus(); w.print(); } catch (e) { /* ignore */ } };
+      if (w.document.readyState === 'complete') done();
+      else w.addEventListener('load', done, { once: true });
+    }
+
+    function supplierContactNames(supplier) {
+      const persons = supplier && supplier.contactPersons;
+      if (!Array.isArray(persons) || !persons.length) return '—';
+      return persons.map(p => (typeof p === 'string' ? p : (p && p.name))).filter(Boolean).join(', ') || '—';
+    }
+
+    async function openProductDetailSuppliers(productId) {
+      currentDetailProductId = productId;
+      const modal = document.getElementById('productDetailModalSuppliers');
+      const productRes = await fetch(`/api/products/${productId}`);
+      const product = await productRes.json();
+      document.getElementById('productDetailTitleSuppliers').textContent = (product.name || 'Product') + ' – Suppliers';
+      modal.style.display = 'flex';
+      document.getElementById('addSupplierLinkForm').style.display = 'none';
+      document.getElementById('modalNewSupplierForm').style.display = 'none';
+
+      const suppliers = await fetch(`/api/products/${productId}/linked-suppliers`).then(r => r.json());
+      const supDiv = document.getElementById('productDetailSuppliers');
+      if (suppliers.length === 0) {
+        supDiv.innerHTML = '<p class="empty-state">No supplier links. Add one below.</p>';
+      } else {
+        supDiv.innerHTML = `
+          <div class="view-modal-table-wrap">
+            <table class="view-modal-table">
+              <thead><tr>
+                <th>Supplier</th>
+                <th>Contact</th>
+                <th>Tel</th>
+                <th>Mobile</th>
+                <th>Email</th>
+                <th>Doc</th>
+                <th>Packing</th>
+                <th></th>
+              </tr></thead>
+              <tbody>
+                ${suppliers.map(sp => {
+                  const sup = sp.supplierId || {};
+                  const contact = (sup.contactPersons && sup.contactPersons[0]) || {};
+                  const doc = sp.productInfoFile;
+                  const docUrl = doc ? '/uploads/' + encodeURIComponent(doc) : '';
+                  const docCell = doc
+                    ? `<a href="${docUrl}" target="_blank" rel="noopener" style="color:#00d4ff;">${escapeHtml(doc)}</a> <button type="button" class="action-btn upload-doc-btn" data-sp-id="${sp._id}">Replace</button>`
+                    : `<button type="button" class="action-btn upload-doc-btn" data-sp-id="${sp._id}"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M4 21h16"/></svg></span>Upload</button>`;
+                  const packImg = sp.packingImage;
+                  const packUrl = packImg ? '/uploads/' + encodeURIComponent(packImg) : '';
+                  const packCell = packImg
+                    ? `<a href="${packUrl}" target="_blank" rel="noopener" style="color:#00d4ff;">${escapeHtml(packImg)}</a> <button type="button" class="action-btn upload-pack-btn" data-sp-id="${sp._id}">Replace</button>`
+                    : `<button type="button" class="action-btn upload-pack-btn" data-sp-id="${sp._id}"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M4 21h16"/></svg></span>Upload</button>`;
+                  const sid = sup._id || '';
+                  const printSpecs = doc ? `<button type="button" class="action-btn row-print-specs" data-url="${docUrl}">Print specs</button>` : '';
+                  const printPack = packImg ? `<button type="button" class="action-btn row-print-pack" data-url="${packUrl}">Print packing</button>` : '';
+                  const emailOne = sid ? `<button type="button" class="action-btn row-email-supplier" data-supplier-id="${sid}">Email</button>` : '';
+                  return `
+                  <tr>
+                    <td class="cell-nowrap">${escapeHtml(sup.companyName || '')}</td>
+                    <td class="cell-nowrap">${escapeHtml(supplierContactNames(sup))}</td>
+                    <td class="cell-nowrap">${escapeHtml(contact.tel || '—')}</td>
+                    <td class="cell-nowrap">${escapeHtml(contact.mobile || '—')}</td>
+                    <td class="cell-nowrap">${escapeHtml(contact.email || '—')}</td>
+                    <td class="cell-nowrap">${docCell}</td>
+                    <td class="cell-nowrap">${packCell}</td>
+                    <td class="cell-actions">${printSpecs}${printPack}${emailOne}<button class="action-btn delete-sp-btn" data-sp-id="${sp._id}"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 16h10l1-16"/></svg></span>Delete</button></td>
+                  </tr>
+                `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        supDiv.querySelectorAll('.row-print-specs, .row-print-pack').forEach(b => {
+          b.addEventListener('click', () => printUploadUrl(b.getAttribute('data-url')));
+        });
+        supDiv.querySelectorAll('.row-email-supplier').forEach(b => {
+          b.addEventListener('click', () => {
+            TriMail.open({
+              productId: currentDetailProductId,
+              recipientType: 'supplier',
+              recipientIds: [b.getAttribute('data-supplier-id')],
+              template: 'offer-request',
+            });
+          });
+        });
+        supDiv.querySelectorAll('.delete-sp-btn').forEach(b => {
+          b.addEventListener('click', async () => {
+            if (!confirm('Remove this supplier link?')) return;
+            await fetch(`/api/supplier-products/${b.dataset.spId}`, { method: 'DELETE' });
+            openProductDetailSuppliers(currentDetailProductId);
+          });
+        });
+        supDiv.querySelectorAll('.upload-doc-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg';
+            input.onchange = async () => {
+              if (!input.files || !input.files[0]) return;
+              const fd = new FormData();
+              fd.append('productInfoFile', input.files[0]);
+              const res = await fetch(`/api/supplier-products/${b.dataset.spId}`, { method: 'PUT', body: fd });
+              const result = await res.json();
+              if (!res.ok) { alert(result.error || 'Upload failed'); return; }
+              openProductDetailSuppliers(currentDetailProductId);
+            };
+            input.click();
+          });
+        });
+        supDiv.querySelectorAll('.upload-pack-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async () => {
+              if (!input.files || !input.files[0]) return;
+              const fd = new FormData();
+              fd.append('packingImage', input.files[0]);
+              const res = await fetch(`/api/supplier-products/${b.dataset.spId}`, { method: 'PUT', body: fd });
+              const result = await res.json();
+              if (!res.ok) { alert(result.error || 'Upload failed'); return; }
+              openProductDetailSuppliers(currentDetailProductId);
+            };
+            input.click();
+          });
+        });
+      }
+
+      const addBtn = document.getElementById('addSupplierLinkBtn');
+      const formDiv = document.getElementById('addSupplierLinkForm');
+      addBtn.onclick = () => { formDiv.style.display = formDiv.style.display === 'none' ? 'block' : 'none'; };
+      const supplierSelect = document.getElementById('modalSupplierSelect');
+      const supplierList = await fetch('/api/suppliers').then(r => r.json());
+      supplierSelect.innerHTML = '<option value="">Select supplier</option>' + supplierList.map(s => `<option value="${s._id}">${s.companyName}</option>`).join('');
+
+      document.getElementById('modalNewSupplierBtn').onclick = () => {
+        const f = document.getElementById('modalNewSupplierForm');
+        f.style.display = f.style.display === 'none' ? 'block' : 'none';
+      };
+      document.getElementById('modalCancelNewSupplierBtn').onclick = () => { document.getElementById('modalNewSupplierForm').style.display = 'none'; };
+      document.getElementById('modalSaveNewSupplierBtn').onclick = async () => {
+        const companyName = document.getElementById('nsCompanyName').value.trim();
+        if (!companyName) { alert('Company name is required'); return; }
+        const rawContacts = document.getElementById('nsContactPersons').value || '';
+        const lines = rawContacts.split(/\n/).map(s => s.trim()).filter(Boolean);
+        const firstContact = {
+          name: lines[0] || 'Primary',
+          department: document.getElementById('nsDepartment').value || '',
+          tel: document.getElementById('nsTel').value || '',
+          mobile: document.getElementById('nsMobile').value || '',
+          email: document.getElementById('nsEmail').value || '',
+          wechat: document.getElementById('nsWechat').value || '',
+          facebook: document.getElementById('nsFacebook').value || '',
+          whatsapp: document.getElementById('nsWhatsapp').value || '',
+          otherSocial: document.getElementById('nsOthers').value || ''
+        };
+        const contactPersons = lines.length ? lines.map((name, i) => i === 0 ? { ...firstContact, name } : { name }) : [firstContact];
+        const fd = new FormData();
+        fd.append('companyName', companyName);
+        fd.append('contactPersons', JSON.stringify(contactPersons));
+        fd.append('address', document.getElementById('nsAddress').value || '');
+        fd.append('postCode', document.getElementById('nsPostCode').value || '');
+        fd.append('city', document.getElementById('nsCity').value || '');
+        fd.append('province', document.getElementById('nsProvince').value || '');
+        fd.append('country', document.getElementById('nsCountry').value || '');
+        fd.append('web', document.getElementById('nsWeb').value || '');
+        const specScan = document.getElementById('nsSpecScan');
+        if (specScan.files && specScan.files[0]) fd.append('productSpecsFile', specScan.files[0]);
+        const res = await fetch('/api/suppliers', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (res.status === 409) {
+          alert(result.error || 'Supplier already exists.');
+          if (result.existingId) {
+            supplierSelect.innerHTML = '<option value="">Select supplier</option>' + (await fetch('/api/suppliers').then(r => r.json())).map(s => `<option value="${s._id}">${s.companyName}</option>`).join('');
+            supplierSelect.value = result.existingId;
+          }
+          return;
+        }
+        if (!res.ok) { alert(result.error || 'Failed to add supplier'); return; }
+        const newId = result.supplier._id;
+        supplierSelect.innerHTML = '<option value="">Select supplier</option>' + (await fetch('/api/suppliers').then(r => r.json())).map(s => `<option value="${s._id}">${s.companyName}</option>`).join('');
+        supplierSelect.value = newId;
+        document.getElementById('modalNewSupplierForm').style.display = 'none';
+        document.getElementById('nsCompanyName').value = '';
+        document.getElementById('nsContactPersons').value = '';
+        document.getElementById('nsAddress').value = '';
+        document.getElementById('nsPostCode').value = '';
+        document.getElementById('nsCity').value = '';
+        document.getElementById('nsProvince').value = '';
+        document.getElementById('nsCountry').value = '';
+        document.getElementById('nsWeb').value = '';
+        if (specScan) specScan.value = '';
+        alert('Supplier added. You can now add the link below.');
+      };
+
+      document.getElementById('modalSaveSupplierLink').onclick = async () => {
+        const supplierId = supplierSelect.value;
+        if (!supplierId) { alert('Select a supplier'); return; }
+        const fd = new FormData();
+        fd.append('productId', currentDetailProductId);
+        fd.append('supplierId', supplierId);
+        fd.append('notes', '');
+        const fileInput = document.getElementById('modalProductInfoFile');
+        const packInput = document.getElementById('modalPackingImage');
+        if (fileInput && fileInput.files && fileInput.files[0]) fd.append('productInfoFile', fileInput.files[0]);
+        if (packInput && packInput.files && packInput.files[0]) fd.append('packingImage', packInput.files[0]);
+        const res = await fetch('/api/supplier-products', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (!res.ok) { alert(result.error || 'Failed'); return; }
+        formDiv.style.display = 'none';
+        if (fileInput) fileInput.value = '';
+        if (packInput) packInput.value = '';
+        openProductDetailSuppliers(currentDetailProductId);
+      };
+      document.getElementById('modalCancelSupplierLink').onclick = () => { formDiv.style.display = 'none'; };
+    }
+
+    document.getElementById('closeProductDetailSuppliersBtn').onclick = () => {
+      document.getElementById('productDetailModalSuppliers').style.display = 'none';
+    };
+
+    function clientContactLine(client) {
+      if (!client || !client.contactPersons) return '—';
+      const cp = client.contactPersons;
+      if (Array.isArray(cp)) {
+        return cp.map(p => (typeof p === 'string' ? p : (p && p.name))).filter(Boolean).join(', ') || '—';
+      }
+      return String(cp);
+    }
+
+    async function openProductDetailClients(productId) {
+      currentDetailProductId = productId;
+      const modal = document.getElementById('productDetailModalClients');
+      const productRes = await fetch(`/api/products/${productId}`);
+      const product = await productRes.json();
+      document.getElementById('productDetailTitleClients').textContent = (product.name || 'Product') + ' – Clients';
+      modal.style.display = 'flex';
+      document.getElementById('addClientLinkForm').style.display = 'none';
+      document.getElementById('modalNewClientForm').style.display = 'none';
+
+      const clients = await fetch(`/api/products/${productId}/linked-clients`).then(r => r.json());
+      const cliDiv = document.getElementById('productDetailClients');
+      if (clients.length === 0) {
+        cliDiv.innerHTML = '<p class="empty-state">No client links. Add one below.</p>';
+      } else {
+        cliDiv.innerHTML = `
+          <div class="view-modal-table-wrap">
+            <table class="view-modal-table">
+              <thead><tr>
+                <th>Client</th>
+                <th>Contacts</th>
+                <th>Tel</th>
+                <th>Mobile</th>
+                <th>Email</th>
+                <th></th>
+              </tr></thead>
+              <tbody>
+                ${clients.map(pc => {
+                  const c = pc.clientId || {};
+                  const contactStr = clientContactLine(c);
+                  const cid = c._id || '';
+                  const emailBtn = cid ? `<button type="button" class="action-btn row-email-client" data-client-id="${cid}">Email</button>` : '';
+                  return `
+                  <tr>
+                    <td class="cell-nowrap">${escapeHtml(c.companyName || '')}</td>
+                    <td class="cell-nowrap">${escapeHtml(String(contactStr).slice(0, 80))}${String(contactStr).length > 80 ? '…' : ''}</td>
+                    <td class="cell-nowrap">${escapeHtml(c.tel || '—')}</td>
+                    <td class="cell-nowrap">${escapeHtml(c.mobile || '—')}</td>
+                    <td class="cell-nowrap">${escapeHtml(c.email || '—')}</td>
+                    <td class="cell-actions">${emailBtn}<button class="action-btn delete-pc-btn" data-pc-id="${pc._id}"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 16h10l1-16"/></svg></span>Delete</button></td>
+                  </tr>
+                `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+        cliDiv.querySelectorAll('.row-email-client').forEach(b => {
+          b.addEventListener('click', () => {
+            TriMail.open({
+              productId: currentDetailProductId,
+              recipientType: 'client',
+              recipientIds: [b.getAttribute('data-client-id')],
+              template: 'product-details-pricing',
+            });
+          });
+        });
+        cliDiv.querySelectorAll('.delete-pc-btn').forEach(b => {
+          b.addEventListener('click', async () => {
+            if (!confirm('Remove this client link?')) return;
+            await fetch(`/api/product-clients/${b.dataset.pcId}`, { method: 'DELETE' });
+            openProductDetailClients(currentDetailProductId);
+          });
+        });
+      }
+
+      const addClientBtn = document.getElementById('addClientLinkBtn');
+      const clientFormDiv = document.getElementById('addClientLinkForm');
+      const modalClientSelect = document.getElementById('modalClientSelect');
+      addClientBtn.onclick = () => { clientFormDiv.style.display = clientFormDiv.style.display === 'none' ? 'block' : 'none'; };
+      const clientList = await fetch('/api/clients').then(r => r.json());
+      modalClientSelect.innerHTML = '<option value="">Select client</option>' + clientList.map(c => `<option value="${c._id}">${c.companyName}</option>`).join('');
+
+      document.getElementById('modalNewClientBtn').onclick = () => {
+        const f = document.getElementById('modalNewClientForm');
+        f.style.display = f.style.display === 'none' ? 'block' : 'none';
+      };
+      document.getElementById('modalCancelNewClientBtn').onclick = () => { document.getElementById('modalNewClientForm').style.display = 'none'; };
+      document.getElementById('modalSaveNewClientBtn').onclick = async () => {
+        const companyName = document.getElementById('ncCompanyName').value.trim();
+        if (!companyName) { alert('Company name is required'); return; }
+        const rawContacts = document.getElementById('ncContactPersons').value || '';
+        const contactPersons = rawContacts.split(/\n/).map(s => s.trim()).filter(Boolean);
+        const fd = new FormData();
+        fd.append('companyName', companyName);
+        fd.append('contactPersons', JSON.stringify(contactPersons));
+        fd.append('address', document.getElementById('ncAddress').value || '');
+        fd.append('postCode', document.getElementById('ncPostCode').value || '');
+        fd.append('city', document.getElementById('ncCity').value || '');
+        fd.append('province', document.getElementById('ncProvince').value || '');
+        fd.append('country', document.getElementById('ncCountry').value || '');
+        fd.append('tel', document.getElementById('ncTel').value || '');
+        fd.append('mobile', document.getElementById('ncMobile').value || '');
+        fd.append('email', document.getElementById('ncEmail').value || '');
+        fd.append('web', document.getElementById('ncWeb').value || '');
+        fd.append('wechat', document.getElementById('ncWechat').value || '');
+        fd.append('facebook', document.getElementById('ncFacebook').value || '');
+        fd.append('whatsapp', document.getElementById('ncWhatsapp').value || '');
+        fd.append('others', document.getElementById('ncOthers').value || '');
+        const ntnFile = document.getElementById('ncNtnFile');
+        if (ntnFile.files && ntnFile.files[0]) fd.append('ntnFile', ntnFile.files[0]);
+        const res = await fetch('/api/clients', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (res.status === 409) {
+          alert('A client with this company name already exists. Select it from the list.');
+          modalClientSelect.innerHTML = '<option value="">Select client</option>' + (await fetch('/api/clients').then(r => r.json())).map(c => `<option value="${c._id}">${c.companyName}</option>`).join('');
+          if (result.existingId) modalClientSelect.value = result.existingId;
+          document.getElementById('modalNewClientForm').style.display = 'none';
+          return;
+        }
+        if (!res.ok) { alert(result.error || 'Failed to add client'); return; }
+        const newId = result.client._id;
+        modalClientSelect.innerHTML = '<option value="">Select client</option>' + (await fetch('/api/clients').then(r => r.json())).map(c => `<option value="${c._id}">${c.companyName}</option>`).join('');
+        modalClientSelect.value = newId;
+        document.getElementById('modalNewClientForm').style.display = 'none';
+        document.getElementById('ncCompanyName').value = '';
+        document.getElementById('ncContactPersons').value = '';
+        document.getElementById('ncAddress').value = '';
+        document.getElementById('ncPostCode').value = '';
+        document.getElementById('ncCity').value = '';
+        document.getElementById('ncProvince').value = '';
+        document.getElementById('ncCountry').value = '';
+        document.getElementById('ncTel').value = '';
+        document.getElementById('ncMobile').value = '';
+        document.getElementById('ncEmail').value = '';
+        document.getElementById('ncWeb').value = '';
+        document.getElementById('ncWechat').value = '';
+        document.getElementById('ncFacebook').value = '';
+        document.getElementById('ncWhatsapp').value = '';
+        document.getElementById('ncOthers').value = '';
+        if (ntnFile) ntnFile.value = '';
+        alert('Client added. You can now add the link below.');
+      };
+
+      document.getElementById('modalSaveClientLink').onclick = async () => {
+        const clientId = modalClientSelect.value;
+        if (!clientId) { alert('Select a client'); return; }
+        const res = await fetch('/api/product-clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: currentDetailProductId, clientId, notes: '' })
+        });
+        const result = await res.json();
+        if (!res.ok) { alert(result.error || 'Failed'); return; }
+        clientFormDiv.style.display = 'none';
+        modalClientSelect.value = '';
+        openProductDetailClients(currentDetailProductId);
+      };
+      document.getElementById('modalCancelClientLink').onclick = () => { clientFormDiv.style.display = 'none'; };
+    }
+
+    document.getElementById('closeProductDetailClientsBtn').onclick = () => {
+      document.getElementById('productDetailModalClients').style.display = 'none';
+    };
+
+    // Bulk action button handlers
+    editSelectedBtn.addEventListener('click', editSelected);
+    deleteSelectedBtn.addEventListener('click', deleteSelected);
+    emailSelectedBtn.addEventListener('click', () => {
+      if (selectedIds.size === 0) return;
+      const ids = Array.from(selectedIds);
+      if (ids.length === 1) TriMail.product(ids[0]);
+      else TriMail.open({ productIds: ids });
+    });
+
+    // existing single-delete function (left mostly as-is)
+    async function deleteProduct(productId) {
+      if (!confirm('Are you sure you want to delete this product?')) return;
+      try {
+        const res = await fetch(`/api/products/${productId}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (res.ok) {
+          alert('Product deleted successfully!');
+          loadProducts();
+        } else {
+          alert(result.error || 'Failed to delete product');
+        }
+      } catch (err) {
+        console.error('Delete failed:', err);
+        alert('Something went wrong!');
+      }
+    }
+
+    // Bulk delete
+    async function deleteSelected() {
+      if (selectedIds.size === 0) return;
+      if (!confirm(`Delete ${selectedIds.size} selected product(s)? This cannot be undone.`)) return;
+      try {
+        const ids = Array.from(selectedIds);
+        // perform deletes in parallel
+        const results = await Promise.all(ids.map(id => fetch(`/api/products/${id}`, { method: 'DELETE' })
+          .then(res => ({ ok: res.ok, id, json: res.ok ? null : res.json() }))
+          .catch(() => ({ ok: false, id }))));
+
+        const successCount = results.filter(r => r.ok).length;
+        const failCount = results.length - successCount;
+        alert(`Deleted ${successCount} product(s). ${failCount > 0 ? failCount + ' failed.' : ''}`);
+        await loadProducts();
+      } catch (err) {
+        console.error('Bulk delete failed', err);
+        alert('Bulk delete failed');
+      }
+    }
+
+    // Edit Selected (only if exactly 1 selected)
+    function editSelected() {
+      if (selectedIds.size !== 1) {
+        alert('Please select exactly one product to edit.');
+        return;
+      }
+      const id = Array.from(selectedIds)[0];
+      openProductEditForm(id);
+      updateBulkUI();
+    }
+
+    // Search/filter is handled by getFilteredAndSortedProducts() + renderProductsTable() (case-insensitive on name, category, HS code)
+  </script>
+</body>
+</html>

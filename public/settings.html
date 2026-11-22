@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings | TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span></button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span></button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+    <a href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg></span>Dashboard</a>
+    <a href="products.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg></span>Products</a>
+    <a href="supplier.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3z"/></svg></span>Suppliers</a>
+    <a href="clients.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M2 21a8 8 0 0 1 20 0"/></svg></span>Clients</a>
+    <a href="mail.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>Mail</a>
+    <a href="quotes.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/></svg></span>Quotations &amp; Offers</a>
+    <a href="sales-contract.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>Sales Contract</a>
+    <a href="indent.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>Indent</a>
+    <a href="sessions.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><path d="M21 12a9 9 0 1 1-9-9"/></svg></span>Sessions</a>
+    <a href="reports.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17V9"/><path d="M12 17V7"/><path d="M16 17v-4"/></svg></span>Reports</a>
+    <a href="admin.html" id="adminNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Admin Panel</a>
+    <a href="settings.html" id="settingsNavLink" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Settings</a>
+    <a href="#" id="logoutLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg></span>Logout</a>
+  </div>
+  <div class="main">
+    <h1>Settings</h1>
+    <p style="color:var(--text-secondary);margin-bottom:16px;">Company profile, defaults, and email configuration. Admin only.</p>
+    <form id="settingsForm" class="form-container show">
+      <h3>Company profile</h3>
+      <label>Company name</label><input type="text" id="companyName" />
+      <label>Address</label><textarea id="companyAddress"></textarea>
+      <label>Phone</label><input type="text" id="companyPhone" />
+      <label>Email</label><input type="email" id="companyEmail" />
+      <label>Default currency</label><input type="text" id="defaultCurrency" value="USD" />
+      <label>USD to PKR rate (for reports)</label><input type="number" id="usdToPkrRate" min="0" step="0.01" placeholder="278" />
+      <h3 style="margin-top:20px;">Defaults</h3>
+      <label>Default margin (%)</label><input type="number" id="defaultMargin" step="0.1" />
+      <label>Default import duty (%)</label><input type="number" id="defaultImportDuty" step="0.01" />
+      <label>Default income tax (%)</label><input type="number" id="defaultIncomeTax" step="0.01" />
+      <label>Default sales tax (%)</label><input type="number" id="defaultSalesTax" step="0.01" />
+      <h3 style="margin-top:20px;">Email (SMTP)</h3>
+      <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:10px;">For Gmail: leave host blank (or use <code>smtp.gmail.com</code>), port <strong>587</strong>, and a Google <strong>App Password</strong>. The app connects over IPv4 to avoid common network errors.</p>
+      <label>Mail service</label><input type="text" id="mailService" placeholder="gmail" />
+      <label>SMTP host (optional)</label><input type="text" id="mailHost" placeholder="smtp.gmail.com" />
+      <label>SMTP port</label><input type="number" id="mailPort" placeholder="587" />
+      <label>Mail user</label><input type="text" id="mailUser" autocomplete="off" />
+      <label>Mail password</label><input type="password" id="mailPass" autocomplete="new-password" placeholder="Gmail App Password (leave blank to keep)" />
+      <label>From address</label><input type="email" id="mailFrom" />
+      <label>Email signature</label><textarea id="emailSignature"></textarea>
+      <div class="form-actions"><button type="submit" class="btn">Save settings</button></div>
+    </form>
+    <div style="margin-top:24px;">
+      <h3>Data export</h3>
+      <p style="color:var(--text-secondary);font-size:0.9rem;">Download CSV exports of your data.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+        <a class="btn" href="/api/export/clients">Export clients</a>
+        <a class="btn" href="/api/export/suppliers">Export suppliers</a>
+        <a class="btn" href="/api/export/products">Export products</a>
+        <a class="btn" href="/api/export/quotations">Export quotations</a>
+        <a class="btn" href="/api/export/contracts">Export contracts</a>
+        <a class="btn" href="/api/export/indents">Export indents</a>
+        <a class="btn" href="/api/export/shipments">Export shipments</a>
+        <a class="btn" href="/api/export/invoices">Export invoices</a>
+      </div>
+    </div>
+    <div style="margin-top:32px;">
+      <h3>Email templates</h3>
+      <p style="color:var(--text-secondary);font-size:0.9rem;">Edit mail templates used on the Mail page. Use placeholders like <code>{{productName}}</code>, <code>{{price}}</code>, <code>{{recipientName}}</code>, <code>{{signature}}</code>, <code>{{customMessageBlock}}</code>. <strong>Custom email</strong> is freeform subject + body.</p>
+      <div id="emailTemplatesEditor"></div>
+    </div>
+  </div>
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script>
+    document.getElementById('logoutLink').addEventListener('click', function(e) { e.preventDefault(); fetch('/logout', { method: 'POST' }).then(function() { location.href = '/login.html'; }); });
+    window.triAuthReady.then(function(user) {
+      if (!user || user.role !== 'admin') { alert('Admin only'); location.href = '/index.html'; return; }
+      fetch('/api/settings').then(function(r) { return r.json(); }).then(function(s) {
+        ['companyName','companyAddress','companyPhone','companyEmail','defaultCurrency','usdToPkrRate','defaultMargin','defaultImportDuty','defaultIncomeTax','defaultSalesTax','mailService','mailHost','mailPort','mailUser','mailFrom','emailSignature'].forEach(function(k) {
+          var el = document.getElementById(k);
+          if (el && s[k] != null) el.value = s[k];
+        });
+        if (s.mailPass) document.getElementById('mailPass').placeholder = '********';
+      });
+    });
+    document.getElementById('settingsForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var payload = {};
+      ['companyName','companyAddress','companyPhone','companyEmail','defaultCurrency','usdToPkrRate','defaultMargin','defaultImportDuty','defaultIncomeTax','defaultSalesTax','mailService','mailHost','mailPort','mailUser','mailPass','mailFrom','emailSignature'].forEach(function(k) {
+        var el = document.getElementById(k);
+        if (el) payload[k] = el.type === 'number' ? Number(el.value) : el.value;
+      });
+      var res = await fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      var data = await res.json();
+      if (res.ok) { if (window.triToast) triToast.success('Settings saved'); else alert('Settings saved'); }
+      else alert(data.error || 'Failed');
+    });
+
+    async function loadEmailTemplatesEditor() {
+      const wrap = document.getElementById('emailTemplatesEditor');
+      if (!wrap) return;
+      const res = await fetch('/api/email-templates/all');
+      const templates = await res.json();
+      wrap.innerHTML = templates.map((t, i) => `
+        <div class="form-container show" style="margin-bottom:16px;" data-tpl-id="${t._id}">
+          <h4>${t.name}</h4>
+          <p class="form-hint">${t.description || ''} — Fields: ${(t.requiredFields || []).join(', ') || 'none'}</p>
+          <label>Subject</label>
+          <input type="text" class="tpl-subject" value="${(t.subject || '').replace(/"/g, '&quot;')}" />
+          <label>Body HTML</label>
+          <textarea class="tpl-body" rows="8">${t.bodyHtml || ''}</textarea>
+          <button type="button" class="btn tpl-save-btn" style="margin-top:8px;">Save template</button>
+        </div>
+      `).join('');
+      wrap.querySelectorAll('.tpl-save-btn').forEach(btn => {
+        btn.onclick = async () => {
+          const card = btn.closest('[data-tpl-id]');
+          const id = card.getAttribute('data-tpl-id');
+          const subject = card.querySelector('.tpl-subject').value;
+          const bodyHtml = card.querySelector('.tpl-body').value;
+          const r = await fetch('/api/email-templates/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subject, bodyHtml }),
+          });
+          const d = await r.json();
+          if (r.ok) { if (window.triToast) triToast.success('Template saved'); else alert('Template saved'); }
+          else alert(d.error || 'Failed');
+        };
+      });
+    }
+    window.triAuthReady.then(function() { loadEmailTemplatesEditor(); });
+  </script>
+</body>
+</html>

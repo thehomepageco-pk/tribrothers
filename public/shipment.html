@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+  <title>Shipment | TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+  <link rel="stylesheet" href="form-helpers.css"/>
+  <style>
+    .sh-form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
+    .sh-form-row > div label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.8125rem; }
+    .sh-form-row input, .sh-form-row select, .sh-form-row textarea { width: 100%; box-sizing: border-box; }
+    .sh-file-hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+    .sh-file-hint a { color: var(--accent-primary); }
+    @media (max-width: 900px) { .sh-form-row { grid-template-columns: 1fr; } }
+    .sh-progress { display: flex; flex-direction: column; gap: 4px; min-width: 120px; }
+    .sh-progress-track {
+      height: 6px; border-radius: 999px; background: var(--accent-muted);
+      overflow: hidden;
+    }
+    .sh-progress-bar {
+      height: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), #0a7a9e);
+      transition: width 0.25s ease;
+    }
+    .sh-progress-label {
+      font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu">
+    <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>
+    </button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+  </div>
+
+  <div class="main">
+    <header class="page-header">
+      <h1>Shipment</h1>
+      <button type="button" id="toggleFormBtn" class="btn">New shipment</button>
+    </header>
+
+    <div id="shipmentFormWrap" class="form-container is-collapsed">
+      <h2 style="margin-bottom:12px;" id="shFormTitle">Create shipment</h2>
+      <form id="shipmentForm" enctype="multipart/form-data">
+        <input type="hidden" id="shEditingId" value="" />
+
+        <div class="sh-form-row">
+          <div style="grid-column: 1 / -1;">
+            <label for="indent">Indent *</label>
+            <select id="indent" required>
+              <option value="">Select indent</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sh-form-row">
+          <div>
+            <label for="shipmentNumber">Shipment number *</label>
+            <input type="text" id="shipmentNumber" required placeholder="e.g. SH-2026-001" />
+          </div>
+          <div>
+            <label for="status">Status *</label>
+            <select id="status" required>
+              <option value="Draft">Draft</option>
+              <option value="Booked">Booked</option>
+              <option value="In transit">In transit</option>
+              <option value="Arrived">Arrived</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+          </div>
+          <div>
+            <label for="shipmentType">Shipment type</label>
+            <select id="shipmentType">
+              <option value="">Select type</option>
+              <option value="FCL">FCL</option>
+              <option value="LCL">LCL</option>
+              <option value="Bulk">Bulk</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sh-form-row">
+          <div>
+            <label for="vesselName">Vessel name</label>
+            <input type="text" id="vesselName" placeholder="Vessel" />
+          </div>
+          <div>
+            <label for="blNumber">B/L number</label>
+            <input type="text" id="blNumber" placeholder="Bill of lading #" />
+          </div>
+          <div>
+            <label for="shipmentDate">Shipment date</label>
+            <input type="date" id="shipmentDate" />
+          </div>
+        </div>
+
+        <div class="sh-form-row">
+          <div>
+            <label for="portOfLoading">Port of loading</label>
+            <input type="text" id="portOfLoading" placeholder="From sales contract" />
+          </div>
+          <div>
+            <label for="portOfDischarge">Port of discharge</label>
+            <input type="text" id="portOfDischarge" placeholder="From sales contract" />
+          </div>
+          <div>
+            <label for="freeDays">Free days</label>
+            <input type="number" id="freeDays" min="0" step="1" placeholder="e.g. 14" />
+          </div>
+        </div>
+
+        <div class="sh-form-row">
+          <div>
+            <label for="shippedQuantity">Shipped quantity</label>
+            <input type="number" id="shippedQuantity" min="0" step="any" placeholder="From contract" />
+          </div>
+          <div>
+            <label for="shippedQuantityUnit">Unit</label>
+            <select id="shippedQuantityUnit">
+              <option value="MT">MT</option>
+              <option value="KGS">KGS</option>
+            </select>
+          </div>
+          <div>
+            <label for="eta">ETA (optional)</label>
+            <input type="date" id="eta" />
+          </div>
+        </div>
+
+        <div class="sh-form-row">
+          <div style="grid-column: 1 / -1;">
+            <label for="notes">Notes</label>
+            <textarea id="notes" rows="2" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+
+        <div id="shIndentLinesBox" style="display:none; margin:12px 0;">
+          <label>Include indent lines (optional)</label>
+          <p class="form-hint">Select client allocations from this indent.</p>
+          <div id="shIndentLinesList"></div>
+        </div>
+
+        <div class="sh-form-row">
+          <div>
+            <label for="blFile">B/L file</label>
+            <input type="file" id="blFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" />
+            <p class="sh-file-hint" id="blFileCurrent" style="display:none;"></p>
+          </div>
+          <div>
+            <label for="shippingDocsFile">Shipping docs</label>
+            <input type="file" id="shippingDocsFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" />
+            <p class="sh-file-hint" id="shippingDocsFileCurrent" style="display:none;"></p>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn" id="shSubmitBtn">Save shipment</button>
+          <button type="button" class="action-btn" id="shCancelEditBtn" style="display:none;">Cancel edit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="products-toolbar" style="margin-top:20px;">
+      <div class="toolbar-row">
+        <div class="toolbar-group">
+          <label for="shSearchInput">Search</label>
+          <input type="text" id="shSearchInput" placeholder="Shipment #, indent, vessel, B/L…" />
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Shipment #</th>
+            <th>Indent</th>
+            <th>Status</th>
+            <th>Vessel</th>
+            <th>B/L #</th>
+            <th>Shipment date</th>
+            <th>ETA</th>
+            <th>Type</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="shTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="form-helpers.js"></script>
+  <script>
+    (function initMobileNav() {
+      var overlay = document.getElementById('sidebarOverlay');
+      document.querySelector('.menu-toggle')?.addEventListener('click', function() { document.body.classList.add('sidebar-open'); });
+      document.querySelector('.sidebar-close')?.addEventListener('click', function() { document.body.classList.remove('sidebar-open'); });
+      overlay?.addEventListener('click', function() { document.body.classList.remove('sidebar-open'); });
+      document.querySelectorAll('.sidebar a').forEach(function(a) { a.addEventListener('click', function() { document.body.classList.remove('sidebar-open'); }); });
+    })();
+
+    function esc(s) {
+      if (s == null) return '';
+      var d = document.createElement('div');
+      d.textContent = String(s);
+      return d.innerHTML;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      var d = new Date(iso);
+      return isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+    }
+
+    function toInputDate(iso) {
+      if (!iso) return '';
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.toISOString().slice(0, 10);
+    }
+
+    var allIndents = [];
+    var allShipments = [];
+    var selectedIndent = null;
+    var indentSelectApi = null;
+    var existingFiles = { blFile: null, shippingDocsFile: null };
+    var SHIPMENT_STEPS = ['Draft', 'Booked', 'In transit', 'Arrived', 'Delivered'];
+
+    function statusProgressHtml(status) {
+      var idx = Math.max(0, SHIPMENT_STEPS.indexOf(status || 'Draft'));
+      var pct = Math.round(((idx + 1) / SHIPMENT_STEPS.length) * 100);
+      return '<div class="sh-progress" title="' + esc(status || 'Draft') + '">' +
+        '<div class="sh-progress-track"><div class="sh-progress-bar" style="width:' + pct + '%"></div></div>' +
+        '<span class="sh-progress-label">' + esc(status || 'Draft') + ' · ' + pct + '%</span></div>';
+    }
+
+    function setFormOpen(open) {
+      var wrap = document.getElementById('shipmentFormWrap');
+      wrap.classList.toggle('is-collapsed', !open);
+      document.getElementById('toggleFormBtn').textContent = open ? 'Close form' : 'New shipment';
+    }
+
+    function suggestShipmentNumber() {
+      var year = new Date().getFullYear();
+      var prefix = 'SH-' + year + '-';
+      var max = 0;
+      allShipments.forEach(function(s) {
+        var m = String(s.shipmentNumber || '').match(new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d+)$'));
+        if (m) max = Math.max(max, parseInt(m[1], 10));
+      });
+      return prefix + String(max + 1).padStart(3, '0');
+    }
+
+    function showFileCurrent(field, filename) {
+      var el = document.getElementById(field + 'Current');
+      existingFiles[field] = filename || null;
+      if (!filename) {
+        el.style.display = 'none';
+        el.innerHTML = '';
+        return;
+      }
+      el.style.display = 'block';
+      el.innerHTML = 'Current: <a href="/uploads/' + esc(filename) + '" target="_blank" rel="noopener">' + esc(filename) + '</a>';
+    }
+
+    function rebuildIndentSelect(selectedId) {
+      var sel = document.getElementById('indent');
+      var prev = selectedId || sel.value;
+      sel.innerHTML = '<option value="">Select indent</option>' + allIndents.map(function(ind) {
+        var cn = (ind.salesContract && ind.salesContract.contractNumber) || '';
+        var sup = (ind.salesContract && ind.salesContract.supplier && ind.salesContract.supplier.companyName) || '';
+        var label = esc(ind.indentNumber) + (cn ? ' — ' + esc(cn) : '') + (sup ? ' (' + esc(sup) + ')' : '');
+        var scId = (ind.salesContract && ind.salesContract._id) ? ind.salesContract._id : ind.salesContract;
+        var shipType = ind.salesContract && ind.salesContract.shipmentType;
+        return '<option value="' + esc(ind._id) + '"' +
+          (scId ? ' data-contract="' + esc(scId) + '"' : '') +
+          (shipType ? ' data-shipment-type="' + esc(shipType) + '"' : '') +
+          '>' + label + '</option>';
+      }).join('');
+      if (prev) sel.value = prev;
+      if (indentSelectApi) indentSelectApi.refresh();
+    }
+
+    async function loadIndents() {
+      var res = await fetch('/api/indents');
+      allIndents = res.ok ? await res.json() : [];
+      rebuildIndentSelect();
+    }
+
+    function renderIndentLineChoices(selectedKeys) {
+      selectedKeys = selectedKeys || {};
+      var box = document.getElementById('shIndentLinesBox');
+      var list = document.getElementById('shIndentLinesList');
+      var rows = [];
+      var ind = selectedIndent;
+      if (ind) {
+        (ind.lines || []).forEach(function(l) {
+          var key = String(ind._id) + ':' + String(l._id || '');
+          var clientName = (l.client && l.client.companyName) || 'Client';
+          var productName = (l.product && l.product.name) || 'Product';
+          var checked = selectedKeys[key] ? ' checked' : '';
+          rows.push(
+            '<label class="sh-indent-line" style="display:flex;gap:8px;align-items:flex-start;margin:6px 0;">' +
+              '<input type="checkbox" class="sh-indent-cb" data-indent="' + esc(ind._id) + '" data-line-id="' + esc(l._id || '') + '" data-client="' + esc((l.client && l.client._id) || l.client || '') + '" data-product="' + esc((l.product && l.product._id) || l.product || '') + '" data-qty="' + esc(l.quantity || '') + '" data-unit="' + esc(l.quantityUnit || 'MT') + '"' + checked + ' />' +
+              '<span>' + esc(clientName) + ' / ' + esc(productName) + ' (' + esc(l.quantity) + ' ' + esc(l.quantityUnit || 'MT') + ')</span>' +
+            '</label>'
+          );
+        });
+      }
+      if (!rows.length) {
+        box.style.display = 'none';
+        list.innerHTML = '';
+        return;
+      }
+      box.style.display = 'block';
+      list.innerHTML = rows.join('');
+    }
+
+    function getSelectedShipmentLines() {
+      return Array.from(document.querySelectorAll('.sh-indent-cb:checked')).map(function(cb) {
+        return {
+          indent: cb.getAttribute('data-indent') || undefined,
+          indentLineId: cb.getAttribute('data-line-id') || undefined,
+          client: cb.getAttribute('data-client') || undefined,
+          product: cb.getAttribute('data-product') || undefined,
+          quantity: Number(cb.getAttribute('data-qty')) || undefined,
+          quantityUnit: cb.getAttribute('data-unit') || 'MT',
+        };
+      });
+    }
+
+    async function onIndentChange(selectedKeys) {
+      var sel = document.getElementById('indent');
+      var id = sel.value;
+      selectedIndent = allIndents.find(function(x) { return String(x._id) === String(id); }) || null;
+      var opt = sel.options[sel.selectedIndex];
+      var type = opt && opt.getAttribute('data-shipment-type');
+      if (type && !document.getElementById('shipmentType').value) {
+        document.getElementById('shipmentType').value = type;
+      }
+      var c = selectedIndent && selectedIndent.salesContract;
+      if (c) {
+        if (!document.getElementById('portOfLoading').value) {
+          document.getElementById('portOfLoading').value = c.portOfShipment || selectedIndent.portOfShipment || '';
+        }
+        if (!document.getElementById('portOfDischarge').value) {
+          document.getElementById('portOfDischarge').value = c.portOfDischarge || selectedIndent.portOfDischarge || '';
+        }
+        if (!document.getElementById('shippedQuantity').value && selectedIndent) {
+          var lines = selectedIndent.lines || [];
+          var qty = lines.reduce(function(s, l) { return s + (Number(l.quantity) || 0); }, 0);
+          document.getElementById('shippedQuantity').value = qty || '';
+          var unit = (lines[0] && lines[0].quantityUnit) || 'MT';
+          document.getElementById('shippedQuantityUnit').value = unit;
+        }
+      }
+      renderIndentLineChoices(selectedKeys);
+    }
+
+    function resetForm() {
+      document.getElementById('shEditingId').value = '';
+      document.getElementById('shipmentForm').reset();
+      document.getElementById('status').value = 'Draft';
+      document.getElementById('shipmentNumber').value = suggestShipmentNumber();
+      document.getElementById('shFormTitle').textContent = 'Create shipment';
+      document.getElementById('shSubmitBtn').textContent = 'Save shipment';
+      document.getElementById('shCancelEditBtn').style.display = 'none';
+      showFileCurrent('blFile', null);
+      showFileCurrent('shippingDocsFile', null);
+      if (indentSelectApi) indentSelectApi.setValue('');
+      selectedIndent = null;
+      renderIndentLineChoices();
+    }
+
+    function getFilteredShipments() {
+      var q = (document.getElementById('shSearchInput').value || '').trim().toLowerCase();
+      if (!q) return allShipments;
+      return allShipments.filter(function(s) {
+        var inNum = (s.indent && s.indent.indentNumber) || '';
+        var cn = (s.salesContract && s.salesContract.contractNumber) || '';
+        return (s.shipmentNumber || '').toLowerCase().includes(q)
+          || inNum.toLowerCase().includes(q)
+          || cn.toLowerCase().includes(q)
+          || (s.vesselName || '').toLowerCase().includes(q)
+          || (s.blNumber || '').toLowerCase().includes(q)
+          || (s.status || '').toLowerCase().includes(q);
+      });
+    }
+
+    function renderTable() {
+      var list = getFilteredShipments();
+      var tbody = document.getElementById('shTableBody');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:16px;color:var(--text-secondary);">No shipments yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(function(s) {
+        var indentNum = (s.indent && s.indent.indentNumber) || '—';
+        return '<tr>' +
+          '<td class="cell-nowrap">' + esc(s.shipmentNumber) + '</td>' +
+          '<td class="cell-nowrap">' + esc(indentNum) + '</td>' +
+          '<td class="cell-nowrap">' + statusProgressHtml(s.status) + '</td>' +
+          '<td>' + esc(s.vesselName || '—') + '</td>' +
+          '<td class="cell-nowrap">' + esc(s.blNumber || '—') + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatDate(s.shipmentDate || s.etd)) + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatDate(s.eta)) + '</td>' +
+          '<td class="cell-nowrap">' + esc(s.shipmentType || '—') + '</td>' +
+          '<td class="cell-actions">' +
+            '<a href="invoices.html?shipment=' + encodeURIComponent(s._id) + '" class="action-btn">Invoice</a> ' +
+            '<button type="button" class="action-btn sh-edit-btn" data-id="' + esc(s._id) + '">Edit</button> ' +
+            '<button type="button" class="action-btn sh-delete-btn" data-id="' + esc(s._id) + '">Delete</button>' +
+          '</td></tr>';
+      }).join('');
+
+      tbody.querySelectorAll('.sh-edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { openEdit(btn.getAttribute('data-id')); });
+      });
+      tbody.querySelectorAll('.sh-delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { deleteShipment(btn.getAttribute('data-id')); });
+      });
+    }
+
+    async function loadShipments() {
+      var res = await fetch('/api/shipments');
+      allShipments = res.ok ? await res.json() : [];
+      renderTable();
+    }
+
+    async function openEdit(id) {
+      var res = await fetch('/api/shipments/' + encodeURIComponent(id));
+      var s = await res.json();
+      if (!res.ok) { alert(s.error || 'Failed to load shipment'); return; }
+
+      await loadIndents();
+      document.getElementById('shEditingId').value = s._id;
+      var indentId = (s.indent && s.indent._id) ? s.indent._id : s.indent;
+      if (!indentId && (s.lines || []).length) {
+        var firstLine = s.lines[0];
+        indentId = (firstLine.indent && firstLine.indent._id) ? firstLine.indent._id : firstLine.indent;
+      }
+      rebuildIndentSelect(indentId);
+      if (indentSelectApi) indentSelectApi.setValue(indentId || '');
+
+      document.getElementById('shipmentNumber').value = s.shipmentNumber || '';
+      document.getElementById('status').value = s.status || 'Draft';
+      document.getElementById('shipmentType').value = s.shipmentType || '';
+      document.getElementById('vesselName').value = s.vesselName || '';
+      document.getElementById('blNumber').value = s.blNumber || '';
+      document.getElementById('shipmentDate').value = toInputDate(s.shipmentDate || s.etd);
+      document.getElementById('eta').value = toInputDate(s.eta);
+      document.getElementById('portOfLoading').value = s.portOfLoading || (s.salesContract && s.salesContract.portOfShipment) || '';
+      document.getElementById('portOfDischarge').value = s.portOfDischarge || (s.salesContract && s.salesContract.portOfDischarge) || '';
+      document.getElementById('shippedQuantity').value = s.shippedQuantity != null ? s.shippedQuantity : '';
+      document.getElementById('shippedQuantityUnit').value = s.shippedQuantityUnit || 'MT';
+      document.getElementById('freeDays').value = s.freeDays != null ? s.freeDays : '';
+      document.getElementById('notes').value = s.notes || '';
+
+      showFileCurrent('blFile', s.blFile);
+      showFileCurrent('shippingDocsFile', s.shippingDocsFile || s.packingListFile);
+      document.getElementById('blFile').value = '';
+      document.getElementById('shippingDocsFile').value = '';
+
+      var selectedKeys = {};
+      (s.lines || []).forEach(function(l) {
+        var indId = (l.indent && l.indent._id) ? l.indent._id : l.indent;
+        var lineId = l.indentLineId || '';
+        if (indId) selectedKeys[String(indId) + ':' + String(lineId)] = true;
+      });
+      await onIndentChange(selectedKeys);
+
+      document.getElementById('shFormTitle').textContent = 'Edit shipment';
+      document.getElementById('shSubmitBtn').textContent = 'Save changes';
+      document.getElementById('shCancelEditBtn').style.display = '';
+      setFormOpen(true);
+      document.getElementById('shipmentFormWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function deleteShipment(id) {
+      if (!confirm('Delete this shipment?')) return;
+      var res = await fetch('/api/shipments/' + encodeURIComponent(id), { method: 'DELETE' });
+      var r = await res.json();
+      if (!res.ok) { alert(r.error || 'Delete failed'); return; }
+      if (document.getElementById('shEditingId').value === id) {
+        resetForm();
+        setFormOpen(false);
+      }
+      loadShipments();
+      if (window.triToast) triToast('Shipment deleted', 'success');
+    }
+
+    document.getElementById('toggleFormBtn').addEventListener('click', function() {
+      var wrap = document.getElementById('shipmentFormWrap');
+      var isCollapsed = wrap.classList.contains('is-collapsed');
+      if (isCollapsed && document.getElementById('shEditingId').value) resetForm();
+      setFormOpen(isCollapsed);
+    });
+
+    document.getElementById('shCancelEditBtn').addEventListener('click', function() {
+      resetForm();
+      setFormOpen(false);
+    });
+
+    document.getElementById('shSearchInput').addEventListener('input', renderTable);
+
+    document.getElementById('shipmentForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var editingId = document.getElementById('shEditingId').value;
+      var fd = new FormData();
+      var indentSel = document.getElementById('indent');
+      var indentId = indentSel.value;
+      var opt = indentSel.options[indentSel.selectedIndex];
+      var salesContractId = opt && opt.getAttribute('data-contract');
+      fd.append('indentId', indentId);
+      if (salesContractId) fd.append('salesContractId', salesContractId);
+      fd.append('shipmentNumber', document.getElementById('shipmentNumber').value.trim());
+      fd.append('status', document.getElementById('status').value);
+      fd.append('shipmentType', document.getElementById('shipmentType').value);
+      fd.append('vesselName', document.getElementById('vesselName').value.trim());
+      fd.append('blNumber', document.getElementById('blNumber').value.trim());
+      fd.append('shipmentDate', document.getElementById('shipmentDate').value);
+      fd.append('etd', document.getElementById('shipmentDate').value);
+      fd.append('eta', document.getElementById('eta').value);
+      fd.append('portOfLoading', document.getElementById('portOfLoading').value.trim());
+      fd.append('portOfDischarge', document.getElementById('portOfDischarge').value.trim());
+      fd.append('shippedQuantity', document.getElementById('shippedQuantity').value);
+      fd.append('shippedQuantityUnit', document.getElementById('shippedQuantityUnit').value);
+      fd.append('freeDays', document.getElementById('freeDays').value);
+      fd.append('notes', document.getElementById('notes').value.trim());
+      fd.append('lines', JSON.stringify(getSelectedShipmentLines()));
+
+      ['blFile', 'shippingDocsFile'].forEach(function(field) {
+        var input = document.getElementById(field);
+        var hasNew = input && input.files && input.files[0];
+        if (editingId) {
+          fd.append('keep' + field.charAt(0).toUpperCase() + field.slice(1), hasNew ? 'false' : (existingFiles[field] ? 'true' : 'false'));
+        }
+        if (hasNew) fd.append(field, input.files[0]);
+      });
+
+      if (!fd.get('indentId')) { alert('Select an indent.'); return; }
+      if (!fd.get('shipmentNumber')) { alert('Enter a shipment number.'); return; }
+
+      var url = editingId ? '/api/shipments/' + editingId : '/api/shipments';
+      var res = await fetch(url, { method: editingId ? 'PUT' : 'POST', body: fd });
+      var result = await res.json();
+      if (!res.ok) { alert(result.error || 'Save failed'); return; }
+
+      var saved = result.shipment || result;
+      var savedId = saved._id || editingId;
+      resetForm();
+      setFormOpen(false);
+      loadShipments();
+      if (window.triToast) triToast(editingId ? 'Shipment updated' : 'Shipment saved', 'success');
+
+      if (savedId && confirm('Create invoice for this shipment?')) {
+        window.location.href = 'invoices.html?shipment=' + encodeURIComponent(savedId);
+      }
+    });
+
+    window.triAuthReady.then(async function(user) {
+      if (!user) return;
+      indentSelectApi = TriForm.initSearchableSelect(document.getElementById('indent'), {
+        placeholder: 'Select indent',
+        searchPlaceholder: 'Search indents…',
+        showEmptyOption: true,
+      });
+      document.getElementById('indent').addEventListener('change', function() { onIndentChange(); });
+      await loadIndents();
+      await loadShipments();
+      document.getElementById('shipmentNumber').value = suggestShipmentNumber();
+
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('new') === '1') setFormOpen(true);
+      var indentParam = params.get('indent');
+      if (indentParam) {
+        rebuildIndentSelect(indentParam);
+        if (indentSelectApi) indentSelectApi.setValue(indentParam);
+        setFormOpen(true);
+        await onIndentChange();
+      }
+    });
+
+    document.getElementById('logoutLink')?.addEventListener('click', async function(e) {
+      e.preventDefault();
+      try { await fetch('/logout', { method: 'POST' }); } catch (_) {}
+      window.location.href = '/login.html';
+    });
+  </script>
+</body>
+</html>

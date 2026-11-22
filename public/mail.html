@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mail Center | TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+  <link rel="stylesheet" href="form-helpers.css"/>
+  <style>
+    .mail-hub-intro { color: var(--text-secondary); margin-bottom: 20px; max-width: 760px; line-height: 1.5; }
+    .mail-hub-layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 24px; align-items: start; }
+    @media (max-width: 1100px) { .mail-hub-layout { grid-template-columns: 1fr; } }
+    .mail-panel { padding: 18px 20px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-md); margin-bottom: 16px; }
+    .mail-panel h3 { margin: 0 0 14px; font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+    .mail-panel label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-secondary); }
+    .mail-panel select, .mail-panel input[type="search"], .mail-panel input[type="text"], .mail-panel input[type="number"], .mail-panel textarea {
+      width: 100%; box-sizing: border-box;
+    }
+    .mail-panel .searchable-select-wrap { width: 100%; }
+    .mail-panel .searchable-select-trigger { width: 100%; text-align: left; }
+    .mail-selection-toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+    .mail-selection-toolbar input[type="search"] { flex: 1; min-width: 180px; margin-bottom: 0; }
+    .mail-selection-list { max-height: 280px; overflow-y: auto; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--bg-input); }
+    .mail-selection-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-bottom: 1px solid var(--border-subtle); cursor: pointer; }
+    .mail-selection-row:last-child { border-bottom: none; }
+    .mail-selection-row:hover { background: var(--bg-hover, rgba(0,0,0,0.03)); }
+    .mail-selection-row.hidden { display: none; }
+    .mail-selection-row input { margin-top: 3px; flex-shrink: 0; width: auto; }
+    .mail-selection-row .meta { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+    .mail-selection-count { font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px; min-height: 1.2em; }
+    .mail-recipient-group { border-bottom: 1px solid var(--border-subtle); }
+    .mail-recipient-group:last-child { border-bottom: none; }
+    .mail-recipient-group-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; background: var(--bg-surface); border-bottom: 1px solid var(--border-subtle); position: sticky; top: 0; z-index: 1; }
+    .mail-recipient-group-header strong { font-size: 0.9rem; }
+    .mail-recipient-group-header .action-btn { font-size: 0.75rem; padding: 4px 8px; }
+    .mail-preview-panel { position: sticky; top: 16px; }
+    .mail-preview-subject { font-weight: 600; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle); word-break: break-word; }
+    .mail-preview-frame { width: 100%; min-height: 320px; height: 55vh; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: #fff; }
+    .mail-dynamic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 600px) { .mail-dynamic-grid { grid-template-columns: 1fr; } }
+    .mail-context-badge { display: inline-block; padding: 4px 10px; background: var(--bg-input); border: 1px solid var(--border-default); border-radius: 999px; font-size: 0.8rem; margin-bottom: 12px; color: var(--text-secondary); }
+    .mail-empty-hint { padding: 24px 16px; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+    .mail-sticky-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+    #mailSendBtn { min-width: 140px; }
+    .mail-product-section-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); padding: 8px 12px 4px; }
+  </style>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span></button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span></button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+    <a href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg></span>Dashboard</a>
+    <a href="products.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg></span>Products</a>
+    <a href="supplier.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3z"/></svg></span>Suppliers</a>
+    <a href="clients.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M2 21a8 8 0 0 1 20 0"/></svg></span>Clients</a>
+    <a href="mail.html" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>Mail</a>
+    <a href="quotes.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/></svg></span>Quotations &amp; Offers</a>
+    <a href="sales-contract.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>Sales Contract</a>
+    <a href="indent.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>Indent</a>
+    <a href="sessions.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><path d="M21 12a9 9 0 1 1-9-9"/></svg></span>Sessions</a>
+    <a href="reports.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17V9"/><path d="M12 17V7"/><path d="M16 17v-4"/></svg></span>Reports</a>
+    <a href="admin.html" id="adminNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Admin Panel</a>
+    <a href="settings.html" id="settingsNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Settings</a>
+    <a href="#" id="logoutLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg></span>Logout</a>
+  </div>
+  <div class="main">
+    <h1>Mail Center</h1>
+    <p class="mail-hub-intro">Compose emails in one place — pick a template (or <strong>Custom email</strong> to write freely), choose suppliers or clients, optionally attach products, preview, then send.</p>
+    <div id="mailContextBadge" class="mail-context-badge" style="display:none;"></div>
+
+    <form id="mailComposeForm">
+      <div class="mail-hub-layout">
+        <div class="mail-compose-col">
+          <div class="mail-panel">
+            <h3>1. Email template</h3>
+            <select id="mailTemplateSelect" required></select>
+            <p id="mailTemplateDesc" class="form-hint" style="margin-top:8px;"></p>
+          </div>
+
+          <div class="mail-panel">
+            <h3>2. Recipients</h3>
+            <label for="mailRecipientType">Send to</label>
+            <select id="mailRecipientType">
+              <option value="supplier">Suppliers</option>
+              <option value="client">Clients</option>
+            </select>
+            <div class="mail-selection-toolbar" style="margin-top:14px;">
+              <input type="search" id="mailRecipientSearch" placeholder="Search company or email…" />
+              <button type="button" class="action-btn" id="mailSelectAllRecipientsBtn">Select all</button>
+              <button type="button" class="action-btn" id="mailClearRecipientsBtn">Clear</button>
+            </div>
+            <div id="mailRecipientList" class="mail-selection-list">
+              <div class="mail-empty-hint">Loading recipients…</div>
+            </div>
+            <p class="mail-selection-count" id="mailRecipientCount"></p>
+          </div>
+
+          <div class="mail-panel">
+            <h3>3. Products <span style="font-weight:400;color:var(--text-secondary);">(optional — select one or more)</span></h3>
+            <div class="mail-selection-toolbar">
+              <input type="search" id="mailProductSearch" placeholder="Search products…" />
+              <button type="button" class="action-btn" id="mailSelectAllProductsBtn">Select all</button>
+              <button type="button" class="action-btn" id="mailClearProductsBtn">Clear</button>
+            </div>
+            <div id="mailProductList" class="mail-selection-list">
+              <div class="mail-empty-hint">Loading products…</div>
+            </div>
+            <p class="mail-selection-count" id="mailProductCount"></p>
+          </div>
+
+          <div id="mailDynamicFields" class="mail-panel" style="display:none;">
+            <h3>4. Email details</h3>
+            <div id="mailDynamicFieldsInner" class="mail-dynamic-grid"></div>
+          </div>
+
+          <div class="mail-sticky-actions">
+            <button type="submit" class="btn" id="mailSendBtn">Send email</button>
+            <span id="mailSendHint" class="form-hint"></span>
+          </div>
+        </div>
+
+        <div class="mail-preview-col mail-preview-panel">
+          <div class="mail-panel">
+            <h3>Live preview</h3>
+            <div id="mailPreviewSubject" class="mail-preview-subject">Select a template and recipient to preview…</div>
+            <iframe id="mailPreviewFrame" class="mail-preview-frame" title="Email preview" sandbox="allow-same-origin"></iframe>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="form-helpers.js"></script>
+  <script src="mail-compose.js"></script>
+  <script>
+    document.getElementById('logoutLink').addEventListener('click', function(e) {
+      e.preventDefault(); fetch('/logout', { method: 'POST' }).then(function() { location.href = '/login.html'; });
+    });
+
+    const FIELD_LABELS = {
+      price: 'Price', currency: 'Currency', importDuty: 'Import duty (%)',
+      incomeTax: 'Income tax (%)', salesTax: 'Sales tax (%)',
+      customMessage: 'Email body', subjectLine: 'Subject',
+    };
+
+    const FREEFORM_SLUGS = ['custom-email', 'general-message'];
+
+    let templates = [];
+    let suppliers = [];
+    let clients = [];
+    let products = [];
+    let mailContext = null;
+    let previewTimer = null;
+    let templateSelectApi = null;
+    const urlParams = new URLSearchParams(window.location.search);
+
+    function escapeHtml(str) {
+      if (str == null) return '';
+      const d = document.createElement('div');
+      d.textContent = String(str);
+      return d.innerHTML;
+    }
+
+    function asArray(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.items)) return data.items;
+      return [];
+    }
+
+    function currentTemplate() {
+      const id = document.getElementById('mailTemplateSelect').value;
+      return templates.find(t => String(t._id) === String(id));
+    }
+
+    function isFreeformTemplate(tpl) {
+      return !!(tpl && FREEFORM_SLUGS.includes(tpl.slug));
+    }
+
+    function fieldLabel(key, tpl) {
+      if (key === 'customMessage' && isFreeformTemplate(tpl)) return 'Email body';
+      if (key === 'customMessage') return 'Additional message';
+      if (key === 'subjectLine') return 'Subject';
+      return FIELD_LABELS[key] || key;
+    }
+
+    function recipientType() {
+      return document.getElementById('mailRecipientType').value;
+    }
+
+    function expandRecipientsFromEntities(entities, type) {
+      const rows = [];
+      entities.forEach((entity) => {
+        const id = entity._id || entity.recipientId;
+        const company = entity.companyName || '—';
+        const cps = Array.isArray(entity.contactPersons) ? entity.contactPersons : [];
+        let added = false;
+        cps.forEach((cp, idx) => {
+          const email = (cp && cp.email) ? String(cp.email).trim() : '';
+          const name = (cp && cp.name) ? String(cp.name).trim() : ('Contact ' + (idx + 1));
+          if (!email) return;
+          added = true;
+          rows.push({
+            recipientType: type,
+            recipientId: String(id),
+            toEmail: email,
+            companyName: company,
+            contactName: name,
+            searchBlob: (company + ' ' + name + ' ' + email).toLowerCase(),
+            key: type + ':' + id + ':' + email,
+          });
+        });
+        if (!added && entity.email && String(entity.email).trim()) {
+          const email = String(entity.email).trim();
+          rows.push({
+            recipientType: type,
+            recipientId: String(id),
+            toEmail: email,
+            companyName: company,
+            contactName: 'Company',
+            searchBlob: (company + ' ' + email).toLowerCase(),
+            key: type + ':' + id + ':' + email,
+          });
+        }
+      });
+      return rows;
+    }
+
+    function getRestrictRecipientIds() {
+      const ids = [];
+      const rid = urlParams.get('recipientId');
+      if (rid) ids.push(rid);
+      (urlParams.get('recipientIds') || '').split(',').forEach((id) => {
+        const t = id.trim();
+        if (t) ids.push(t);
+      });
+      return ids;
+    }
+
+    function getRecipientRows() {
+      const type = recipientType();
+      let rows = [];
+      if (mailContext && mailContext.recipients && mailContext.recipients.length) {
+        const filtered = mailContext.recipients.filter(r => r.recipientType === type);
+        if (filtered.length) rows = expandRecipientsFromEntities(filtered, type);
+      }
+      if (!rows.length) {
+        const list = type === 'supplier' ? suppliers : clients;
+        rows = expandRecipientsFromEntities(list, type);
+      }
+      const restrictIds = getRestrictRecipientIds();
+      if (restrictIds.length) {
+        const idSet = new Set(restrictIds.map(String));
+        rows = rows.filter(r => idSet.has(String(r.recipientId)));
+      }
+      return rows;
+    }
+
+    function groupRecipientRows(rows) {
+      const groups = new Map();
+      rows.forEach((row) => {
+        if (!groups.has(row.recipientId)) {
+          groups.set(row.recipientId, { recipientId: row.recipientId, companyName: row.companyName, contacts: [] });
+        }
+        groups.get(row.recipientId).contacts.push(row);
+      });
+      return Array.from(groups.values());
+    }
+
+    function renderRecipientList() {
+      const listEl = document.getElementById('mailRecipientList');
+      const rows = getRecipientRows();
+      if (!rows.length) {
+        listEl.innerHTML = '<div class="mail-empty-hint">No contacts with email addresses found. Add contact emails on the ' +
+          (recipientType() === 'supplier' ? 'Suppliers' : 'Clients') + ' page first.</div>';
+        updateRecipientCount();
+        return;
+      }
+
+      const groups = groupRecipientRows(rows);
+      listEl.innerHTML = groups.map((g) => `
+        <div class="mail-recipient-group" data-company-id="${escapeHtml(g.recipientId)}">
+          <div class="mail-recipient-group-header">
+            <strong>${escapeHtml(g.companyName)}</strong>
+            <button type="button" class="action-btn mail-group-select-btn" data-company-id="${escapeHtml(g.recipientId)}">Select all</button>
+          </div>
+          ${g.contacts.map(r => `
+            <label class="mail-selection-row mail-recipient-row" data-search="${escapeHtml(r.searchBlob)}" data-company-id="${escapeHtml(r.recipientId)}">
+              <input type="checkbox" class="mail-recipient-cb" data-key="${escapeHtml(r.key)}"
+                data-recipient-type="${escapeHtml(r.recipientType)}"
+                data-recipient-id="${escapeHtml(r.recipientId)}"
+                data-to-email="${escapeHtml(r.toEmail)}" />
+              <span>
+                ${escapeHtml(r.contactName)}
+                <div class="meta">${escapeHtml(r.toEmail)}</div>
+              </span>
+            </label>
+          `).join('')}
+        </div>
+      `).join('');
+
+      const pre = getPreselectKeys();
+      if (pre.size) {
+        listEl.querySelectorAll('.mail-recipient-cb').forEach(cb => {
+          if (pre.has(cb.dataset.key) || pre.has(cb.dataset.recipientId)) cb.checked = true;
+        });
+      }
+      filterRecipientList();
+      updateRecipientCount();
+      schedulePreview();
+    }
+
+    function getPreselectKeys() {
+      const pre = new Set();
+      const rid = urlParams.get('recipientId');
+      const rids = (urlParams.get('recipientIds') || '').split(',').filter(Boolean);
+      const toEmail = urlParams.get('toEmail');
+      if (rid) pre.add(rid);
+      rids.forEach(id => pre.add(id.trim()));
+      if (toEmail && rid) pre.add(recipientType() + ':' + rid + ':' + toEmail);
+      return pre;
+    }
+
+    function getPreselectProductIds() {
+      const ids = [];
+      const pid = urlParams.get('productId');
+      if (pid) ids.push(pid);
+      (urlParams.get('productIds') || '').split(',').forEach((id) => {
+        const t = id.trim();
+        if (t) ids.push(t);
+      });
+      return ids;
+    }
+
+    function getProductOptions() {
+      const linked = (mailContext && mailContext.linkedProducts) || [];
+      const linkedIds = new Set(linked.map(p => String(p._id)));
+      const restrictRecipient = !!urlParams.get('recipientId');
+      if (restrictRecipient && linked.length) {
+        const other = products.filter(p => !linkedIds.has(String(p._id)));
+        return { linked, other };
+      }
+      return { linked: [], other: products };
+    }
+
+    function renderProductList() {
+      const listEl = document.getElementById('mailProductList');
+      const { linked, other } = getProductOptions();
+      const all = [...linked, ...other];
+      if (!all.length) {
+        listEl.innerHTML = '<div class="mail-empty-hint">No products found.</div>';
+        updateProductCount();
+        return;
+      }
+
+      let html = '';
+      if (linked.length) {
+        html += '<div class="mail-product-section-label">Linked products</div>';
+        html += linked.map(p => productRowHtml(p)).join('');
+      }
+      if (other.length) {
+        if (linked.length) html += '<div class="mail-product-section-label">All products</div>';
+        html += other.map(p => productRowHtml(p)).join('');
+      }
+      listEl.innerHTML = html;
+
+      const pre = new Set(getPreselectProductIds().map(String));
+      listEl.querySelectorAll('.mail-product-cb').forEach(cb => {
+        if (pre.has(cb.value)) cb.checked = true;
+      });
+      filterProductList();
+      updateProductCount();
+      applyProductDefaults();
+      schedulePreview();
+    }
+
+    function productRowHtml(p) {
+      const hs = p.hsCode ? ' · HS ' + p.hsCode : '';
+      const cat = (p.categories && p.categories.length) ? p.categories.join(', ') : (p.category || '');
+      const meta = [cat, hs].filter(Boolean).join('');
+      return `
+        <label class="mail-selection-row mail-product-row" data-search="${escapeHtml((p.name + ' ' + meta).toLowerCase())}">
+          <input type="checkbox" class="mail-product-cb" value="${escapeHtml(String(p._id))}" />
+          <span>
+            <strong>${escapeHtml(p.name || '—')}</strong>
+            ${meta ? `<div class="meta">${escapeHtml(meta)}</div>` : ''}
+          </span>
+        </label>`;
+    }
+
+    function filterRecipientList() {
+      const q = (document.getElementById('mailRecipientSearch').value || '').trim().toLowerCase();
+      document.querySelectorAll('#mailRecipientList .mail-recipient-group').forEach(group => {
+        let anyVisible = false;
+        group.querySelectorAll('.mail-recipient-row').forEach(el => {
+          const match = !q || (el.getAttribute('data-search') || '').includes(q);
+          el.classList.toggle('hidden', !match);
+          if (match) anyVisible = true;
+        });
+        group.style.display = anyVisible ? '' : 'none';
+      });
+    }
+
+    function filterProductList() {
+      const q = (document.getElementById('mailProductSearch').value || '').trim().toLowerCase();
+      document.querySelectorAll('#mailProductList .mail-product-row').forEach(el => {
+        const match = !q || (el.getAttribute('data-search') || '').includes(q);
+        el.classList.toggle('hidden', !match);
+      });
+    }
+
+    function updateRecipientCount() {
+      const checked = document.querySelectorAll('.mail-recipient-cb:checked').length;
+      const total = document.querySelectorAll('.mail-recipient-cb').length;
+      document.getElementById('mailRecipientCount').textContent =
+        checked ? `${checked} of ${total} contact(s) selected` : (total ? `${total} contact(s) available` : '');
+      updateSendHint();
+    }
+
+    function updateProductCount() {
+      const checked = document.querySelectorAll('.mail-product-cb:checked').length;
+      const total = document.querySelectorAll('.mail-product-cb').length;
+      document.getElementById('mailProductCount').textContent =
+        checked ? `${checked} product(s) selected` : (total ? `${total} product(s) available` : 'No products selected');
+      updateSendHint();
+    }
+
+    function updateSendHint() {
+      const recipients = document.querySelectorAll('.mail-recipient-cb:checked').length;
+      const prods = document.querySelectorAll('.mail-product-cb:checked').length;
+      let hint = '';
+      if (recipients > 1) hint = `Will send ${recipients} separate emails`;
+      if (prods > 1 && recipients <= 1) hint = `Email will include ${prods} products`;
+      if (prods > 1 && recipients > 1) hint = `${recipients} emails, each with ${prods} products`;
+      document.getElementById('mailSendHint').textContent = hint;
+    }
+
+    function getSelectedRecipients() {
+      return Array.from(document.querySelectorAll('.mail-recipient-cb:checked')).map(cb => ({
+        recipientType: cb.dataset.recipientType,
+        recipientId: cb.dataset.recipientId,
+        toEmail: cb.dataset.toEmail,
+      }));
+    }
+
+    function getSelectedProductIds() {
+      return Array.from(document.querySelectorAll('.mail-product-cb:checked')).map(cb => cb.value);
+    }
+
+    function getSelectedProducts() {
+      const ids = new Set(getSelectedProductIds().map(String));
+      return products.filter(p => ids.has(String(p._id)));
+    }
+
+    function filterTemplatesForType() {
+      const type = recipientType();
+      const sel = document.getElementById('mailTemplateSelect');
+      const current = sel.value;
+      const filtered = templates.filter(t => {
+        const types = t.recipientTypes || ['any'];
+        return types.includes('any') || types.includes(type);
+      });
+      sel.innerHTML = filtered.map(t => `<option value="${t._id}">${escapeHtml(t.name)}</option>`).join('');
+      if (current && filtered.some(t => String(t._id) === String(current))) sel.value = current;
+      else if (filtered.length) sel.value = filtered[0]._id;
+      if (templateSelectApi && templateSelectApi.refresh) templateSelectApi.refresh();
+      onTemplateChange();
+    }
+
+    function onTemplateChange() {
+      const tpl = currentTemplate();
+      document.getElementById('mailTemplateDesc').textContent = tpl ? (tpl.description || '') : '';
+      const wrap = document.getElementById('mailDynamicFields');
+      const inner = document.getElementById('mailDynamicFieldsInner');
+      const fields = tpl ? (tpl.requiredFields || []) : [];
+      const freeform = isFreeformTemplate(tpl);
+      // Always expose subject + body for freeform templates even if detection missed them
+      const fieldSet = new Set(fields);
+      if (freeform) {
+        fieldSet.add('subjectLine');
+        fieldSet.add('customMessage');
+      }
+      const allFields = Array.from(fieldSet);
+      const visibleFields = allFields.filter(f => f !== 'customMessage' && f !== 'subjectLine');
+      const hasTextFields = allFields.includes('customMessage') || allFields.includes('subjectLine');
+
+      if (!allFields.length) {
+        wrap.style.display = 'none';
+        inner.innerHTML = '';
+      } else {
+        wrap.style.display = 'block';
+        let html = '';
+        if (hasTextFields) {
+          if (allFields.includes('subjectLine')) {
+            html += `<div style="grid-column:1/-1;"><label for="mailField_subjectLine">${fieldLabel('subjectLine', tpl)}</label>` +
+              `<input type="text" id="mailField_subjectLine" placeholder="Email subject" ${freeform ? 'required' : ''} /></div>`;
+          }
+          if (allFields.includes('customMessage')) {
+            html += `<div style="grid-column:1/-1;"><label for="mailField_customMessage">${fieldLabel('customMessage', tpl)}</label>` +
+              `<textarea id="mailField_customMessage" rows="${freeform ? 10 : 4}" placeholder="${freeform ? 'Write your email here…' : 'Optional notes…'}" ${freeform ? 'required' : ''}></textarea></div>`;
+          }
+        }
+        visibleFields.forEach(f => {
+          const type = ['importDuty', 'incomeTax', 'salesTax'].includes(f) ? 'number' : 'text';
+          html += `<div><label>${fieldLabel(f, tpl)}</label><input type="${type}" id="mailField_${f}" step="0.01" /></div>`;
+        });
+        inner.innerHTML = html;
+        applyProductDefaults();
+        ['mailField_subjectLine', 'mailField_customMessage'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.addEventListener('input', schedulePreview);
+        });
+        visibleFields.forEach(f => {
+          const el = document.getElementById('mailField_' + f);
+          if (el) el.addEventListener('input', schedulePreview);
+        });
+      }
+      schedulePreview();
+    }
+
+    function applyProductDefaults() {
+      const selected = getSelectedProducts();
+      const product = selected[0] || (mailContext && mailContext.product) || null;
+      const settings = mailContext && mailContext.settings ? mailContext.settings : {};
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && (el.value === '' || el.dataset.autoFilled === '1')) {
+          el.value = val != null && val !== '' ? String(val) : '';
+          el.dataset.autoFilled = '1';
+        }
+      };
+      setVal('mailField_price', product && product.finalPrice != null ? product.finalPrice : '');
+      setVal('mailField_currency', settings.defaultCurrency || 'USD');
+      setVal('mailField_importDuty', product && product.importDuty != null ? product.importDuty : (settings.defaultImportDuty || '0'));
+      setVal('mailField_incomeTax', product && product.incomeTax != null ? product.incomeTax : (settings.defaultIncomeTax || '0'));
+      setVal('mailField_salesTax', product && product.salesTax != null ? product.salesTax : (settings.defaultSalesTax || '0'));
+    }
+
+    function collectFields() {
+      const tpl = currentTemplate();
+      const out = {};
+      const keys = new Set(tpl?.requiredFields || []);
+      if (isFreeformTemplate(tpl)) {
+        keys.add('subjectLine');
+        keys.add('customMessage');
+      }
+      keys.forEach(f => {
+        const el = document.getElementById('mailField_' + f);
+        if (el) out[f] = el.value;
+      });
+      return out;
+    }
+
+    async function loadMailContext() {
+      const selectedProductIds = getSelectedProductIds();
+      const productId = selectedProductIds[0] || urlParams.get('productId') || '';
+      const recipientTypeParam = urlParams.get('recipientType') || recipientType();
+      const recipientId = urlParams.get('recipientId') || '';
+      const q = new URLSearchParams();
+      if (productId) q.set('productId', productId);
+      if (recipientTypeParam) q.set('recipientType', recipientTypeParam);
+      if (recipientId) q.set('recipientId', recipientId);
+      if (!q.toString()) {
+        mailContext = null;
+        document.getElementById('mailContextBadge').style.display = 'none';
+        renderProductList();
+        return;
+      }
+      try {
+        const res = await fetch('/api/mail/context?' + q.toString());
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load context');
+        mailContext = data;
+        const badge = document.getElementById('mailContextBadge');
+        const parts = [];
+        if (mailContext.product) parts.push('Product: ' + mailContext.product.name);
+        if (recipientId && mailContext.recipients && mailContext.recipients[0]) {
+          parts.push((recipientTypeParam === 'supplier' ? 'Supplier' : 'Client') + ': ' + mailContext.recipients[0].companyName);
+        }
+        if (parts.length) {
+          badge.textContent = 'Opened from: ' + parts.join(' · ');
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+        renderProductList();
+        applyProductDefaults();
+      } catch (e) {
+        console.warn('Mail context:', e.message);
+        mailContext = null;
+        renderProductList();
+      }
+    }
+
+    function apiJsonHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': '1',
+      };
+    }
+
+    async function apiPostJson(url, body) {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: apiJsonHeaders(),
+        credentials: 'same-origin',
+        body: JSON.stringify(body),
+      });
+      const text = await res.text();
+      let data = {};
+      if (text) {
+        try {
+          data = JSON.parse(text);
+        } catch (parseErr) {
+          if (res.status === 404) {
+            throw new Error('Preview API not found. Restart the server (npm start) and refresh this page.');
+          }
+          throw new Error('Server returned an unexpected response. Restart the server and try again.');
+        }
+      }
+      if (!res.ok) throw new Error(data.error || ('Request failed (' + res.status + ')'));
+      return data;
+    }
+
+    function buildLocalPreview(tpl, recipient, fields) {
+      const selectedProducts = getSelectedProducts();
+      const settings = (mailContext && mailContext.settings) || {};
+      const primary = selectedProducts[0] || null;
+      const productNames = selectedProducts.map(p => p.name).filter(Boolean);
+      const ctx = {
+        recipientName: escapeHtml(recipient.contactName || recipient.companyName || 'Sir/Madam'),
+        companyName: escapeHtml(recipient.companyName || ''),
+        productName: escapeHtml(productNames.length > 1
+          ? productNames[0] + ' (+' + (productNames.length - 1) + ' more)'
+          : (productNames[0] || '—')),
+        categories: escapeHtml((primary && primary.categories && primary.categories.length)
+          ? primary.categories.join(', ') : (primary && primary.category) || 'N/A'),
+        specs: escapeHtml((primary && primary.specs) || 'N/A'),
+        packing: escapeHtml((primary && primary.packing) || 'N/A'),
+        hsCode: escapeHtml((primary && primary.hsCode) || 'N/A'),
+        price: escapeHtml(fields.price || (primary && primary.finalPrice != null ? primary.finalPrice : '')),
+        currency: escapeHtml(fields.currency || settings.defaultCurrency || 'USD'),
+        importDuty: escapeHtml(fields.importDuty || (primary && primary.importDuty) || settings.defaultImportDuty || '0'),
+        incomeTax: escapeHtml(fields.incomeTax || (primary && primary.incomeTax) || settings.defaultIncomeTax || '0'),
+        salesTax: escapeHtml(fields.salesTax || (primary && primary.salesTax) || settings.defaultSalesTax || '0'),
+        signature: 'Best regards,<br>Tri Brothers Team',
+        subjectLine: escapeHtml(fields.subjectLine || tpl.name || 'Message'),
+        customMessageBlock: fields.customMessage
+          ? '<p>' + escapeHtml(fields.customMessage).replace(/\n/g, '<br>') + '</p>' : '',
+        productBlock: selectedProducts.map(p =>
+          '<p><strong>' + escapeHtml(p.name) + '</strong><br>HS Code: ' + escapeHtml(p.hsCode || 'N/A') + '</p>'
+        ).join(''),
+        productsBlock: selectedProducts.map((p, i) =>
+          '<div style="margin-bottom:12px;"><strong>' + (i + 1) + '. ' + escapeHtml(p.name) + '</strong><br>HS Code: '
+          + escapeHtml(p.hsCode || 'N/A') + '</div>'
+        ).join(''),
+      };
+      const render = (str) => String(str || '').replace(/\{\{\s*(\w+)\s*\}\}/g, (_, key) => (ctx[key] != null ? ctx[key] : ''));
+      let html = render(tpl.bodyHtml);
+      if (selectedProducts.length > 1 && !/\{\{\s*productsBlock\s*\}\}/i.test(tpl.bodyHtml)) {
+        html = html.replace(/<hr\s*\/?>/i, ctx.productsBlock + '<hr/>');
+      }
+      return { subject: render(tpl.subject), html };
+    }
+
+    function recipientFromSelection(r) {
+      const cbs = Array.from(document.querySelectorAll('.mail-recipient-cb:checked'));
+      const row = cbs.find(cb =>
+        cb.dataset.recipientId === r.recipientId && cb.dataset.toEmail === r.toEmail
+      );
+      const label = row && row.closest('.mail-selection-row');
+      const contactName = label ? (label.querySelector('span')?.childNodes[0]?.textContent || '').trim() : '';
+      const companyEl = label && label.closest('.mail-recipient-group');
+      const companyName = companyEl ? (companyEl.querySelector('.mail-recipient-group-header strong')?.textContent || '').trim() : '';
+      return { contactName, companyName };
+    }
+
+    function setPreviewHtml(subject, html) {
+      document.getElementById('mailPreviewSubject').textContent = 'Subject: ' + (subject || '—');
+      const frame = document.getElementById('mailPreviewFrame');
+      const safeHtml = String(html || '').replace(/<\/script/gi, '<\\/script');
+      frame.srcdoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.5;color:#222;padding:16px;margin:0;}h2{margin-top:0;}p{margin:0 0 10px;}</style></head><body>' + safeHtml + '</body></html>';
+    }
+
+    function setPreviewMessage(message) {
+      document.getElementById('mailPreviewSubject').textContent = message;
+      document.getElementById('mailPreviewFrame').srcdoc = '<!DOCTYPE html><html><body style="font-family:system-ui,sans-serif;padding:16px;color:#666;margin:0;"><p>' + escapeHtml(message) + '</p></body></html>';
+    }
+
+    function schedulePreview() {
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(updatePreview, 400);
+    }
+
+    async function updatePreview() {
+      const tpl = currentTemplate();
+      const recipients = getSelectedRecipients();
+      if (!tpl || !recipients.length) {
+        setPreviewMessage('Select a template and at least one recipient to preview…');
+        return;
+      }
+      setPreviewMessage('Generating preview…');
+      const first = recipients[0];
+      const meta = recipientFromSelection(first);
+      const productIds = getSelectedProductIds();
+      const fields = collectFields();
+      const payload = {
+        templateId: String(tpl._id),
+        recipientType: first.recipientType,
+        recipientId: String(first.recipientId),
+        toEmail: first.toEmail,
+        fields,
+      };
+      if (productIds.length) payload.productIds = productIds.map(String);
+
+      try {
+        const data = await apiPostJson('/api/mail/preview', payload);
+        const subject = recipients.length > 1
+          ? data.subject + ' (preview for first of ' + recipients.length + ' recipients)'
+          : data.subject;
+        setPreviewHtml(subject, data.html);
+      } catch (err) {
+        console.warn('Mail preview API:', err.message);
+        const local = buildLocalPreview(tpl, meta, fields);
+        const subject = recipients.length > 1
+          ? local.subject + ' (preview for first of ' + recipients.length + ' recipients)'
+          : local.subject;
+        setPreviewHtml(subject, '<p style="color:#888;font-size:12px;margin:0 0 12px;">Approximate preview — ' + escapeHtml(err.message) + '</p>' + local.html);
+      }
+    }
+
+    async function loadAll() {
+      const [tplRes, supRes, cliRes, prodRes] = await Promise.all([
+        fetch('/api/email-templates'),
+        fetch('/api/suppliers'),
+        fetch('/api/clients'),
+        fetch('/api/products'),
+      ]);
+      templates = asArray(await tplRes.json());
+      suppliers = asArray(await supRes.json());
+      clients = asArray(await cliRes.json());
+      products = asArray(await prodRes.json());
+
+      templateSelectApi = TriForm.initSearchableSelect(document.getElementById('mailTemplateSelect'), {
+        placeholder: 'Choose template…',
+        searchPlaceholder: 'Search templates…',
+      });
+
+      if (urlParams.get('recipientType')) {
+        document.getElementById('mailRecipientType').value = urlParams.get('recipientType');
+      }
+
+      await loadMailContext();
+      filterTemplatesForType();
+      renderRecipientList();
+      renderProductList();
+
+      if (urlParams.get('template')) {
+        const match = templates.find(t => t.slug === urlParams.get('template'));
+        if (match) {
+          document.getElementById('mailTemplateSelect').value = match._id;
+          if (templateSelectApi && templateSelectApi.refresh) templateSelectApi.refresh();
+          onTemplateChange();
+        }
+      } else {
+        const custom = templates.find(t => t.slug === 'custom-email');
+        if (custom) {
+          document.getElementById('mailTemplateSelect').value = custom._id;
+          if (templateSelectApi && templateSelectApi.refresh) templateSelectApi.refresh();
+          onTemplateChange();
+        }
+      }
+    }
+
+    document.getElementById('mailTemplateSelect').addEventListener('change', onTemplateChange);
+    document.getElementById('mailRecipientType').addEventListener('change', async () => {
+      await loadMailContext();
+      filterTemplatesForType();
+      renderRecipientList();
+    });
+    document.getElementById('mailRecipientSearch').addEventListener('input', filterRecipientList);
+    document.getElementById('mailProductSearch').addEventListener('input', filterProductList);
+
+    document.getElementById('mailRecipientList').addEventListener('change', () => {
+      updateRecipientCount();
+      schedulePreview();
+    });
+    document.getElementById('mailProductList').addEventListener('change', async () => {
+      updateProductCount();
+      const ids = getSelectedProductIds();
+      if (ids.length === 1) {
+        urlParams.set('productId', ids[0]);
+        await loadMailContext();
+        if (!urlParams.get('recipientId') && !urlParams.get('recipientIds')) {
+          renderRecipientList();
+        }
+      } else if (!ids.length) {
+        urlParams.delete('productId');
+        await loadMailContext();
+        renderRecipientList();
+      }
+      applyProductDefaults();
+      schedulePreview();
+    });
+
+    document.getElementById('mailSelectAllRecipientsBtn').addEventListener('click', () => {
+      document.querySelectorAll('#mailRecipientList .mail-recipient-row:not(.hidden) .mail-recipient-cb').forEach(cb => { cb.checked = true; });
+      updateRecipientCount();
+      schedulePreview();
+    });
+    document.getElementById('mailClearRecipientsBtn').addEventListener('click', () => {
+      document.querySelectorAll('.mail-recipient-cb').forEach(cb => { cb.checked = false; });
+      updateRecipientCount();
+      schedulePreview();
+    });
+    document.getElementById('mailSelectAllProductsBtn').addEventListener('click', () => {
+      document.querySelectorAll('#mailProductList .mail-product-row:not(.hidden) .mail-product-cb').forEach(cb => { cb.checked = true; });
+      updateProductCount();
+      applyProductDefaults();
+      schedulePreview();
+    });
+    document.getElementById('mailClearProductsBtn').addEventListener('click', () => {
+      document.querySelectorAll('.mail-product-cb').forEach(cb => { cb.checked = false; });
+      updateProductCount();
+      schedulePreview();
+    });
+
+    document.getElementById('mailRecipientList').addEventListener('click', (e) => {
+      const btn = e.target.closest('.mail-group-select-btn');
+      if (!btn) return;
+      const companyId = btn.getAttribute('data-company-id');
+      document.querySelectorAll(`.mail-recipient-cb[data-recipient-id="${companyId}"]`).forEach(cb => { cb.checked = true; });
+      updateRecipientCount();
+      schedulePreview();
+    });
+
+    document.getElementById('mailDynamicFieldsInner').addEventListener('input', (e) => {
+      if (e.target && e.target.id && e.target.id.startsWith('mailField_')) {
+        e.target.dataset.autoFilled = '0';
+        schedulePreview();
+      }
+    });
+
+    document.getElementById('mailComposeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (window.triAuth && !window.triAuth.can('canEmail')) { alert('No permission to send emails'); return; }
+      const tpl = currentTemplate();
+      const recipients = getSelectedRecipients();
+      if (!recipients.length) { alert('Select at least one recipient'); return; }
+      const productIds = getSelectedProductIds();
+      const fields = collectFields();
+      if (isFreeformTemplate(tpl)) {
+        if (!(fields.subjectLine || '').trim()) { alert('Enter an email subject'); return; }
+        if (!(fields.customMessage || '').trim()) { alert('Write the email body'); return; }
+      }
+      const btn = document.getElementById('mailSendBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        const sends = recipients.map(r => ({
+          recipientType: r.recipientType,
+          recipientId: r.recipientId,
+          toEmail: r.toEmail,
+          productIds: productIds.length ? productIds : undefined,
+          fields,
+        }));
+        const res = await fetch('/api/mail/send-batch', {
+          method: 'POST',
+          headers: apiJsonHeaders(),
+          credentials: 'same-origin',
+          body: JSON.stringify({ templateId: String(tpl._id), sends }),
+        });
+        const text = await res.text();
+        let data = {};
+        try { data = text ? JSON.parse(text) : {}; } catch (_) { data = { error: 'Send failed — invalid server response' }; }
+        if (!res.ok) throw new Error(data.error || 'Send failed');
+        if (window.triToast) triToast.success(data.message); else alert(data.message);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send email';
+      }
+    });
+
+    window.triAuthReady.then(() => loadAll());
+  </script>
+</body>
+</html>

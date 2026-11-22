@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+client/node_modules/
+
+# Secrets / local env
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Logs & OS
+logs/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Uploads (user content)
+uploads/*
+!uploads/.gitkeep
+
+# Build / cache
+client/dist/
+.cache/
+tmp/
+*.tsbuildinfo
+client/node_modules/.tmp/
+
+# Editor / tooling
+.idea/
+.vscode/
+*.swp
+
+# Local extracts / scratch
+.ui-extract/

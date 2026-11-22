@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reports | TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    .reports-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: var(--bg-card, #fff);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg, 12px);
+    }
+    .reports-toolbar label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .reports-toolbar select,
+    .reports-toolbar input[type="date"] {
+      min-width: 120px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      background: var(--bg-input);
+      color: var(--text-primary);
+    }
+    .reports-toolbar .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .reports-period-label {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin: -8px 0 20px;
+    }
+    .reports-charts {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: var(--space-6, 24px);
+      margin-bottom: 24px;
+    }
+    .reports-charts .card { min-height: 320px; }
+    .chart-wrap { position: relative; height: 260px; }
+    .chart-wrap canvas { max-height: 260px; }
+    .reports-charts-row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6, 24px);
+      margin-bottom: 24px;
+    }
+    .stat-delta { font-size: 0.75rem; margin-top: 4px; }
+    .stat-delta.up { color: #16a34a; }
+    .stat-delta.down { color: #dc2626; }
+    .stat-delta.neutral { color: var(--text-muted); }
+    @media (max-width: 900px) {
+      .reports-charts, .reports-charts-row2 { grid-template-columns: 1fr; }
+      .reports-toolbar .toolbar-actions { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span></button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span></button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+    <a href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg></span>Dashboard</a>
+    <a href="products.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg></span>Products</a>
+    <a href="supplier.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3z"/></svg></span>Suppliers</a>
+    <a href="clients.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M2 21a8 8 0 0 1 20 0"/></svg></span>Clients</a>
+    <a href="mail.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>Mail</a>
+    <a href="quotes.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/></svg></span>Quotations &amp; Offers</a>
+    <a href="sales-contract.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>Sales Contract</a>
+    <a href="indent.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>Indent</a>
+    <a href="sessions.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><path d="M21 12a9 9 0 1 1-9-9"/></svg></span>Sessions</a>
+    <a href="reports.html" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 17V9"/><path d="M12 17V7"/><path d="M16 17v-4"/></svg></span>Reports</a>
+    <a href="admin.html" id="adminNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Admin Panel</a>
+    <a href="settings.html" id="settingsNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Settings</a>
+    <a href="#" id="logoutLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg></span>Logout</a>
+  </div>
+  <div class="main">
+    <header class="page-header"><h1>Reports &amp; Analytics</h1></header>
+
+    <div class="reports-toolbar">
+      <label>Period
+        <select id="periodMode">
+          <option value="month">Monthly</option>
+          <option value="year">Yearly (calendar)</option>
+          <option value="custom">Custom range</option>
+        </select>
+      </label>
+      <label id="yearLabel">Year
+        <select id="reportYear"></select>
+      </label>
+      <label id="monthLabel">Month
+        <select id="reportMonth"></select>
+      </label>
+      <label id="fromLabel" style="display:none">From
+        <input type="date" id="reportFrom" />
+      </label>
+      <label id="toLabel" style="display:none">To
+        <input type="date" id="reportTo" />
+      </label>
+      <label>Display currency
+        <select id="displayCurrency">
+          <option value="USD">USD ($)</option>
+          <option value="PKR">PKR (₨)</option>
+        </select>
+      </label>
+      <div class="toolbar-actions">
+        <button type="button" class="btn" id="applyReportBtn">Apply</button>
+        <button type="button" class="btn" id="downloadCsvBtn">Download CSV</button>
+        <button type="button" class="btn" id="downloadPrintBtn">Download / Print PDF</button>
+      </div>
+    </div>
+    <p class="reports-period-label">Showing: <strong id="periodLabel">—</strong></p>
+
+    <section class="kpi-row" aria-label="Report statistics">
+      <div class="kpi-card">
+        <div class="kpi-card-top"><div class="kpi-title">Business revenue</div></div>
+        <div class="kpi-number" id="statBusinessRevenue">—</div>
+        <div class="stat-delta neutral" id="deltaBusinessRevenue"></div>
+        <div class="kpi-sub">Invoices + commission</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card-top"><div class="kpi-title">Commission earned</div></div>
+        <div class="kpi-number" id="statCommission">—</div>
+        <div class="stat-delta neutral" id="deltaCommission"></div>
+        <div class="kpi-sub"><span id="statIndentQty">— MT indents</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card-top"><div class="kpi-title">Invoiced</div></div>
+        <div class="kpi-number" id="statInvoiced">—</div>
+        <div class="stat-delta neutral" id="deltaInvoiced"></div>
+        <div class="kpi-sub"><span id="statInvoiceCount">0 invoices</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card-top"><div class="kpi-title">Payments received</div></div>
+        <div class="kpi-number" id="statPayments">—</div>
+        <div class="stat-delta neutral" id="deltaPayments"></div>
+      </div>
+    </section>
+
+    <section class="kpi-row" aria-label="Pipeline statistics">
+      <div class="kpi-card">
+        <div class="kpi-card-top"><div class="kpi-title">Contract value</div></div>
+        <div class="kpi-number" id="statContractValue">—</div>
+        <div class="stat-delta neutral" id="deltaContractValue"></div>
+        <div class="kpi-sub"><span id="statContracts">0 contracts</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card-top"><div class="kpi-title">Indents</div></div>
+        <div class="kpi-number" id="statIndents">—</div>
+        <div class="stat-delta neutral" id="deltaIndents"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card-top"><div class="kpi-title">Shipments</div></div>
+        <div class="kpi-number" id="statShipments">—</div>
+        <div class="stat-delta neutral" id="deltaShipments"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-card-top"><div class="kpi-title">Total quoted</div></div>
+        <div class="kpi-number" id="statTotalQuoted">—</div>
+        <div class="stat-delta neutral" id="deltaTotalQuoted"></div>
+        <div class="kpi-sub"><span id="statQuotations">0 quotations</span> · <span id="statOffers">0 offers</span></div>
+      </div>
+    </section>
+
+    <div class="reports-charts">
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Revenue over time</h2></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="revenueChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Pipeline activity</h2></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="activityChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <h2 style="font-size:1.1rem;margin:0 0 12px;">Period breakdown</h2>
+      <table class="clients-table"><thead><tr>
+        <th>Period</th><th>Contracts</th><th>Contract value</th><th>Indents</th><th>Commission</th>
+        <th>Invoices</th><th>Invoiced</th><th>Payments</th><th>Revenue</th>
+      </tr></thead><tbody id="periodBreakdownTable"></tbody></table>
+    </div>
+
+    <div class="reports-charts-row2">
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Top clients (by revenue)</h2></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="clientsChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Top products (by revenue)</h2></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="productsChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <h2 style="font-size:1.1rem;margin:0 0 12px;">Indent commission</h2>
+      <table class="clients-table"><thead><tr>
+        <th>Indent #</th><th>Date</th><th>Contract</th><th>Clients</th><th>Qty (MT)</th><th>Rate/MT</th><th>Commission</th>
+      </tr></thead><tbody id="indentCommissionTable"></tbody></table>
+    </div>
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <h2 style="font-size:1.1rem;margin:0 0 12px;">Contracts signed</h2>
+      <table class="clients-table"><thead><tr>
+        <th>Contract #</th><th>Date</th><th>Supplier</th><th>Value</th>
+      </tr></thead><tbody id="contractsTable"></tbody></table>
+    </div>
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <h2 style="font-size:1.1rem;margin:0 0 12px;">Invoices &amp; payments</h2>
+      <table class="clients-table"><thead><tr>
+        <th>Invoice #</th><th>Date</th><th>Client</th><th>Status</th><th>Amount</th>
+      </tr></thead><tbody id="invoicesTable"></tbody></table>
+    </div>
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <h2 style="font-size:1.1rem;margin:0 0 12px;">Margin analysis by product</h2>
+      <table class="clients-table"><thead><tr><th>Product</th><th>Quotations</th><th>Avg margin</th><th>Total revenue</th><th>Avg price</th></tr></thead><tbody id="marginsTable"></tbody></table>
+    </div>
+    <div class="table-wrap" style="margin-bottom:24px;">
+      <h2 style="font-size:1.1rem;margin:0 0 12px;">Quotations by client</h2>
+      <table class="clients-table"><thead><tr><th>Client</th><th>Count</th><th>Total quoted</th><th>Avg margin</th></tr></thead><tbody id="clientQuotesTable"></tbody></table>
+    </div>
+    <div class="table-wrap">
+      <h2 style="font-size:1.1rem;margin:0 0 12px;">Supplier price comparison</h2>
+      <div id="supplierPricesReport"></div>
+    </div>
+  </div>
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script>
+    (function initMobileNav() {
+      var overlay = document.getElementById('sidebarOverlay');
+      var menuBtn = document.querySelector('.menu-toggle');
+      var closeBtn = document.querySelector('.sidebar-close');
+      function openSidebar() { document.body.classList.add('sidebar-open'); }
+      function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+      if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+      document.querySelectorAll('.sidebar a').forEach(function(a) { a.addEventListener('click', closeSidebar); });
+    })();
+
+    document.getElementById('logoutLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      fetch('/logout', { method: 'POST' }).then(function() { location.href = '/login.html'; });
+    });
+
+    var charts = {};
+    var reportCurrency = { usdToPkrRate: 278 };
+    var displayCurrency = 'USD';
+    var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    function esc(s) {
+      var d = document.createElement('div');
+      d.textContent = s == null ? '' : s;
+      return d.innerHTML;
+    }
+
+    function toDisplayAmount(amountUsd) {
+      var n = Number(amountUsd) || 0;
+      if (displayCurrency === 'PKR') return n * (reportCurrency.usdToPkrRate || 278);
+      return n;
+    }
+
+    function money(n, amountIsUsd) {
+      var val = amountIsUsd === false ? Number(n || 0) : toDisplayAmount(n);
+      if (displayCurrency === 'PKR') {
+        return 'PKR ' + val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      }
+      return '$' + val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function chartMoneyTick(v) {
+      if (displayCurrency === 'PKR') return 'PKR ' + Number(v).toLocaleString();
+      return '$' + Number(v).toLocaleString();
+    }
+
+    function pctDelta(cur, prev) {
+      if (!prev) return cur ? '+100%' : '0%';
+      var d = ((cur - prev) / prev) * 100;
+      return (d >= 0 ? '+' : '') + d.toFixed(1) + '% vs prev period';
+    }
+
+    function deltaEl(el, cur, prev) {
+      var d = cur - prev;
+      el.textContent = pctDelta(cur, prev);
+      el.className = 'stat-delta ' + (d > 0 ? 'up' : d < 0 ? 'down' : 'neutral');
+    }
+
+    function initYearMonthSelects() {
+      var now = new Date();
+      var yearSel = document.getElementById('reportYear');
+      var monthSel = document.getElementById('reportMonth');
+      for (var y = now.getFullYear(); y >= now.getFullYear() - 6; y--) {
+        var opt = document.createElement('option');
+        opt.value = y;
+        opt.textContent = y;
+        yearSel.appendChild(opt);
+      }
+      MONTHS.forEach(function(name, i) {
+        var opt = document.createElement('option');
+        opt.value = i + 1;
+        opt.textContent = name;
+        monthSel.appendChild(opt);
+      });
+      yearSel.value = now.getFullYear();
+      monthSel.value = now.getMonth() + 1;
+      document.getElementById('reportFrom').value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+      document.getElementById('reportTo').value = now.toISOString().slice(0, 10);
+    }
+
+    function queryString() {
+      var mode = document.getElementById('periodMode').value;
+      if (mode === 'custom') {
+        return 'from=' + encodeURIComponent(document.getElementById('reportFrom').value) +
+          '&to=' + encodeURIComponent(document.getElementById('reportTo').value);
+      }
+      if (mode === 'year') {
+        return 'year=' + encodeURIComponent(document.getElementById('reportYear').value);
+      }
+      return 'year=' + encodeURIComponent(document.getElementById('reportYear').value) +
+        '&month=' + encodeURIComponent(document.getElementById('reportMonth').value);
+    }
+
+    function updatePeriodUI() {
+      var mode = document.getElementById('periodMode').value;
+      document.getElementById('monthLabel').style.display = mode === 'month' ? '' : 'none';
+      document.getElementById('fromLabel').style.display = mode === 'custom' ? '' : 'none';
+      document.getElementById('toLabel').style.display = mode === 'custom' ? '' : 'none';
+    }
+
+    function destroyChart(id) {
+      if (charts[id]) { charts[id].destroy(); charts[id] = null; }
+    }
+
+    function chartColors(n) {
+      var base = ['#2563eb','#7c3aed','#0891b2','#16a34a','#ca8a04','#dc2626','#db2777','#64748b'];
+      var out = [];
+      for (var i = 0; i < n; i++) out.push(base[i % base.length]);
+      return out;
+    }
+
+    function renderCharts(summary, timeline) {
+      var labels = (timeline.series || []).map(function(s) { return s.label; });
+      var revenue = (timeline.series || []).map(function(s) { return toDisplayAmount(s.revenue); });
+      var invoiceRevenue = (timeline.series || []).map(function(s) { return toDisplayAmount(s.invoiceRevenue); });
+      var commission = (timeline.series || []).map(function(s) { return toDisplayAmount(s.commission); });
+      var contracts = (timeline.series || []).map(function(s) { return s.contracts; });
+      var indents = (timeline.series || []).map(function(s) { return s.indents; });
+      var invoices = (timeline.series || []).map(function(s) { return s.invoices; });
+      var quotations = (timeline.series || []).map(function(s) { return s.quotations; });
+
+      destroyChart('revenue');
+      charts.revenue = new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Total revenue',
+              data: revenue,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37,99,235,0.12)',
+              fill: true,
+              tension: 0.35,
+              pointRadius: 3,
+            },
+            {
+              label: 'Invoiced',
+              data: invoiceRevenue,
+              borderColor: '#16a34a',
+              backgroundColor: 'transparent',
+              tension: 0.35,
+              pointRadius: 2,
+            },
+            {
+              label: 'Commission',
+              data: commission,
+              borderColor: '#ca8a04',
+              backgroundColor: 'transparent',
+              tension: 0.35,
+              pointRadius: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+          scales: {
+            y: { beginAtZero: true, ticks: { callback: chartMoneyTick } },
+          },
+        },
+      });
+
+      destroyChart('activity');
+      charts.activity = new Chart(document.getElementById('activityChart'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Contracts', data: contracts, backgroundColor: '#7c3aed', borderRadius: 4 },
+            { label: 'Indents', data: indents, backgroundColor: '#0891b2', borderRadius: 4 },
+            { label: 'Invoices', data: invoices, backgroundColor: '#16a34a', borderRadius: 4 },
+            { label: 'Quotations', data: quotations, backgroundColor: '#2563eb', borderRadius: 4 },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+        },
+      });
+
+      var topClients = summary.topClients || [];
+      destroyChart('clients');
+      charts.clients = new Chart(document.getElementById('clientsChart'), {
+        type: 'doughnut',
+        data: {
+          labels: topClients.map(function(c) { return c.clientName || 'Unknown'; }),
+          datasets: [{
+            data: topClients.map(function(c) { return c.totalQuoted || 0; }),
+            backgroundColor: chartColors(topClients.length),
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+          },
+        },
+      });
+
+      var topProducts = summary.topProducts || [];
+      destroyChart('products');
+      charts.products = new Chart(document.getElementById('productsChart'), {
+        type: 'bar',
+        data: {
+          labels: topProducts.map(function(p) { return p.productName || 'Unknown'; }),
+          datasets: [{
+            label: 'Revenue',
+            data: topProducts.map(function(p) { return p.totalQuoted || 0; }),
+            backgroundColor: chartColors(topProducts.length),
+            borderRadius: 4,
+          }],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, ticks: { callback: chartMoneyTick } },
+          },
+        },
+      });
+    }
+
+    function loadReport() {
+      var qs = queryString();
+      displayCurrency = document.getElementById('displayCurrency').value || 'USD';
+      document.getElementById('periodLabel').textContent = 'Loading…';
+
+      Promise.all([
+        fetch('/api/reports/summary?' + qs).then(function(r) { return r.json(); }),
+        fetch('/api/reports/timeline?' + qs).then(function(r) { return r.json(); }),
+        fetch('/api/reports/margins?' + qs).then(function(r) { return r.json(); }),
+        fetch('/api/reports/quotations-by-client?' + qs).then(function(r) { return r.json(); }),
+        fetch('/api/reports/supplier-prices').then(function(r) { return r.json(); }),
+        fetch('/api/reports/operations?' + qs).then(function(r) { return r.json(); }),
+      ]).then(function(results) {
+        var summary = results[0];
+        var timeline = results[1];
+        var margins = results[2];
+        var clientQuotes = results[3];
+        var supplierPrices = results[4];
+        var operations = results[5];
+
+        if (summary.error) throw new Error(summary.error);
+
+        if (summary.currency) reportCurrency = summary.currency;
+        else if (timeline.currency) reportCurrency = timeline.currency;
+
+        var s = summary.stats || {};
+        document.getElementById('periodLabel').textContent = summary.range.label +
+          (displayCurrency === 'PKR' ? ' · amounts in PKR @ ' + (reportCurrency.usdToPkrRate || 278) + '/USD' : ' · amounts in USD');
+
+        document.getElementById('statBusinessRevenue').textContent = money(s.businessRevenue);
+        document.getElementById('statCommission').textContent = money(s.commissionTotal);
+        document.getElementById('statInvoiced').textContent = money(s.invoicedTotal);
+        document.getElementById('statPayments').textContent = money(s.paymentsTotal);
+        document.getElementById('statContractValue').textContent = money(s.contractValue);
+        document.getElementById('statIndents').textContent = s.indents || 0;
+        document.getElementById('statShipments').textContent = s.shipments || 0;
+        document.getElementById('statTotalQuoted').textContent = money(s.totalQuoted);
+        document.getElementById('statIndentQty').textContent = (s.indentQtyMt || 0).toFixed(2) + ' MT indents';
+        document.getElementById('statInvoiceCount').textContent = (s.invoices || 0) + ' invoices';
+        document.getElementById('statContracts').textContent = (s.contracts || 0) + ' contracts';
+        document.getElementById('statQuotations').textContent = (s.quotations || 0) + ' quotations';
+        document.getElementById('statOffers').textContent = (s.offers || 0) + ' offers';
+
+        deltaEl(document.getElementById('deltaBusinessRevenue'), s.businessRevenue || 0, s.prevBusinessRevenue || 0);
+        deltaEl(document.getElementById('deltaCommission'), s.commissionTotal || 0, s.prevCommissionTotal || 0);
+        deltaEl(document.getElementById('deltaInvoiced'), s.invoicedTotal || 0, s.prevInvoicedTotal || 0);
+        deltaEl(document.getElementById('deltaPayments'), s.paymentsTotal || 0, s.prevPaymentsTotal || 0);
+        deltaEl(document.getElementById('deltaContractValue'), s.contractValue || 0, s.prevContractValue || 0);
+        deltaEl(document.getElementById('deltaIndents'), s.indents || 0, s.prevIndents || 0);
+        deltaEl(document.getElementById('deltaShipments'), s.shipments || 0, s.prevShipments || 0);
+        deltaEl(document.getElementById('deltaTotalQuoted'), s.totalQuoted || 0, s.prevTotalQuoted || 0);
+
+        renderCharts(summary, timeline);
+
+        document.getElementById('periodBreakdownTable').innerHTML = (timeline.series || []).map(function(row) {
+          return '<tr><td>' + esc(row.label) + '</td><td>' + (row.contracts || 0) + '</td><td>' +
+            money(row.contractValue) + '</td><td>' + (row.indents || 0) + '</td><td>' +
+            money(row.commission) + '</td><td>' + (row.invoices || 0) + '</td><td>' +
+            money(row.invoiceRevenue) + '</td><td>' + money(row.payments) + '</td><td>' +
+            money(row.revenue) + '</td></tr>';
+        }).join('') || '<tr><td colspan="9">No data for this period</td></tr>';
+
+        document.getElementById('indentCommissionTable').innerHTML = (operations.indents || []).map(function(r) {
+          return '<tr><td>' + esc(r.indentNumber) + '</td><td>' + esc(new Date(r.indentDate).toLocaleDateString()) + '</td><td>' +
+            esc(r.contractNumber) + '</td><td>' + esc(r.clients) + '</td><td>' + Number(r.qtyMt || 0).toFixed(3) + '</td><td>' +
+            esc(r.commissionCurrency) + ' ' + Number(r.commissionPerMt || 0).toFixed(2) + '</td><td>' +
+            money(r.commissionUsd) + '</td></tr>';
+        }).join('') || '<tr><td colspan="7">No indents with commission in this period</td></tr>';
+
+        document.getElementById('contractsTable').innerHTML = (operations.contracts || []).map(function(r) {
+          return '<tr><td>' + esc(r.contractNumber) + '</td><td>' + esc(new Date(r.contractDate).toLocaleDateString()) + '</td><td>' +
+            esc(r.supplierName) + '</td><td>' + money(r.valueUsd) + '</td></tr>';
+        }).join('') || '<tr><td colspan="4">No contracts in this period</td></tr>';
+
+        document.getElementById('invoicesTable').innerHTML = (operations.invoices || []).map(function(r) {
+          return '<tr><td>' + esc(r.invoiceNumber) + '</td><td>' + esc(new Date(r.invoiceDate).toLocaleDateString()) + '</td><td>' +
+            esc(r.clientName) + '</td><td>' + esc(r.status) + '</td><td>' + money(r.subtotalUsd) + '</td></tr>';
+        }).join('') || '<tr><td colspan="5">No invoices in this period</td></tr>';
+
+        document.getElementById('marginsTable').innerHTML = (margins || []).map(function(r) {
+          return '<tr><td>' + esc(r.productName || '—') + '</td><td>' + (r.count || 0) + '</td><td>' +
+            (r.avgMargin != null ? Number(r.avgMargin).toFixed(1) + '%' : '—') + '</td><td>' +
+            money(r.totalRevenue) + '</td><td>$' + Number(r.avgPrice || 0).toFixed(2) + '</td></tr>';
+        }).join('') || '<tr><td colspan="5">No data for this period</td></tr>';
+
+        document.getElementById('clientQuotesTable').innerHTML = (clientQuotes || []).map(function(r) {
+          return '<tr><td>' + esc(r.clientName || '—') + '</td><td>' + (r.count || 0) + '</td><td>' +
+            money(r.totalQuoted) + '</td><td>' +
+            (r.avgMargin != null ? Number(r.avgMargin).toFixed(1) + '%' : '—') + '</td></tr>';
+        }).join('') || '<tr><td colspan="4">No data for this period</td></tr>';
+
+        document.getElementById('supplierPricesReport').innerHTML = (supplierPrices || []).map(function(p) {
+          var sups = (p.suppliers || []).map(function(sup) {
+            return '<li>' + esc(sup.supplierName) + ': ' + (sup.currency || 'USD') + ' ' +
+              (sup.price != null ? sup.price : '—') + (sup.moq ? ' (MOQ ' + sup.moq + ')' : '') + '</li>';
+          }).join('');
+          return '<div class="card" style="margin-bottom:12px;padding:12px;"><strong>' + esc(p.productName) +
+            '</strong> <span style="color:var(--text-secondary)">' + esc(p.category) +
+            '</span><ul style="margin:8px 0 0;padding-left:20px;">' + (sups || '<li>No supplier prices</li>') + '</ul></div>';
+        }).join('') || '<p class="empty-state">No supplier product links yet.</p>';
+      }).catch(function(err) {
+        document.getElementById('periodLabel').textContent = 'Error loading report';
+        if (typeof toast === 'function') toast(err.message || 'Failed to load report', 'error');
+        else alert(err.message || 'Failed to load report');
+      });
+    }
+
+    document.getElementById('periodMode').addEventListener('change', updatePeriodUI);
+    document.getElementById('displayCurrency').addEventListener('change', loadReport);
+    document.getElementById('applyReportBtn').addEventListener('click', loadReport);
+    document.getElementById('downloadCsvBtn').addEventListener('click', function() {
+      window.location.href = '/api/reports/download?' + queryString() + '&format=csv&type=full';
+    });
+    document.getElementById('downloadPrintBtn').addEventListener('click', function() {
+      window.open('/api/reports/download?' + queryString() + '&format=html&type=full', '_blank');
+    });
+
+    initYearMonthSelects();
+    updatePeriodUI();
+
+    window.triAuthReady.then(function() {
+      loadReport();
+    });
+  </script>
+</body>
+</html>

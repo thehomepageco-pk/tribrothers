@@ -1,0 +1,86 @@
+:root {
+  --font-sans: "Google Sans", "Product Sans", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Google Sans", "Product Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --bg-base: #eef3f7;
+  --bg-elevated: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #f3f7fa;
+  --bg-muted: #e5edf3;
+  --bg-sidebar: #0a2433;
+  --bg-sidebar-hover: rgba(255, 255, 255, 0.06);
+  --bg-sidebar-active: rgba(255, 255, 255, 0.1);
+
+  --border-subtle: rgba(15, 36, 56, 0.06);
+  --border-default: #d5e0e8;
+  --border-strong: #b3c2cf;
+
+  --text-primary: #0b1f33;
+  --text-secondary: #3d5568;
+  --text-muted: #6b8194;
+  --text-on-dark: #f4f8fb;
+  --text-on-dark-muted: rgba(244, 248, 251, 0.62);
+
+  --accent: #0c5a7a;
+  --accent-hover: #094861;
+  --accent-soft: #e6f3f8;
+  --accent-muted: rgba(12, 90, 122, 0.12);
+  --accent-glow: rgba(12, 90, 122, 0.18);
+
+  --success: #159a4a;
+  --success-soft: #e8f8ef;
+  --error: #d92d20;
+  --error-soft: #fef3f2;
+  --warning: #c47a07;
+  --warning-soft: #fff8eb;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-xs: 0 1px 2px rgba(11, 31, 51, 0.04);
+  --shadow-sm: 0 1px 3px rgba(11, 31, 51, 0.06), 0 1px 2px rgba(11, 31, 51, 0.04);
+  --shadow-md: 0 8px 24px rgba(11, 31, 51, 0.08), 0 2px 6px rgba(11, 31, 51, 0.04);
+  --shadow-lg: 0 16px 40px rgba(11, 31, 51, 0.1), 0 4px 12px rgba(11, 31, 51, 0.05);
+  --shadow-glow: 0 0 0 3px var(--accent-muted);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-fast: 0.15s var(--ease-out);
+  --transition-normal: 0.22s var(--ease-out);
+  --transition-slow: 0.35s var(--ease-out);
+
+  --sidebar-width: 260px;
+  --topbar-h: 56px;
+  --content-max: 1400px;
+}
+
+@font-face {
+  font-family: "Google Sans";
+  src: url("/fonts/Google_Sans/static/GoogleSans-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Google Sans";
+  src: url("/fonts/Google_Sans/static/GoogleSans-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Google Sans";
+  src: url("/fonts/Google_Sans/static/GoogleSans-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Google Sans";
+  src: url("/fonts/Google_Sans/static/GoogleSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

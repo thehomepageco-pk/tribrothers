@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+  <title>TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu">
+    <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>
+    </button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+  </div>
+
+  <div class="main" id="mainContent">
+    <header class="page-header page-header-dash">
+      <div>
+        <p class="page-eyebrow">Dashboard</p>
+        <h1>Start here</h1>
+        <p class="page-lede">Create a quote, move deals through the pipeline, or jump into Mail.</p>
+      </div>
+    </header>
+
+    <section class="dash-start" aria-label="Quick actions">
+      <a class="btn" href="quotes.html?new=1">New quotation</a>
+      <a class="btn" href="sales-contract.html?new=1">New sales contract</a>
+      <a class="btn" href="indent.html?new=1">Create indent</a>
+      <a class="btn" href="mail.html">Open Mail</a>
+    </section>
+
+    <section class="dash-pipeline" aria-label="Sales pipeline">
+      <span class="dash-pipeline-label">Pipeline</span>
+      <a class="dash-pipeline-step" href="quotes.html">Quote</a>
+      <span class="dash-pipeline-arrow" aria-hidden="true">→</span>
+      <a class="dash-pipeline-step" href="sales-contract.html">Contract</a>
+      <span class="dash-pipeline-arrow" aria-hidden="true">→</span>
+      <a class="dash-pipeline-step" href="indent.html">Indent</a>
+      <span class="dash-pipeline-arrow" aria-hidden="true">→</span>
+      <a class="dash-pipeline-step" href="shipment.html">Shipment</a>
+      <span class="dash-pipeline-arrow" aria-hidden="true">→</span>
+      <a class="dash-pipeline-step" href="invoices.html">Invoice</a>
+    </section>
+
+    <section class="kpi-row" aria-label="Key metrics">
+      <a class="kpi-card is-link" href="products.html">
+        <div class="kpi-card-top">
+          <div class="kpi-title">Products</div>
+        </div>
+        <div class="kpi-number" id="kpiProducts">—</div>
+        <div class="kpi-sub"><span>Open products</span></div>
+      </a>
+      <a class="kpi-card is-link" href="clients.html">
+        <div class="kpi-card-top">
+          <div class="kpi-title">Clients</div>
+        </div>
+        <div class="kpi-number" id="kpiClients">—</div>
+        <div class="kpi-sub"><span>Open clients</span></div>
+      </a>
+      <a class="kpi-card is-link" href="sales-contract.html">
+        <div class="kpi-card-top">
+          <div class="kpi-title">Contracts</div>
+        </div>
+        <div class="kpi-number" id="kpiContracts">—</div>
+        <div class="kpi-sub"><span>Sales contracts</span></div>
+      </a>
+      <a class="kpi-card is-link" href="indent.html">
+        <div class="kpi-card-top">
+          <div class="kpi-title">Indents</div>
+        </div>
+        <div class="kpi-number" id="kpiIndents">—</div>
+        <div class="kpi-sub"><span>Client allocations</span></div>
+      </a>
+    </section>
+
+    <section class="dash-shipment-grid" aria-label="Shipment overview">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Shipment pipeline</h2>
+          <a href="shipment.html" class="action-btn" style="font-size:0.8125rem;">View all</a>
+        </div>
+        <div class="card-body">
+          <div class="dash-shipment-pipeline-list" id="shipmentPipelineList">
+            <p class="empty-state">Loading…</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Recent shipments</h2></div>
+        <div class="card-body">
+          <div class="dash-recent-shipments" id="recentShipmentsList">
+            <p class="empty-state">Loading…</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="report-grid" aria-label="Dashboard overview">
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Needs attention</h2></div>
+        <div class="card-body">
+          <ul class="dash-attention-list" id="attentionList">
+            <li class="empty-state">Loading…</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card sales-report">
+        <div class="card-header"><h2 class="card-title">Revenue Overview</h2></div>
+        <div class="card-body">
+          <p><strong>Total quoted:</strong> <span id="kpiTotalQuoted">—</span></p>
+          <p><strong>Last 7 days:</strong> <span id="kpiLast7Days">—</span> (<span id="kpiLast7Count">0</span> quotations)</p>
+          <p><strong>Average margin:</strong> <span id="kpiAvgMargin">—</span></p>
+          <p><strong>Offers / Shipments:</strong> <span id="kpiOffers">—</span> / <span id="kpiShipments">—</span></p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2 class="card-title">Recent Quotations</h2></div>
+        <div class="card-body"><div id="recentQuotationsList"><p class="empty-state">Loading…</p></div></div>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <div class="card-header"><h2 class="card-title">Recent Activity</h2></div>
+        <div class="card-body"><div id="recentActivityList"><p class="empty-state">Loading…</p></div></div>
+      </div>
+    </section>
+  </div>
+
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="session-activity.js"></script>
+  <script>
+    (function initMobileNav() {
+      var overlay = document.getElementById('sidebarOverlay');
+      var menuBtn = document.querySelector('.menu-toggle');
+      var closeBtn = document.querySelector('.sidebar-close');
+      function openSidebar() { document.body.classList.add('sidebar-open'); }
+      function closeSidebar() { document.body.classList.remove('sidebar-open'); }
+      if (menuBtn) menuBtn.addEventListener('click', openSidebar);
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+      document.querySelectorAll('.sidebar').forEach(function(sb) {
+        sb.addEventListener('click', function(e) {
+          if (e.target.closest('a')) closeSidebar();
+        });
+      });
+    })();
+
+    function escHtml(s) {
+      if (s == null) return '';
+      var d = document.createElement('div');
+      d.textContent = String(s);
+      return d.innerHTML;
+    }
+
+    function statusProgressHtml(status, pct) {
+      pct = pct != null ? pct : 0;
+      return '<div class="sh-progress" title="' + escHtml(status || 'Draft') + '">' +
+        '<div class="sh-progress-track"><div class="sh-progress-bar" style="width:' + pct + '%"></div></div>' +
+        '<span class="sh-progress-label">' + escHtml(status || 'Draft') + ' · ' + pct + '%</span></div>';
+    }
+
+    function formatShipmentDate(iso) {
+      if (!iso) return '';
+      var d = new Date(iso);
+      return isNaN(d.getTime()) ? '' : d.toLocaleDateString();
+    }
+
+    async function loadDashboardStats() {
+      try {
+        const res = await fetch('/api/dashboard/stats');
+        if (!res.ok) return;
+        const data = await res.json();
+        const c = data.counts || {};
+        document.getElementById('kpiProducts').textContent = c.products ?? '0';
+        document.getElementById('kpiClients').textContent = c.clients ?? '0';
+        document.getElementById('kpiContracts').textContent = c.contracts ?? '0';
+        document.getElementById('kpiIndents').textContent = c.indents ?? '0';
+        document.getElementById('kpiOffers').textContent = c.offers ?? '0';
+        document.getElementById('kpiShipments').textContent = c.shipments ?? '0';
+        const rev = data.revenue || {};
+        document.getElementById('kpiTotalQuoted').textContent = '$' + Number(rev.totalQuoted || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
+        document.getElementById('kpiLast7Days').textContent = '$' + Number(rev.last7Days || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
+        document.getElementById('kpiLast7Count').textContent = rev.last7DaysCount || 0;
+        document.getElementById('kpiAvgMargin').textContent = rev.avgMargin != null ? Number(rev.avgMargin).toFixed(1) + '%' : '—';
+
+        const pipeline = data.shipmentPipeline || [];
+        const pipelineEl = document.getElementById('shipmentPipelineList');
+        const pipelineTotal = pipeline.reduce(function(sum, step) { return sum + (step.count || 0); }, 0);
+        pipelineEl.innerHTML = pipeline.length
+          ? pipeline.map(function(step) {
+              var pct = pipelineTotal ? Math.round((step.count / pipelineTotal) * 100) : 0;
+              return '<div class="dash-shipment-pipeline-row">' +
+                '<span class="dash-shipment-pipeline-label">' + escHtml(step.status) + '</span>' +
+                '<span class="dash-shipment-pipeline-count">' + (step.count || 0) + '</span>' +
+                '<div class="sh-progress" title="' + escHtml(step.status) + ' — ' + (step.count || 0) + '">' +
+                  '<div class="sh-progress-track"><div class="sh-progress-bar" style="width:' + pct + '%"></div></div>' +
+                '</div></div>';
+            }).join('')
+          : '<p class="empty-state">No shipments yet.</p>';
+
+        const shipments = data.recentShipments || [];
+        const shipEl = document.getElementById('recentShipmentsList');
+        shipEl.innerHTML = shipments.length
+          ? shipments.map(function(s) {
+              var meta = [
+                s.contractNumber ? 'Contract ' + s.contractNumber : '',
+                s.blNumber ? 'B/L ' + s.blNumber : '',
+                formatShipmentDate(s.shipmentDate),
+                s.portOfLoading ? 'POL ' + s.portOfLoading : '',
+              ].filter(Boolean).join(' · ');
+              return '<div class="dash-recent-shipment-item">' +
+                '<a href="shipment.html">' + escHtml(s.shipmentNumber || 'Shipment') + '</a>' +
+                (meta ? '<div class="dash-recent-shipment-meta">' + escHtml(meta) + '</div>' : '') +
+                statusProgressHtml(s.status, s.progressPct) +
+                '</div>';
+            }).join('')
+          : '<p class="empty-state">No shipments yet.</p>';
+
+        const attention = data.attention || [];
+        const aEl = document.getElementById('attentionList');
+        aEl.innerHTML = attention.length
+          ? attention.map(function(item) {
+              return '<li><a href="' + (item.href || '#') + '">' + (item.title || 'Item') +
+                '<span class="dash-attention-meta">' + (item.meta || '') + '</span></a></li>';
+            }).join('')
+          : '<li class="empty-state">Nothing urgent — you are caught up.</li>';
+
+        const qList = document.getElementById('recentQuotationsList');
+        const quotes = data.recentQuotations || [];
+        qList.innerHTML = quotes.length ? '<table class="view-modal-table"><thead><tr><th>Product</th><th>Client</th><th>Price</th></tr></thead><tbody>' +
+          quotes.map(function(q) {
+            return '<tr style="cursor:pointer" onclick="location.href=\'quotes.html\'"><td>' + (q.product?.name || '—') + '</td><td>' + (q.client?.companyName || '—') + '</td><td>$' + (q.finalPrice || 0) + '</td></tr>';
+          }).join('') + '</tbody></table>' : '<p class="empty-state">No quotations yet.</p>';
+
+        const aList = document.getElementById('recentActivityList');
+        const acts = data.recentActivity || [];
+        aList.innerHTML = acts.length ? '<table class="view-modal-table"><thead><tr><th>When</th><th>User</th><th>What happened</th></tr></thead><tbody>' +
+          acts.map(function(a) {
+            var when = a.createdAt ? new Date(a.createdAt).toLocaleString() : '';
+            var user = a.username || (a.userId && a.userId.username) || '—';
+            var summary = (window.TriSessionActivity && TriSessionActivity.formatSessionActivity)
+              ? TriSessionActivity.formatSessionActivity(a)
+              : (a.action || '—');
+            return '<tr><td>' + when + '</td><td>' + user + '</td><td>' + summary + '</td></tr>';
+          }).join('') + '</tbody></table>' : '<p class="empty-state">No activity yet.</p>';
+      } catch (err) {
+        console.error('Dashboard load failed:', err);
+      }
+    }
+    window.triAuthReady.then(function(u) { if (u) loadDashboardStats(); });
+  </script>
+</body>
+</html>

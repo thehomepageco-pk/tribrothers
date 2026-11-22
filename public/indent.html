@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+  <title>Indent | TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+  <link rel="stylesheet" href="form-helpers.css"/>
+  <style>
+    .ind-form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
+    .ind-form-row > div label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.8125rem; }
+    .ind-form-row input, .ind-form-row select, .ind-form-row textarea { width: 100%; box-sizing: border-box; }
+    .ind-contract-summary {
+      margin: 0 0 16px; padding: 14px 16px; background: var(--bg-input);
+      border: 1px solid var(--border-default); border-radius: var(--radius-md);
+      display: none;
+    }
+    .ind-contract-summary.visible { display: block; }
+    .ind-contract-summary dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px 16px; margin: 0; }
+    .ind-contract-summary dt { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
+    .ind-contract-summary dd { margin: 0; font-weight: 600; font-size: 0.9375rem; }
+    .ind-lines-wrap { margin: 16px 0; overflow-x: auto; }
+    .ind-lines-table { width: 100%; border-collapse: collapse; }
+    .ind-lines-table th, .ind-lines-table td { padding: 8px; border-bottom: 1px solid var(--border-subtle); text-align: left; vertical-align: middle; }
+    .ind-lines-table th { font-size: 0.8125rem; color: var(--text-secondary); font-weight: 600; }
+    .ind-lines-table input, .ind-lines-table select { width: 100%; min-width: 120px; box-sizing: border-box; }
+    .ind-qty-summary { font-size: 0.875rem; margin: 8px 0 16px; color: var(--text-secondary); }
+    .ind-qty-summary strong { color: var(--text-primary); }
+    .ind-qty-summary.is-over { color: #b45309; }
+    .ind-qty-summary.has-total { color: var(--accent-primary); font-weight: 600; }
+    .ind-product-lines {
+      margin: 0 0 12px; padding: 12px; background: var(--bg-input);
+      border: 1px solid var(--border-default); border-radius: var(--radius-md); display: none;
+    }
+    .ind-product-lines.visible { display: block; }
+    .ind-product-lines ul { margin: 0; padding-left: 18px; }
+    .ind-product-lines li { margin: 4px 0; font-size: 0.875rem; }
+    @media (max-width: 900px) { .ind-form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span></button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span></button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+    <a href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg></span>Dashboard</a>
+    <a href="products.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg></span>Products</a>
+    <a href="supplier.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 2v5h-5z"/></svg></span>Suppliers</a>
+    <a href="clients.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M2 21a8 8 0 0 1 20 0"/></svg></span>Clients</a>
+    <a href="mail.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>Mail</a>
+    <a href="quotes.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/></svg></span>Quotations &amp; Offers</a>
+    <a href="sales-contract.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/></svg></span>Sales Contract</a>
+    <a href="indent.html" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>Indent</a>
+    <a href="sessions.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><path d="M21 12a9 9 0 1 1-9-9"/></svg></span>Sessions</a>
+    <a href="reports.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/></svg></span>Reports</a>
+    <a href="admin.html" id="adminNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Admin Panel</a>
+    <a href="settings.html" id="settingsNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Settings</a>
+    <a href="#" id="logoutLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg></span>Logout</a>
+  </div>
+
+  <div class="main">
+    <header class="page-header">
+      <h1>Indent</h1>
+      <button type="button" class="btn" id="toggleFormBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>New indent</button>
+    </header>
+
+    <div class="form-container is-collapsed" id="indentFormWrap">
+      <h2 style="margin-bottom:12px;" id="indFormTitle">Create indent</h2>
+      <form id="indentForm">
+        <input type="hidden" id="indEditingId" value="" />
+
+        <div class="ind-form-row">
+          <div style="grid-column: 1 / -1;">
+            <label for="indSalesContract">Sales contract *</label>
+            <select id="indSalesContract" required>
+              <option value="">Select sales contract</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ind-contract-summary" id="indContractSummary">
+          <dl>
+            <div><dt>Supplier</dt><dd id="indSumSupplier">—</dd></div>
+            <div><dt>Origin</dt><dd id="indSumOrigin">—</dd></div>
+            <div><dt>Contract qty</dt><dd id="indSumTotal">—</dd></div>
+            <div><dt>Allocated</dt><dd id="indSumAllocated">—</dd></div>
+            <div><dt>Remaining</dt><dd id="indSumRemaining">—</dd></div>
+            <div><dt>Terms</dt><dd id="indSumTerms">—</dd></div>
+          </dl>
+        </div>
+
+        <div class="ind-product-lines" id="indProductLinesBox">
+          <strong>Product lines (remaining qty)</strong>
+          <ul id="indProductLinesList"></ul>
+        </div>
+
+        <div class="ind-form-row">
+          <div>
+            <label for="indNumber">Indent number</label>
+            <input type="text" id="indNumber" placeholder="Auto-generated if blank" />
+          </div>
+          <div>
+            <label for="indDate">Indent date *</label>
+            <input type="date" id="indDate" required />
+          </div>
+        </div>
+
+        <div class="ind-form-row">
+          <div>
+            <label for="indSellingPrice">Selling price per MT *</label>
+            <input type="number" id="indSellingPrice" min="0" step="any" required placeholder="Client selling price" />
+          </div>
+          <div>
+            <label for="indSellingPriceCurrency">Currency</label>
+            <input type="text" id="indSellingPriceCurrency" value="USD" placeholder="USD" />
+          </div>
+          <div>
+            <label for="indLastDateOfShipment">Last date of shipment</label>
+            <input type="date" id="indLastDateOfShipment" />
+          </div>
+        </div>
+        <div class="ind-form-row">
+          <div>
+            <label for="indPortOfShipment">Port of shipment</label>
+            <input type="text" id="indPortOfShipment" placeholder="From contract" />
+          </div>
+          <div>
+            <label for="indPortOfDischarge">Port of discharge</label>
+            <input type="text" id="indPortOfDischarge" placeholder="From contract" />
+          </div>
+        </div>
+        <p class="ind-qty-summary" id="indCommissionSummary">Estimated margin: —</p>
+        <p class="form-hint" id="indSupplierCommissionHint" style="margin-top:4px;"></p>
+        <p class="form-hint" id="indBankHint" style="margin-top:4px;"></p>
+
+        <h3 class="product-form-section-title">Client allocations</h3>
+        <p class="form-hint">Choose product line, client, and quantity. Each line cannot exceed that product's remaining quantity on the contract.</p>
+
+        <div class="ind-lines-wrap">
+          <table class="ind-lines-table">
+            <thead>
+              <tr>
+                <th>Product line *</th>
+                <th>Client *</th>
+                <th>Quantity *</th>
+                <th>NTN #</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="indLinesBody"></tbody>
+          </table>
+        </div>
+        <button type="button" class="action-btn" id="indAddLineBtn">+ Add client</button>
+        <p class="ind-qty-summary" id="indQtySummary">This indent: 0 — Remaining after save: —</p>
+
+        <label for="indRemarks">Remarks</label>
+        <textarea id="indRemarks" rows="2" placeholder="Remarks for this indent"></textarea>
+
+        <label for="indNotes">Notes (optional)</label>
+        <textarea id="indNotes" rows="2"></textarea>
+
+        <div class="form-actions">
+          <button type="submit" class="btn" id="indSubmitBtn">Save indent</button>
+          <button type="button" class="action-btn" id="indCancelEditBtn" style="display:none;">Cancel edit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="products-toolbar" style="margin-top:20px;">
+      <div class="toolbar-row">
+        <div class="toolbar-group">
+          <label for="indSearchInput">Search</label>
+          <input type="text" id="indSearchInput" placeholder="Indent #, contract, client…" />
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Indent #</th>
+            <th>Date</th>
+            <th>Contract</th>
+            <th>Product</th>
+            <th>Clients / Qty</th>
+            <th>Indent qty</th>
+            <th>Margin</th>
+            <th>Contract remaining</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="indTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="form-helpers.js"></script>
+  <script src="mail-compose.js"></script>
+  <script>
+    (function initMobileNav() {
+      var overlay = document.getElementById('sidebarOverlay');
+      document.querySelector('.menu-toggle')?.addEventListener('click', () => document.body.classList.add('sidebar-open'));
+      document.querySelector('.sidebar-close')?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+      overlay?.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+      document.querySelectorAll('.sidebar a').forEach(a => a.addEventListener('click', () => document.body.classList.remove('sidebar-open')));
+    })();
+
+    function esc(s) {
+      if (s == null) return '';
+      var d = document.createElement('div');
+      d.textContent = String(s);
+      return d.innerHTML;
+    }
+
+    var allContracts = [];
+    var allClients = [];
+    var allIndents = [];
+    var selectedContract = null;
+    var contractProductLines = [];
+    var editingExcludeByLine = {};
+
+    function getContractLines(c) {
+      if (!c) return [];
+      if (c.productLinesEnriched && c.productLinesEnriched.length) return c.productLinesEnriched;
+      if (c.productLines && c.productLines.length) return c.productLines;
+      if (c.product) {
+        return [{
+          _id: null,
+          product: c.product,
+          productPopulated: c.product,
+          quantity: c.quantity,
+          quantityUnit: c.quantityUnit || 'MT',
+          remainingQuantity: c.remainingQuantity != null ? c.remainingQuantity : c.quantity,
+        }];
+      }
+      return [];
+    }
+
+    function productLineOptionsHtml(selectedLineId, selectedProductId) {
+      if (!contractProductLines.length) {
+        return '<option value="">Select contract first</option>';
+      }
+      return '<option value="">Select product line</option>' + contractProductLines.map(function(l) {
+        var p = l.productPopulated || l.product;
+        var name = (p && p.name) || 'Product';
+        var rem = getLineRemaining(l);
+        var val = l._id ? String(l._id) : String(l.product && l.product._id ? l.product._id : l.product);
+        var sel = (selectedLineId && String(l._id) === String(selectedLineId)) ||
+          (!selectedLineId && selectedProductId && String(l.product && l.product._id ? l.product._id : l.product) === String(selectedProductId))
+          ? ' selected' : '';
+        return '<option value="' + esc(val) + '" data-line-id="' + esc(l._id || '') + '" data-product-id="' + esc(l.product && l.product._id ? l.product._id : l.product) + '" data-unit="' + esc(l.quantityUnit || 'MT') + '"' + sel + '>' +
+          esc(name) + productHsSuffix(p) + ' — remaining: ' + rem + ' ' + esc(l.quantityUnit || 'MT') + '</option>';
+      }).join('');
+    }
+
+    function getLineRemaining(line) {
+      var rem = line.remainingQuantity != null ? line.remainingQuantity : line.quantity;
+      var key = line._id ? String(line._id) : String(line.product && line.product._id ? line.product._id : line.product);
+      if (editingExcludeByLine[key]) rem += editingExcludeByLine[key];
+      return rem;
+    }
+
+    function lineQtyInMt(qty, unit) {
+      var n = parseFloat(qty) || 0;
+      return unit === 'KGS' ? n / 1000 : n;
+    }
+
+    /** Contract line price is per quantity unit; normalize to per MT */
+    function linePricePerMt(price, unit) {
+      var p = parseFloat(price) || 0;
+      return unit === 'KGS' ? p * 1000 : p;
+    }
+
+    function findContractLine(contractLineId, productId) {
+      return contractProductLines.find(function(l) {
+        if (contractLineId && l._id && String(l._id) === String(contractLineId)) return true;
+        var pid = l.product && l.product._id ? l.product._id : l.product;
+        return productId && String(pid) === String(productId);
+      }) || null;
+    }
+
+    function getBuyPricePerMt(contractLineId, productId) {
+      var line = findContractLine(contractLineId, productId);
+      if (!line) return 0;
+      return linePricePerMt(line.price, line.quantityUnit || 'MT');
+    }
+
+    /** Per-line commission sum: (selling − buy) × MT for each allocation row */
+    function computeIndentCommissionFromSelling(sellingPrice) {
+      var sell = parseFloat(sellingPrice);
+      if (Number.isNaN(sell) || sell <= 0) return { totalMt: 0, totalCommission: 0, ratePerMt: 0 };
+      var rows = getAllocationRows();
+      var totalMt = 0;
+      var totalCommission = 0;
+      rows.forEach(function(row) {
+        var qtyMt = lineQtyInMt(row.quantity, row.quantityUnit || 'MT');
+        if (qtyMt <= 0) return;
+        var buy = getBuyPricePerMt(row.contractLineId, row.productId);
+        totalMt += qtyMt;
+        totalCommission += (sell - buy) * qtyMt;
+      });
+      return {
+        totalMt: totalMt,
+        totalCommission: totalCommission,
+        ratePerMt: totalMt > 0 ? totalCommission / totalMt : 0,
+      };
+    }
+
+    function formatCommissionAmount(amount, cur) {
+      return cur + ' ' + Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function onSellingPriceInput() {
+      updateCommissionSummary();
+    }
+
+    function refreshCommissionFromSellingPrice() {
+      updateCommissionSummary();
+    }
+
+    function updateCommissionSummary() {
+      var sell = parseFloat(document.getElementById('indSellingPrice').value) || 0;
+      var cur = (document.getElementById('indSellingPriceCurrency').value || 'USD').trim().toUpperCase();
+      var el = document.getElementById('indCommissionSummary');
+      el.classList.remove('has-total', 'is-over');
+      if (!selectedContract) {
+        el.textContent = 'Estimated margin: — (select a contract)';
+        return;
+      }
+      var calc = computeIndentCommissionFromSelling(sell);
+      if (!calc.totalMt) {
+        el.textContent = 'Estimated margin: — (add client allocations)';
+        return;
+      }
+      if (!sell) {
+        el.textContent = 'Estimated margin: — (enter selling price per MT)';
+        return;
+      }
+      var msg = 'Estimated margin: ' + formatCommissionAmount(Math.max(0, calc.totalCommission), cur) +
+        ' (' + calc.totalMt.toFixed(3) + ' MT)';
+      if (calc.totalMt > 0) {
+        msg += ' · Effective ' + formatCommissionAmount(calc.ratePerMt, cur) + '/MT';
+        msg += ' · Selling value: ' + formatCommissionAmount(calc.totalMt * sell, cur);
+      }
+      el.textContent = msg;
+      el.classList.add('has-total');
+    }
+
+    function productHsSuffix(p) {
+      var hs = p && (p.hsCode || (p.productPopulated && p.productPopulated.hsCode));
+      return hs ? ' <span style="color:var(--text-secondary);font-size:0.85em">(' + esc(hs) + ')</span>' : '';
+    }
+
+    function formatCommissionCell(ind) {
+      var total = ind.commissionTotal != null ? ind.commissionTotal : 0;
+      if (!total) return '—';
+      var cur = ind.sellingPriceCurrency || ind.clientCommissionCurrency || ind.commissionCurrency || 'USD';
+      return esc(cur) + ' ' + Number(total).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function clientOptionsHtml(selectedId) {
+      return '<option value="">Select client</option>' + allClients.map(function(c) {
+        var sel = selectedId && String(c._id) === String(selectedId) ? ' selected' : '';
+        return '<option value="' + esc(c._id) + '" data-ntn="' + esc(c.ntnNumber || '') + '"' + sel + '>' + esc(c.companyName) + '</option>';
+      }).join('');
+    }
+
+    function addLineRow(data) {
+      data = data || {};
+      var tbody = document.getElementById('indLinesBody');
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><select class="ind-line-product" required>' + productLineOptionsHtml(data.contractLineId, data.productId || (data.product && data.product._id) || data.product) + '</select></td>' +
+        '<td><select class="ind-line-client" required>' + clientOptionsHtml(data.clientId) + '</select></td>' +
+        '<td><input type="number" class="ind-line-qty" min="0.001" step="any" required value="' + esc(data.quantity || '') + '" placeholder="Qty" /></td>' +
+        '<td><input type="text" class="ind-line-ntn" value="' + esc(data.ntnNumber || '') + '" placeholder="NTN #" /></td>' +
+        '<td><button type="button" class="action-btn ind-remove-line">Remove</button></td>';
+      tbody.appendChild(tr);
+      var clientSel = tr.querySelector('.ind-line-client');
+      var productSel = tr.querySelector('.ind-line-product');
+      if (window.TriForm) {
+        TriForm.initSearchableSelect(productSel, { placeholder: 'Product', searchPlaceholder: 'Search products…', showEmptyOption: true });
+        TriForm.initSearchableSelect(clientSel, { placeholder: 'Client', searchPlaceholder: 'Search clients…', showEmptyOption: true });
+      }
+      clientSel.addEventListener('change', function() {
+        var opt = clientSel.options[clientSel.selectedIndex];
+        var ntn = opt && opt.getAttribute('data-ntn');
+        if (ntn) tr.querySelector('.ind-line-ntn').value = ntn;
+      });
+      tr.querySelector('.ind-line-qty').addEventListener('input', function() { updateQtySummary(); refreshCommissionFromSellingPrice(); });
+      productSel.addEventListener('change', function() { updateQtySummary(); refreshCommissionFromSellingPrice(); });
+      tr.querySelector('.ind-remove-line').addEventListener('click', function() {
+        tr.remove();
+        updateQtySummary();
+        refreshCommissionFromSellingPrice();
+      });
+      if (data.clientId && data.ntnNumber) tr.querySelector('.ind-line-ntn').value = data.ntnNumber;
+      updateQtySummary();
+      refreshCommissionFromSellingPrice();
+    }
+
+    function getLineRowsData() {
+      return getAllocationRows().filter(function(l) { return l.clientId; });
+    }
+
+    function getAllocationRows() {
+      return Array.from(document.querySelectorAll('#indLinesBody tr')).map(function(tr) {
+        var prodSel = tr.querySelector('.ind-line-product');
+        var opt = prodSel.options[prodSel.selectedIndex];
+        return {
+          contractLineId: opt && opt.getAttribute('data-line-id') ? opt.getAttribute('data-line-id') : undefined,
+          productId: opt ? opt.getAttribute('data-product-id') : '',
+          quantityUnit: opt ? opt.getAttribute('data-unit') : 'MT',
+          clientId: tr.querySelector('.ind-line-client').value,
+          quantity: tr.querySelector('.ind-line-qty').value,
+          ntnNumber: tr.querySelector('.ind-line-ntn').value.trim(),
+        };
+      }).filter(function(l) { return l.productId && l.quantity; });
+    }
+
+    function sumLineQtyForKey(key) {
+      return getLineRowsData().filter(function(l) {
+        var lk = l.contractLineId || l.productId;
+        return String(lk) === String(key);
+      }).reduce(function(s, l) { return s + (parseFloat(l.quantity) || 0); }, 0);
+    }
+
+    function updateQtySummary() {
+      var el = document.getElementById('indQtySummary');
+      if (!selectedContract || !contractProductLines.length) {
+        el.textContent = 'This indent: 0 — Select a contract with product lines.';
+        el.classList.remove('is-over');
+        return;
+      }
+      var parts = [];
+      var over = false;
+      contractProductLines.forEach(function(line) {
+        var key = line._id ? String(line._id) : String(line.product && line.product._id ? line.product._id : line.product);
+        var used = sumLineQtyForKey(key);
+        var rem = getLineRemaining(line);
+        var p = line.productPopulated || line.product;
+        var name = (p && p.name) || 'Product';
+        parts.push(name + ': ' + used + ' / ' + rem + ' ' + (line.quantityUnit || 'MT'));
+        if (used > rem + 0.0001) over = true;
+      });
+      el.innerHTML = parts.join(' · ');
+      el.classList.toggle('is-over', over);
+    }
+
+    function renderProductLinesList() {
+      var box = document.getElementById('indProductLinesBox');
+      var list = document.getElementById('indProductLinesList');
+      if (!contractProductLines.length) {
+        box.classList.remove('visible');
+        list.innerHTML = '';
+        return;
+      }
+      box.classList.add('visible');
+      list.innerHTML = contractProductLines.map(function(l) {
+        var p = l.productPopulated || l.product;
+        var name = (p && p.name) || 'Product';
+        return '<li>' + esc(name) + productHsSuffix(p) + ': ' + getLineRemaining(l) + ' ' + esc(l.quantityUnit || 'MT') + ' remaining (contract ' + l.quantity + ')</li>';
+      }).join('');
+    }
+
+    function showContractSummary(c) {
+      selectedContract = c;
+      contractProductLines = getContractLines(c);
+      var box = document.getElementById('indContractSummary');
+      if (!c) {
+        box.classList.remove('visible');
+        renderProductLinesList();
+        updateQtySummary();
+        refreshLineProductSelects();
+        return;
+      }
+      box.classList.add('visible');
+      document.getElementById('indSumSupplier').textContent = (c.supplier && c.supplier.companyName) || '—';
+      document.getElementById('indSumOrigin').textContent = c.originCountry || '—';
+      document.getElementById('indSumTotal').textContent = c.totalQuantity != null ? c.totalQuantity : c.quantity;
+      document.getElementById('indSumAllocated').textContent = c.allocatedQuantity != null ? c.allocatedQuantity : 0;
+      document.getElementById('indSumRemaining').textContent = c.remainingQuantity != null ? c.remainingQuantity : c.quantity;
+      var terms = c.contractTerms === 'Custom' ? (c.contractTermsCustom || 'Custom') : (c.contractTerms || '');
+      var pay = c.paymentTerms === 'Custom' ? (c.paymentTermsCustom || 'Custom') : (c.paymentTerms || '');
+      if (c.paymentTerms === 'CAD' && c.cadDays) pay += ' (' + c.cadDays + ' days)';
+      document.getElementById('indSumTerms').textContent = terms + (pay ? ' / ' + pay : '');
+      if (c.priceCurrency) document.getElementById('indSellingPriceCurrency').value = c.priceCurrency;
+      if (c.portOfShipment && !document.getElementById('indPortOfShipment').value) {
+        document.getElementById('indPortOfShipment').value = c.portOfShipment;
+      }
+      if (c.portOfDischarge && !document.getElementById('indPortOfDischarge').value) {
+        document.getElementById('indPortOfDischarge').value = c.portOfDischarge;
+      }
+      var bank = c.supplierBank || {};
+      var bankEl = document.getElementById('indBankHint');
+      if (bank.bankName || bank.accountNumber) {
+        bankEl.textContent = 'Supplier bank: ' + (bank.bankName || '') +
+          (bank.accountNumber ? ' · A/C ' + bank.accountNumber : '') +
+          (bank.swiftCode ? ' · SWIFT ' + bank.swiftCode : '');
+      } else {
+        bankEl.textContent = '';
+      }
+      var scHint = document.getElementById('indSupplierCommissionHint');
+      if (c.supplierCommissionPerMt) {
+        scHint.textContent = 'Supplier commission (from contract): ' +
+          (c.supplierCommissionCurrency || c.priceCurrency || 'USD') + ' ' +
+          Number(c.supplierCommissionPerMt).toFixed(2) + ' / MT';
+      } else {
+        scHint.textContent = '';
+      }
+      renderProductLinesList();
+      refreshLineProductSelects();
+      updateQtySummary();
+      refreshCommissionFromSellingPrice();
+    }
+
+    function refreshLineProductSelects() {
+      document.querySelectorAll('#indLinesBody tr').forEach(function(tr) {
+        var sel = tr.querySelector('.ind-line-product');
+        var prev = sel.value;
+        sel.innerHTML = productLineOptionsHtml(null, prev);
+        if (prev) sel.value = prev;
+        if (sel._searchableSelectApi) sel._searchableSelectApi.refresh();
+      });
+    }
+
+    async function loadContracts() {
+      var res = await fetch('/api/sales-contracts');
+      allContracts = res.ok ? await res.json() : [];
+      var sel = document.getElementById('indSalesContract');
+      var prev = sel.value;
+      sel.innerHTML = '<option value="">Select sales contract</option>' + allContracts.map(function(c) {
+        var rem = c.remainingQuantity != null ? c.remainingQuantity : c.quantity;
+        var lines = getContractLines(c);
+        var prodLabel = lines.length > 1
+          ? lines.length + ' products'
+          : ((lines[0] && (lines[0].productPopulated || lines[0].product) && (lines[0].productPopulated || lines[0].product).name) || '');
+        var label = esc(c.contractNumber) + ' — ' + esc(prodLabel) + ' (remaining: ' + rem + ')';
+        return '<option value="' + esc(c._id) + '">' + label + '</option>';
+      }).join('');
+      if (prev) sel.value = prev;
+      onContractChange();
+    }
+
+    async function loadClients() {
+      var res = await fetch('/api/clients');
+      allClients = res.ok ? await res.json() : [];
+    }
+
+    function onContractChange() {
+      var id = document.getElementById('indSalesContract').value;
+      var c = allContracts.find(function(x) { return String(x._id) === String(id); });
+      showContractSummary(c || null);
+    }
+
+    function resetForm() {
+      document.getElementById('indEditingId').value = '';
+      editingExcludeByLine = {};
+      document.getElementById('indentForm').reset();
+      document.getElementById('indDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('indLinesBody').innerHTML = '';
+      addLineRow();
+      document.getElementById('indFormTitle').textContent = 'Create indent';
+      document.getElementById('indSubmitBtn').textContent = 'Save indent';
+      document.getElementById('indCancelEditBtn').style.display = 'none';
+      showContractSummary(null);
+    }
+
+    function renderIndentsTable() {
+      var q = (document.getElementById('indSearchInput').value || '').trim().toLowerCase();
+      var list = allIndents.filter(function(ind) {
+        if (!q) return true;
+        var cn = (ind.salesContract && ind.salesContract.contractNumber) || '';
+        var lines = getContractLines(ind.salesContract || {});
+        var prod = lines.map(function(l) {
+          var p = l.productPopulated || l.product;
+          return (p && p.name) || '';
+        }).join(' ');
+        var clients = (ind.lines || []).map(function(l) { return (l.client && l.client.companyName) || ''; }).join(' ');
+        return (ind.indentNumber || '').toLowerCase().includes(q) || cn.toLowerCase().includes(q) || prod.toLowerCase().includes(q) || clients.toLowerCase().includes(q);
+      });
+      var tbody = document.getElementById('indTableBody');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:16px;color:var(--text-secondary);">No indents yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(function(ind) {
+        var linesSummary = (ind.lines || []).map(function(l) {
+          var prod = (l.product && l.product.name) || '';
+          var hs = (l.product && l.product.hsCode) ? ' · HS ' + l.product.hsCode : '';
+          return esc((l.client && l.client.companyName) || '?') + (prod ? ' / ' + esc(prod) : '') + esc(hs) + ' (' + l.quantity + ' ' + (l.quantityUnit || 'MT') + ')';
+        }).join('<br/>');
+        var contractLines = getContractLines(ind.salesContract || {});
+        var prodCell = contractLines.length > 1
+          ? contractLines.length + ' products'
+          : (function() {
+              var p = contractLines[0] && (contractLines[0].productPopulated || contractLines[0].product);
+              var name = (p && p.name) || '—';
+              return esc(name) + productHsSuffix(p);
+            })();
+        var rem = ind.contractRemainingQuantity != null ? ind.contractRemainingQuantity : '—';
+        var lineActions = (ind.lines || []).map(function(l) {
+          var cid = (l.client && l.client._id) ? l.client._id : '';
+          return '<button type="button" class="action-btn ind-email-line" data-client-id="' + esc(cid) + '" data-id="' + esc(ind._id) + '">Email ' + esc((l.client && l.client.companyName) || 'client') + '</button>';
+        }).join(' ');
+        return '<tr>' +
+          '<td class="cell-nowrap">' + esc(ind.indentNumber) + '</td>' +
+          '<td class="cell-nowrap">' + esc(new Date(ind.indentDate).toLocaleDateString()) + '</td>' +
+          '<td class="cell-nowrap">' + esc(ind.salesContract && ind.salesContract.contractNumber) + '</td>' +
+          '<td>' + prodCell + '</td>' +
+          '<td>' + linesSummary + '</td>' +
+          '<td class="cell-nowrap">' + esc(ind.indentTotalQuantity) + '</td>' +
+          '<td class="cell-nowrap">' + formatCommissionCell(ind) + '</td>' +
+          '<td class="cell-nowrap">' + esc(rem) + '</td>' +
+          '<td class="cell-actions">' +
+            '<button type="button" class="action-btn ind-print-btn" data-id="' + esc(ind._id) + '">Print</button> ' +
+            lineActions +
+            ' <button type="button" class="action-btn ind-edit-btn" data-id="' + esc(ind._id) + '">Edit</button>' +
+            ' <button type="button" class="action-btn ind-delete-btn" data-id="' + esc(ind._id) + '">Delete</button>' +
+          '</td></tr>';
+      }).join('');
+
+      tbody.querySelectorAll('.ind-print-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          window.open('/api/indents/' + btn.getAttribute('data-id') + '/print', '_blank');
+        });
+      });
+      tbody.querySelectorAll('.ind-email-line').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var cid = btn.getAttribute('data-client-id');
+          if (!cid) { alert('No client on this line'); return; }
+          if (window.TriMail) TriMail.client(cid, { template: 'general-message' });
+          else window.location.href = 'mail.html?recipientType=client&recipientId=' + encodeURIComponent(cid);
+        });
+      });
+      tbody.querySelectorAll('.ind-edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { openEdit(btn.getAttribute('data-id')); });
+      });
+      tbody.querySelectorAll('.ind-delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { deleteIndent(btn.getAttribute('data-id')); });
+      });
+    }
+
+    async function loadIndents() {
+      var res = await fetch('/api/indents');
+      allIndents = res.ok ? await res.json() : [];
+      renderIndentsTable();
+      await loadContracts();
+    }
+
+    async function openEdit(id) {
+      var res = await fetch('/api/indents/' + encodeURIComponent(id));
+      var ind = await res.json();
+      if (!res.ok) { alert(ind.error || 'Failed to load'); return; }
+
+      await loadContracts();
+      document.getElementById('indEditingId').value = ind._id;
+      editingExcludeByLine = {};
+      (ind.lines || []).forEach(function(l) {
+        var key = l.contractLineId ? String(l.contractLineId) : String(l.product && l.product._id ? l.product._id : l.product);
+        editingExcludeByLine[key] = (editingExcludeByLine[key] || 0) + (Number(l.quantity) || 0);
+      });
+      var scId = ind.salesContract && ind.salesContract._id ? ind.salesContract._id : ind.salesContract;
+      document.getElementById('indSalesContract').value = scId || '';
+      onContractChange();
+      document.getElementById('indNumber').value = ind.indentNumber || '';
+      document.getElementById('indDate').value = ind.indentDate ? new Date(ind.indentDate).toISOString().slice(0, 10) : '';
+      document.getElementById('indNotes').value = ind.notes || '';
+      document.getElementById('indRemarks').value = ind.remarks || '';
+      document.getElementById('indSellingPriceCurrency').value = ind.sellingPriceCurrency || ind.clientCommissionCurrency || ind.commissionCurrency || 'USD';
+      document.getElementById('indSellingPrice').value = ind.sellingPricePerMt || '';
+      document.getElementById('indLastDateOfShipment').value = ind.lastDateOfShipment ? new Date(ind.lastDateOfShipment).toISOString().slice(0, 10) : '';
+      document.getElementById('indPortOfShipment').value = ind.portOfShipment || (ind.salesContract && ind.salesContract.portOfShipment) || '';
+      document.getElementById('indPortOfDischarge').value = ind.portOfDischarge || (ind.salesContract && ind.salesContract.portOfDischarge) || '';
+      document.getElementById('indLinesBody').innerHTML = '';
+      (ind.lines || []).forEach(function(l) {
+        addLineRow({
+          contractLineId: l.contractLineId,
+          productId: l.product && l.product._id ? l.product._id : l.product,
+          clientId: l.client && l.client._id ? l.client._id : l.client,
+          quantity: l.quantity,
+          ntnNumber: l.ntnNumber || (l.client && l.client.ntnNumber) || '',
+        });
+      });
+      if (!(ind.lines || []).length) addLineRow();
+      updateCommissionSummary();
+      document.getElementById('indFormTitle').textContent = 'Edit indent';
+      document.getElementById('indSubmitBtn').textContent = 'Save changes';
+      document.getElementById('indCancelEditBtn').style.display = '';
+      openIndForm();
+      document.getElementById('indentForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function sumIndentLines(lines) {
+      return (lines || []).reduce(function(s, l) { return s + (Number(l.quantity) || 0); }, 0);
+    }
+
+    async function deleteIndent(id) {
+      if (!confirm('Delete this indent? Quantities will return to the sales contract.')) return;
+      var res = await fetch('/api/indents/' + encodeURIComponent(id), { method: 'DELETE' });
+      var r = await res.json();
+      if (!res.ok) { alert(r.error || 'Delete failed'); return; }
+      if (document.getElementById('indEditingId').value === id) resetForm();
+      loadIndents();
+    }
+
+    document.getElementById('indSalesContract').addEventListener('change', onContractChange);
+    document.getElementById('indAddLineBtn').addEventListener('click', function() { addLineRow(); });
+    document.getElementById('indSellingPrice').addEventListener('input', onSellingPriceInput);
+    document.getElementById('indSellingPriceCurrency').addEventListener('input', updateCommissionSummary);
+    document.getElementById('indSearchInput').addEventListener('input', renderIndentsTable);
+    document.getElementById('indCancelEditBtn').addEventListener('click', resetForm);
+
+    document.getElementById('indentForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var lines = getLineRowsData();
+      if (!lines.length) { alert('Add at least one client line with product and quantity.'); return; }
+      var contractId = document.getElementById('indSalesContract').value;
+      if (!contractId) { alert('Select a sales contract.'); return; }
+
+      var over = false;
+      contractProductLines.forEach(function(line) {
+        var key = line._id ? String(line._id) : String(line.product && line.product._id ? line.product._id : line.product);
+        if (sumLineQtyForKey(key) > getLineRemaining(line) + 0.0001) over = true;
+      });
+      if (over) {
+        alert('One or more product lines exceed remaining contract quantity.');
+        return;
+      }
+
+      var payload = {
+        salesContractId: contractId,
+        indentNumber: document.getElementById('indNumber').value.trim(),
+        indentDate: document.getElementById('indDate').value,
+        notes: document.getElementById('indNotes').value.trim(),
+        remarks: document.getElementById('indRemarks').value.trim(),
+        lastDateOfShipment: document.getElementById('indLastDateOfShipment').value,
+        portOfShipment: document.getElementById('indPortOfShipment').value.trim(),
+        portOfDischarge: document.getElementById('indPortOfDischarge').value.trim(),
+        sellingPricePerMt: document.getElementById('indSellingPrice').value,
+        sellingPriceCurrency: document.getElementById('indSellingPriceCurrency').value.trim(),
+        lines: lines.map(function(l) {
+          return {
+            clientId: l.clientId,
+            productId: l.productId,
+            contractLineId: l.contractLineId || undefined,
+            quantityUnit: l.quantityUnit,
+            quantity: l.quantity,
+            ntnNumber: l.ntnNumber,
+          };
+        }),
+      };
+
+      var editingId = document.getElementById('indEditingId').value;
+      var url = editingId ? '/api/indents/' + editingId : '/api/indents';
+      var res = await fetch(url, {
+        method: editingId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      var result = await res.json();
+      if (!res.ok) { alert(result.error || 'Save failed'); return; }
+      var savedIndentId = (result.indent && result.indent._id) ? result.indent._id : (editingId || '');
+      resetForm();
+      closeIndForm();
+      loadIndents();
+      if (window.triToast) triToast(editingId ? 'Indent updated' : 'Indent saved', 'success');
+      if (savedIndentId && confirm('Create shipment for this indent?')) {
+        window.location.href = 'shipment.html?indent=' + encodeURIComponent(savedIndentId) + '&new=1';
+      }
+    });
+
+    function openIndForm() {
+      document.getElementById('indentFormWrap').classList.remove('is-collapsed');
+      document.getElementById('toggleFormBtn').textContent = 'Close form';
+    }
+    function closeIndForm() {
+      document.getElementById('indentFormWrap').classList.add('is-collapsed');
+      document.getElementById('toggleFormBtn').innerHTML = '<span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>New indent';
+    }
+    document.getElementById('toggleFormBtn').addEventListener('click', function() {
+      var wrap = document.getElementById('indentFormWrap');
+      if (wrap.classList.contains('is-collapsed')) openIndForm();
+      else { resetForm(); closeIndForm(); }
+    });
+
+    window.triAuthReady.then(async function(user) {
+      if (!user) return;
+      document.getElementById('indDate').value = new Date().toISOString().slice(0, 10);
+      await loadClients();
+      addLineRow();
+      loadIndents();
+      if (window.TriForm) {
+        TriForm.initSearchableSelect(document.getElementById('indSalesContract'), {
+          placeholder: 'Select sales contract',
+          searchPlaceholder: 'Search contracts…',
+          showEmptyOption: true,
+        });
+      }
+      var params = new URLSearchParams(window.location.search);
+      var sc = params.get('contract');
+      if (sc) {
+        document.getElementById('indSalesContract').value = sc;
+        onContractChange();
+        openIndForm();
+      }
+      if (params.get('new') === '1') openIndForm();
+    });
+
+    document.getElementById('logoutLink').addEventListener('click', async function(e) {
+      e.preventDefault();
+      try { await fetch('/logout', { method: 'POST' }); } catch (_) {}
+      window.location.href = '/login.html';
+    });
+  </script>
+</body>
+</html>

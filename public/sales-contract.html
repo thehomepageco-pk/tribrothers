@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover"/>
+  <title>Sales Contract | TRI Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="responsive.css"/>
+  <link rel="stylesheet" href="form-helpers.css"/>
+  <style>
+    .sc-form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-bottom: var(--space-4); }
+    .sc-form-row.sc-two-col { grid-template-columns: repeat(2, 1fr); }
+    .sc-form-row > div label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.8125rem; }
+    .sc-form-row input, .sc-form-row select, .sc-form-row textarea { width: 100%; box-sizing: border-box; }
+    #salesContractForm .searchable-select-wrap { margin-top: var(--space-1); }
+    .sc-conditional { display: none; }
+    .sc-conditional.visible { display: block; }
+    .sc-lines-wrap { overflow-x: auto; margin: 12px 0; }
+    .sc-lines-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+    .sc-lines-table th, .sc-lines-table td { padding: 8px; border-bottom: 1px solid var(--border-subtle); text-align: left; vertical-align: top; }
+    .sc-lines-table td:first-child { min-width: 220px; }
+    .sc-lines-table th { font-size: 0.8125rem; color: var(--text-secondary); }
+    .sc-lines-table input, .sc-lines-table select { width: 100%; min-width: 80px; box-sizing: border-box; padding: 10px 12px; font-size: 0.875rem; }
+    .sc-lines-table .searchable-select-trigger { padding: 10px 32px 10px 12px; font-size: 0.875rem; min-height: 42px; }
+    .sc-lines-table .searchable-select-wrap { margin-top: 0; }
+    .sc-spec-hint { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+    .sc-spec-hint a { color: var(--accent-primary); }
+    .sc-commission-total {
+      font-size: 0.875rem;
+      margin: 8px 0 0;
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+    @media (max-width: 900px) {
+      .sc-form-row, .sc-form-row.sc-two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="app-layout theme-light">
+  <button class="menu-toggle" type="button" aria-label="Open menu">
+    <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+  <div class="sidebar">
+    <button class="sidebar-close" type="button" aria-label="Close menu">
+      <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg></span>
+    </button>
+    <h2>Tri Brothers</h2>
+    <small id="navUserBadge" style="display:none;color:var(--text-secondary);font-size:0.75rem;padding:0 16px 8px;"></small>
+    <a href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 10v10h14V10"/></svg></span>Dashboard</a>
+    <a href="products.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg></span>Products</a>
+    <a href="supplier.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3z"/><path d="M16 10h3l2 2v5h-5z"/></svg></span>Suppliers</a>
+    <a href="clients.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M2 21a8 8 0 0 1 20 0"/></svg></span>Clients</a>
+    <a href="mail.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg></span>Mail</a>
+    <a href="quotes.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/></svg></span>Quotations &amp; Offers</a>
+    <a href="sales-contract.html" class="active"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>Sales Contract</a>
+    <a href="indent.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M8 13h8"/><path d="M8 17h6"/></svg></span>Indent</a>
+    <a href="sessions.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5l3 2"/><path d="M21 12a9 9 0 1 1-9-9"/></svg></span>Sessions</a>
+    <a href="reports.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/></svg></span>Reports</a>
+    <a href="admin.html" id="adminNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Admin Panel</a>
+    <a href="settings.html" id="settingsNavLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/></svg></span>Settings</a>
+    <a href="#" id="logoutLink"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg></span>Logout</a>
+  </div>
+
+  <div class="main">
+    <header class="page-header">
+      <h1>Sales Contract</h1>
+      <button type="button" class="btn" id="toggleFormBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>New sales contract</button>
+    </header>
+
+    <div class="form-container is-collapsed" id="salesContractFormWrap">
+      <h2 style="margin-bottom: 12px;" id="scFormTitle">Create sales contract</h2>
+      <form id="salesContractForm" enctype="multipart/form-data">
+        <input type="hidden" id="scEditingId" value="" />
+
+        <div class="sc-form-row">
+          <div>
+            <label for="scSupplier">Supplier *</label>
+            <select id="scSupplier" required>
+              <option value="">Select supplier</option>
+            </select>
+          </div>
+          <div>
+            <label for="scOriginCountry">Origin (country) *</label>
+            <input type="text" id="scOriginCountry" required autocomplete="off" placeholder="Country of origin" />
+          </div>
+          <div>
+            <label for="scContractNumber">Contract number *</label>
+            <input type="text" id="scContractNumber" required placeholder="e.g. SC-2026-001" />
+          </div>
+        </div>
+
+        <div class="sc-form-row">
+          <div>
+            <label for="scContractDate">Contract date *</label>
+            <input type="date" id="scContractDate" required />
+          </div>
+          <div>
+            <label for="scShipmentType">Shipment *</label>
+            <select id="scShipmentType" required>
+              <option value="">Select shipment</option>
+              <option value="FCL">FCL</option>
+              <option value="LCL">LCL</option>
+              <option value="Bulk">Bulk</option>
+            </select>
+          </div>
+          <div>
+            <label for="scPriceCurrency">Price currency *</label>
+            <select id="scPriceCurrency" required></select>
+          </div>
+        </div>
+
+        <h3 class="product-form-section-title">Products</h3>
+        <p class="form-hint">Add one or more product lines. Search and select existing products. Quantity unit is KGS or MT.</p>
+
+        <div class="sc-lines-wrap">
+          <table class="sc-lines-table">
+            <thead>
+              <tr>
+                <th>Product *</th>
+                <th>Qty *</th>
+                <th>Unit *</th>
+                <th id="scPriceColHeader">Unit price *</th>
+                <th>Item specs note</th>
+                <th>Packing</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="scLinesBody"></tbody>
+          </table>
+        </div>
+        <button type="button" class="action-btn" id="scAddLineBtn">+ Add product line</button>
+
+        <div class="sc-form-row sc-two-col" style="margin-top:20px;">
+          <div>
+            <label for="scContractTerms">Sales contract terms *</label>
+            <select id="scContractTerms" required>
+              <option value="">Select terms</option>
+              <option value="CNF">CNF</option>
+              <option value="FOB">FOB</option>
+              <option value="Custom">Custom</option>
+            </select>
+            <div class="sc-conditional" id="scContractTermsCustomWrap" style="margin-top:8px;">
+              <label for="scContractTermsCustom">Custom contract terms *</label>
+              <textarea id="scContractTermsCustom" rows="2" placeholder="Enter custom sales contract terms"></textarea>
+            </div>
+          </div>
+          <div>
+            <label for="scPaymentTerms">Payment terms *</label>
+            <select id="scPaymentTerms" required>
+              <option value="">Select payment terms</option>
+              <option value="LC at sight">LC at sight</option>
+              <option value="DP">DP</option>
+              <option value="CAD">CAD</option>
+              <option value="DP at sight">DP at sight</option>
+              <option value="TT">TT</option>
+              <option value="Custom">Custom</option>
+            </select>
+            <div class="sc-conditional" id="scCadDaysWrap" style="margin-top:8px;">
+              <label for="scCadDays">CAD — number of days *</label>
+              <input type="number" id="scCadDays" min="1" step="1" placeholder="e.g. 30" />
+            </div>
+            <div class="sc-conditional" id="scPaymentTermsCustomWrap" style="margin-top:8px;">
+              <label for="scPaymentTermsCustom">Custom payment terms *</label>
+              <textarea id="scPaymentTermsCustom" rows="2" placeholder="Enter custom payment terms"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="sc-form-row sc-two-col">
+          <div>
+            <label for="scDeliveryTime">Delivery time *</label>
+            <input type="text" id="scDeliveryTime" required placeholder="e.g. 45 days from contract date" />
+          </div>
+          <div>
+            <label for="scBrandName">Brand name (optional)</label>
+            <input type="text" id="scBrandName" placeholder="Brand on documents" />
+          </div>
+        </div>
+
+        <div class="sc-form-row sc-two-col">
+          <div>
+            <label for="scPortOfShipment">Port of shipment</label>
+            <input type="text" id="scPortOfShipment" placeholder="e.g. Shanghai" />
+          </div>
+          <div>
+            <label for="scPortOfDischarge">Port of discharge</label>
+            <input type="text" id="scPortOfDischarge" placeholder="e.g. Karachi" />
+          </div>
+        </div>
+
+        <div class="sc-form-row sc-two-col">
+          <div>
+            <label for="scSupplierCommission">Supplier commission / MT</label>
+            <input type="number" id="scSupplierCommission" min="0" step="any" placeholder="0" />
+            <p class="sc-commission-total" id="scSupplierCommissionTotal">Total supplier commission: —</p>
+          </div>
+          <div>
+            <label for="scSpecialInstructions">Special instructions</label>
+            <textarea id="scSpecialInstructions" rows="3" placeholder="Optional notes"></textarea>
+          </div>
+        </div>
+
+        <h3 class="product-form-section-title">Supplier bank details</h3>
+        <p class="form-hint">Saved against this supplier and reused on the next contract. Change anytime — the new details are saved too.</p>
+        <div class="sc-form-row">
+          <div style="grid-column:1/-1;">
+            <label for="scBankAccountSelect">Saved bank accounts</label>
+            <select id="scBankAccountSelect">
+              <option value="">New / enter manually</option>
+            </select>
+          </div>
+        </div>
+        <div class="sc-form-row sc-two-col">
+          <div>
+            <label for="scBankName">Bank name</label>
+            <input type="text" id="scBankName" placeholder="Bank name" />
+          </div>
+          <div>
+            <label for="scSwiftCode">SWIFT code</label>
+            <input type="text" id="scSwiftCode" placeholder="SWIFT / BIC" />
+          </div>
+        </div>
+        <div class="sc-form-row sc-two-col">
+          <div>
+            <label for="scAccountNumber">Account number</label>
+            <input type="text" id="scAccountNumber" placeholder="Account number" />
+          </div>
+          <div>
+            <label for="scBankAddress">Bank address</label>
+            <input type="text" id="scBankAddress" placeholder="Bank address" />
+          </div>
+        </div>
+
+        <div>
+          <label for="scContractFile">Sales contract document</label>
+          <input type="file" id="scContractFile" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp" />
+          <p class="form-hint">Upload the signed sales contract file (PDF, Word, Excel, or image).</p>
+          <p class="sc-spec-hint" id="scContractFileCurrent" style="display:none;"></p>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn" id="scSubmitBtn">Save sales contract</button>
+          <button type="button" class="action-btn" id="scCancelEditBtn" style="display:none;">Cancel edit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="products-toolbar" style="margin-top: 20px;">
+      <div class="toolbar-row">
+        <div class="toolbar-group">
+          <label for="scSearchInput">Search</label>
+          <input type="text" id="scSearchInput" placeholder="Contract #, supplier, product, origin…" />
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Contract #</th>
+            <th>Date</th>
+            <th>Supplier</th>
+            <th>Origin</th>
+            <th>Products</th>
+            <th>Remaining</th>
+            <th>Contract value</th>
+            <th>Shipment</th>
+            <th>Terms</th>
+            <th>Payment</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="scTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="toast.js"></script>
+  <script src="mobile-ui.js"></script>
+  <script src="nav-auth.js"></script>
+  <script src="form-helpers.js"></script>
+  <script>
+    (function initMobileNav() {
+      var overlay = document.getElementById('sidebarOverlay');
+      document.querySelector('.menu-toggle')?.addEventListener('click', function() { document.body.classList.add('sidebar-open'); });
+      document.querySelector('.sidebar-close')?.addEventListener('click', function() { document.body.classList.remove('sidebar-open'); });
+      overlay?.addEventListener('click', function() { document.body.classList.remove('sidebar-open'); });
+      document.querySelectorAll('.sidebar a').forEach(function(a) { a.addEventListener('click', function() { document.body.classList.remove('sidebar-open'); }); });
+    })();
+
+    function esc(s) {
+      if (s == null) return '';
+      var d = document.createElement('div');
+      d.textContent = String(s);
+      return d.innerHTML;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      var d = new Date(iso);
+      return isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+    }
+
+    function toInputDate(iso) {
+      if (!iso) return '';
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      return d.toISOString().slice(0, 10);
+    }
+
+    var allContracts = [];
+    var allSuppliers = [];
+    var allProducts = [];
+    var allCurrencies = [];
+    var lineCounter = 0;
+    var supplierSelectApi = null;
+    var currencySelectApi = null;
+    var existingContractFile = null;
+
+    function showContractFileCurrent(filename) {
+      var el = document.getElementById('scContractFileCurrent');
+      if (!filename) {
+        existingContractFile = null;
+        el.style.display = 'none';
+        el.innerHTML = '';
+        return;
+      }
+      existingContractFile = filename;
+      el.style.display = 'block';
+      el.innerHTML = 'Current file: <a href="/uploads/' + esc(filename) + '" target="_blank" rel="noopener">' + esc(filename) + '</a>';
+    }
+
+    function getSelectedCurrency() {
+      return document.getElementById('scPriceCurrency').value || 'USD';
+    }
+
+    function getCurrencySymbol(code) {
+      code = code || getSelectedCurrency();
+      try {
+        var parts = new Intl.NumberFormat('en', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' }).formatToParts(0);
+        var sym = parts.find(function(p) { return p.type === 'currency'; });
+        return sym ? sym.value : code;
+      } catch (_) {
+        return code;
+      }
+    }
+
+    function formatCurrencyAmount(amount, code) {
+      var n = Number(amount);
+      if (Number.isNaN(n)) return '—';
+      code = code || getSelectedCurrency();
+      try {
+        return new Intl.NumberFormat(undefined, { style: 'currency', currency: code }).format(n);
+      } catch (_) {
+        return code + ' ' + n.toFixed(2);
+      }
+    }
+
+    function updateCurrencyDisplay() {
+      var code = getSelectedCurrency();
+      var header = document.getElementById('scPriceColHeader');
+      if (header) header.textContent = 'Unit price (' + code + ') *';
+      updateLineTotals();
+    }
+
+    function lineQtyInMt(qty, unit) {
+      var n = parseFloat(qty) || 0;
+      return unit === 'KGS' ? n / 1000 : n;
+    }
+
+    function getFormLinesTotalMt() {
+      return Array.from(document.querySelectorAll('#scLinesBody tr')).reduce(function(sum, tr) {
+        var qty = tr.querySelector('.sc-line-qty').value;
+        var unit = tr.querySelector('.sc-line-unit').value || 'MT';
+        return sum + lineQtyInMt(qty, unit);
+      }, 0);
+    }
+
+    function updateSupplierCommissionTotal() {
+      var rate = parseFloat(document.getElementById('scSupplierCommission').value);
+      var totalMt = getFormLinesTotalMt();
+      var el = document.getElementById('scSupplierCommissionTotal');
+      var code = getSelectedCurrency();
+      if (Number.isNaN(rate) || rate <= 0 || totalMt <= 0) {
+        el.textContent = totalMt > 0
+          ? 'Total supplier commission: — (enter rate per MT)'
+          : 'Total supplier commission: —';
+        return;
+      }
+      var total = rate * totalMt;
+      el.textContent = 'Total supplier commission: ' + formatCurrencyAmount(total, code) +
+        ' (' + totalMt.toFixed(3) + ' MT × ' + rate + ')';
+    }
+
+    function updateLineTotals() {
+      var code = getSelectedCurrency();
+      document.querySelectorAll('#scLinesBody tr').forEach(function(tr) {
+        var qty = parseFloat(tr.querySelector('.sc-line-qty').value);
+        var price = parseFloat(tr.querySelector('.sc-line-price').value);
+        var hint = tr.querySelector('.sc-line-total');
+        if (!hint) return;
+        if (!Number.isNaN(qty) && !Number.isNaN(price) && qty > 0) {
+          hint.textContent = 'Line total: ' + formatCurrencyAmount(qty * price, code);
+        } else {
+          hint.textContent = 'Line total: —';
+        }
+      });
+      updateSupplierCommissionTotal();
+    }
+
+    function getContractLines(c) {
+      if (c.productLinesEnriched && c.productLinesEnriched.length) return c.productLinesEnriched;
+      if (c.productLines && c.productLines.length) return c.productLines;
+      if (c.product) {
+        return [{
+          product: c.product,
+          quantity: c.quantity,
+          quantityUnit: c.quantityUnit || 'MT',
+          price: c.price,
+          remainingQuantity: c.remainingQuantity,
+        }];
+      }
+      return [];
+    }
+
+    function formatTerms(c) {
+      if (c.contractTerms === 'Custom') return c.contractTermsCustom || 'Custom';
+      return c.contractTerms || '';
+    }
+
+    function formatPayment(c) {
+      if (c.paymentTerms === 'Custom') return c.paymentTermsCustom || 'Custom';
+      if (c.paymentTerms === 'CAD' && c.cadDays) return 'CAD (' + c.cadDays + ' days)';
+      if (c.paymentTerms === 'DA' && c.daDays) return 'DA (' + c.daDays + ' days)';
+      return c.paymentTerms || '';
+    }
+
+    function productOptionsHtml(selectedId) {
+      return '<option value="">Select product</option>' + allProducts.map(function(p) {
+        var sel = selectedId && String(p._id) === String(selectedId) ? ' selected' : '';
+        return '<option value="' + esc(p._id) + '"' + sel + '>' + esc(p.name) + (p.hsCode ? ' (' + esc(p.hsCode) + ')' : '') + '</option>';
+      }).join('');
+    }
+
+    function initLineProductSelect(tr) {
+      var sel = tr.querySelector('.sc-line-product');
+      if (!sel || sel._searchableSelectApi) return;
+      TriForm.initSearchableSelect(sel, {
+        placeholder: 'Select product',
+        searchPlaceholder: 'Search products…',
+        showEmptyOption: true,
+      });
+    }
+
+    function addProductLine(data) {
+      data = data || {};
+      lineCounter += 1;
+      var idx = lineCounter;
+      var tbody = document.getElementById('scLinesBody');
+      var tr = document.createElement('tr');
+      tr.dataset.lineIndex = String(idx);
+      if (data._id) tr.dataset.lineId = data._id;
+      if (data.itemSpecsFile) tr.dataset.existingSpecs = data.itemSpecsFile;
+
+      tr.innerHTML =
+        '<td><select class="sc-line-product" required>' + productOptionsHtml(data.productId || (data.product && data.product._id) || data.product) + '</select></td>' +
+        '<td><input type="number" class="sc-line-qty" min="0.001" step="any" required value="' + esc(data.quantity != null ? data.quantity : '') + '" /></td>' +
+        '<td><select class="sc-line-unit" required><option value="MT"' + ((data.quantityUnit || 'MT') === 'MT' ? ' selected' : '') + '>MT</option><option value="KGS"' + (data.quantityUnit === 'KGS' ? ' selected' : '') + '>KGS</option></select></td>' +
+        '<td><input type="number" class="sc-line-price" min="0" step="0.01" required value="' + esc(data.price != null ? data.price : '') + '" /><p class="sc-line-total">Line total: —</p></td>' +
+        '<td><textarea class="sc-line-specs-note" rows="2" placeholder="Item specs…">' + esc(data.itemSpecsNote || '') + '</textarea></td>' +
+        '<td><input type="text" class="sc-line-packing" value="' + esc(data.packing || '') + '" placeholder="Packing" /></td>' +
+        '<td><button type="button" class="action-btn sc-remove-line">Remove</button></td>';
+
+      tbody.appendChild(tr);
+      initLineProductSelect(tr);
+      tr.querySelector('.sc-line-qty').addEventListener('input', updateLineTotals);
+      tr.querySelector('.sc-line-price').addEventListener('input', updateLineTotals);
+      tr.querySelector('.sc-line-unit').addEventListener('change', updateLineTotals);
+      tr.querySelector('.sc-remove-line').addEventListener('click', function() {
+        if (tbody.querySelectorAll('tr').length <= 1) { alert('At least one product line is required.'); return; }
+        var sel = tr.querySelector('.sc-line-product');
+        if (sel && sel._searchableSelectApi) sel._searchableSelectApi.destroy();
+        tr.remove();
+        updateLineTotals();
+      });
+      updateLineTotals();
+    }
+
+    function refreshLineProductSelects() {
+      document.querySelectorAll('#scLinesBody tr').forEach(function(tr) {
+        var sel = tr.querySelector('.sc-line-product');
+        var prev = sel.value;
+        sel.innerHTML = productOptionsHtml(prev);
+        if (sel._searchableSelectApi) sel._searchableSelectApi.refresh();
+        else initLineProductSelect(tr);
+      });
+    }
+
+    function toggleConditionals() {
+      var pt = document.getElementById('scPaymentTerms').value;
+      var ct = document.getElementById('scContractTerms').value;
+      document.getElementById('scCadDaysWrap').classList.toggle('visible', pt === 'CAD');
+      document.getElementById('scPaymentTermsCustomWrap').classList.toggle('visible', pt === 'Custom');
+      document.getElementById('scContractTermsCustomWrap').classList.toggle('visible', ct === 'Custom');
+      document.getElementById('scCadDays').required = pt === 'CAD';
+      document.getElementById('scPaymentTermsCustom').required = pt === 'Custom';
+      document.getElementById('scContractTermsCustom').required = ct === 'Custom';
+    }
+
+    function rebuildSupplierSelect(selectedId) {
+      var sel = document.getElementById('scSupplier');
+      var prev = selectedId || sel.value;
+      sel.innerHTML = '<option value="">Select supplier</option>' + allSuppliers.map(function(s) {
+        return '<option value="' + esc(s._id) + '">' + esc(s.companyName) + (s.country ? ' (' + esc(s.country) + ')' : '') + '</option>';
+      }).join('');
+      if (prev) sel.value = prev;
+      if (supplierSelectApi) supplierSelectApi.refresh();
+    }
+
+    function rebuildCurrencySelect(selectedCode) {
+      var sel = document.getElementById('scPriceCurrency');
+      var prev = selectedCode || sel.value || 'USD';
+      sel.innerHTML = allCurrencies.map(function(c) {
+        return '<option value="' + esc(c.code) + '">' + esc(c.code) + ' — ' + esc(c.name) + '</option>';
+      }).join('');
+      sel.value = prev;
+      if (!sel.value && allCurrencies.length) sel.value = 'USD';
+      if (currencySelectApi) currencySelectApi.refresh();
+      updateCurrencyDisplay();
+    }
+
+    async function loadSuppliers() {
+      var res = await fetch('/api/suppliers');
+      allSuppliers = res.ok ? await res.json() : [];
+      rebuildSupplierSelect();
+    }
+
+    async function loadProducts() {
+      var res = await fetch('/api/products');
+      allProducts = res.ok ? await res.json() : [];
+      allProducts.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
+      refreshLineProductSelects();
+    }
+
+    async function loadCurrencies() {
+      var res = await fetch('/api/currencies');
+      allCurrencies = res.ok ? await res.json() : [{ code: 'USD', name: 'US Dollar' }];
+      rebuildCurrencySelect();
+    }
+
+    function resetForm() {
+      document.getElementById('scEditingId').value = '';
+      document.getElementById('salesContractForm').reset();
+      document.getElementById('scContractDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('scLinesBody').innerHTML = '';
+      lineCounter = 0;
+      addProductLine();
+      document.getElementById('scFormTitle').textContent = 'Create sales contract';
+      document.getElementById('scSubmitBtn').textContent = 'Save sales contract';
+      document.getElementById('scCancelEditBtn').style.display = 'none';
+      showContractFileCurrent(null);
+      rebuildCurrencySelect('USD');
+      fillBankFields({});
+      supplierBanks = [];
+      rebuildBankSelect('');
+      document.getElementById('scBrandName').value = '';
+      document.getElementById('scPortOfShipment').value = '';
+      document.getElementById('scPortOfDischarge').value = '';
+      document.getElementById('scSupplierCommission').value = '';
+      toggleConditionals();
+      updateCurrencyDisplay();
+      updateSupplierCommissionTotal();
+    }
+
+    function getFilteredContracts() {
+      var q = (document.getElementById('scSearchInput').value || '').trim().toLowerCase();
+      if (!q) return allContracts;
+      return allContracts.filter(function(c) {
+        var sup = (c.supplier && c.supplier.companyName) || '';
+        var origin = c.originCountry || '';
+        var prods = getContractLines(c).map(function(l) {
+          var p = l.productPopulated || l.product;
+          return (p && p.name) || '';
+        }).join(' ');
+        return (c.contractNumber || '').toLowerCase().includes(q)
+          || sup.toLowerCase().includes(q)
+          || origin.toLowerCase().includes(q)
+          || prods.toLowerCase().includes(q);
+      });
+    }
+
+    function renderTable() {
+      var tbody = document.getElementById('scTableBody');
+      var list = getFilteredContracts();
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:var(--text-secondary);padding:16px;">No sales contracts yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(function(c) {
+        var cur = c.priceCurrency || 'USD';
+        var lines = getContractLines(c);
+        var prodSummary = lines.map(function(l) {
+          var p = l.productPopulated || l.product;
+          var name = (p && p.name) || '?';
+          return name + ' ' + l.quantity + ' ' + (l.quantityUnit || 'MT') + ' @ ' + formatCurrencyAmount(l.price, cur);
+        }).join('<br/>');
+        var contractTotal = lines.reduce(function(s, l) {
+          return s + (Number(l.quantity) || 0) * (Number(l.price) || 0);
+        }, 0);
+        var rem = lines.map(function(l) {
+          var p = l.productPopulated || l.product;
+          var name = (p && p.name) || '?';
+          var r = l.remainingQuantity != null ? l.remainingQuantity : l.quantity;
+          return name + ': ' + r;
+        }).join('<br/>');
+        return '<tr>' +
+          '<td class="cell-nowrap">' + esc(c.contractNumber) + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatDate(c.contractDate)) + '</td>' +
+          '<td>' + esc(c.supplier && c.supplier.companyName) + '</td>' +
+          '<td>' + esc(c.originCountry || '—') + '</td>' +
+          '<td>' + prodSummary + '</td>' +
+          '<td>' + rem + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatCurrencyAmount(contractTotal, cur)) + '</td>' +
+          '<td class="cell-nowrap">' + esc(c.shipmentType || '—') + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatTerms(c)) + '</td>' +
+          '<td class="cell-nowrap">' + esc(formatPayment(c)) + '</td>' +
+          '<td class="cell-actions">' +
+            (c.contractFile ? '<a href="/uploads/' + encodeURIComponent(c.contractFile) + '" class="action-btn" target="_blank" rel="noopener">Contract</a> ' : '') +
+            '<a href="indent.html?contract=' + encodeURIComponent(c._id) + '" class="action-btn">Indent</a> ' +
+            '<button type="button" class="action-btn sc-edit-btn" data-id="' + esc(c._id) + '">Edit</button>' +
+            '<button type="button" class="action-btn sc-delete-btn" data-id="' + esc(c._id) + '">Delete</button>' +
+          '</td></tr>';
+      }).join('');
+
+      tbody.querySelectorAll('.sc-edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { openEdit(btn.getAttribute('data-id')); });
+      });
+      tbody.querySelectorAll('.sc-delete-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { deleteContract(btn.getAttribute('data-id')); });
+      });
+    }
+
+    async function loadContracts() {
+      var res = await fetch('/api/sales-contracts');
+      if (!res.ok) return;
+      allContracts = await res.json();
+      renderTable();
+    }
+
+    function collectProductLinesJson() {
+      return Array.from(document.querySelectorAll('#scLinesBody tr')).map(function(tr) {
+        return {
+          _id: tr.dataset.lineId || undefined,
+          productId: tr.querySelector('.sc-line-product').value,
+          quantity: tr.querySelector('.sc-line-qty').value,
+          quantityUnit: tr.querySelector('.sc-line-unit').value,
+          price: tr.querySelector('.sc-line-price').value,
+          itemSpecsNote: (tr.querySelector('.sc-line-specs-note') || {}).value || '',
+          packing: (tr.querySelector('.sc-line-packing') || {}).value || '',
+          itemSpecsFile: tr.dataset.existingSpecs || null,
+          keepSpecsFile: !!tr.dataset.existingSpecs,
+        };
+      });
+    }
+
+    var supplierBanks = [];
+
+    function fillBankFields(bank) {
+      bank = bank || {};
+      document.getElementById('scBankName').value = bank.bankName || '';
+      document.getElementById('scSwiftCode').value = bank.swiftCode || '';
+      document.getElementById('scAccountNumber').value = bank.accountNumber || '';
+      document.getElementById('scBankAddress').value = bank.bankAddress || '';
+    }
+
+    function rebuildBankSelect(selectedId) {
+      var sel = document.getElementById('scBankAccountSelect');
+      sel.innerHTML = '<option value="">New / enter manually</option>' + supplierBanks.map(function(b) {
+        var label = (b.bankName || 'Bank') + (b.accountNumber ? ' · ' + b.accountNumber : '');
+        var selAttr = selectedId && String(b._id) === String(selectedId) ? ' selected' : '';
+        return '<option value="' + esc(b._id) + '"' + selAttr + '>' + esc(label) + '</option>';
+      }).join('');
+    }
+
+    async function loadSupplierBanks(supplierId, selectedId) {
+      supplierBanks = [];
+      if (!supplierId) {
+        rebuildBankSelect('');
+        return;
+      }
+      try {
+        var res = await fetch('/api/suppliers/' + encodeURIComponent(supplierId) + '/bank-accounts');
+        var data = res.ok ? await res.json() : { bankAccounts: [] };
+        supplierBanks = data.bankAccounts || [];
+        rebuildBankSelect(selectedId || '');
+        if (selectedId) {
+          var found = supplierBanks.find(function(b) { return String(b._id) === String(selectedId); });
+          if (found) fillBankFields(found);
+        } else if (supplierBanks.length && !document.getElementById('scBankName').value) {
+          var def = supplierBanks.find(function(b) { return b.isDefault; }) || supplierBanks[0];
+          document.getElementById('scBankAccountSelect').value = def._id;
+          fillBankFields(def);
+        }
+      } catch (e) {
+        rebuildBankSelect('');
+      }
+    }
+
+    async function openEdit(id) {
+      var res = await fetch('/api/sales-contracts/' + encodeURIComponent(id));
+      var c = await res.json();
+      if (!res.ok) { alert(c.error || 'Failed to load contract'); return; }
+
+      document.getElementById('scEditingId').value = c._id;
+      var supId = (c.supplier && c.supplier._id) ? c.supplier._id : (c.supplier || '');
+      rebuildSupplierSelect(supId);
+      if (supplierSelectApi) supplierSelectApi.setValue(supId);
+      document.getElementById('scOriginCountry').value = c.originCountry || '';
+      document.getElementById('scContractNumber').value = c.contractNumber || '';
+      document.getElementById('scContractDate').value = toInputDate(c.contractDate);
+      document.getElementById('scShipmentType').value = c.shipmentType || '';
+      rebuildCurrencySelect(c.priceCurrency || 'USD');
+      document.getElementById('scContractTerms').value = c.contractTerms || '';
+      document.getElementById('scContractTermsCustom').value = c.contractTermsCustom || '';
+      document.getElementById('scPaymentTerms').value = c.paymentTerms || '';
+      document.getElementById('scCadDays').value = c.cadDays || c.daDays || '';
+      document.getElementById('scPaymentTermsCustom').value = c.paymentTermsCustom || '';
+      document.getElementById('scDeliveryTime').value = c.deliveryTime || '';
+      document.getElementById('scBrandName').value = c.brandName || '';
+      document.getElementById('scPortOfShipment').value = c.portOfShipment || '';
+      document.getElementById('scPortOfDischarge').value = c.portOfDischarge || '';
+      document.getElementById('scSupplierCommission').value = c.supplierCommissionPerMt || '';
+      document.getElementById('scSpecialInstructions').value = c.specialInstructions || '';
+      showContractFileCurrent(c.contractFile || null);
+      document.getElementById('scContractFile').value = '';
+      fillBankFields(c.supplierBank || {});
+      await loadSupplierBanks(supId, c.supplierBankAccountId || '');
+
+      document.getElementById('scLinesBody').innerHTML = '';
+      lineCounter = 0;
+      var lines = getContractLines(c);
+      if (!lines.length) addProductLine();
+      else lines.forEach(function(l) {
+        addProductLine({
+          _id: l._id,
+          product: l.productPopulated || l.product,
+          productId: l.product && l.product._id ? l.product._id : l.product,
+          quantity: l.quantity,
+          quantityUnit: l.quantityUnit,
+          price: l.price,
+          itemSpecsNote: l.itemSpecsNote,
+          packing: l.packing,
+          itemSpecsFile: l.itemSpecsFile,
+        });
+      });
+
+      toggleConditionals();
+      updateCurrencyDisplay();
+      updateSupplierCommissionTotal();
+      document.getElementById('scFormTitle').textContent = 'Edit sales contract';
+      document.getElementById('scSubmitBtn').textContent = 'Save changes';
+      document.getElementById('scCancelEditBtn').style.display = '';
+      openScForm();
+      document.getElementById('salesContractFormWrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function deleteContract(id) {
+      if (!confirm('Delete this sales contract?')) return;
+      var res = await fetch('/api/sales-contracts/' + encodeURIComponent(id), { method: 'DELETE' });
+      var result = await res.json();
+      if (!res.ok) { alert(result.error || 'Delete failed'); return; }
+      if (document.getElementById('scEditingId').value === id) resetForm();
+      loadContracts();
+      if (window.triToast) triToast('Sales contract deleted', 'success');
+    }
+
+    document.getElementById('scPriceCurrency').addEventListener('change', updateCurrencyDisplay);
+    document.getElementById('scSupplierCommission').addEventListener('input', updateSupplierCommissionTotal);
+    document.getElementById('scPaymentTerms').addEventListener('change', toggleConditionals);
+    document.getElementById('scContractTerms').addEventListener('change', toggleConditionals);
+    document.getElementById('scSearchInput').addEventListener('input', renderTable);
+    document.getElementById('scCancelEditBtn').addEventListener('click', resetForm);
+    document.getElementById('scAddLineBtn').addEventListener('click', function() { addProductLine(); });
+    document.getElementById('scSupplier').addEventListener('change', function() {
+      loadSupplierBanks(this.value, '');
+    });
+    document.getElementById('scBankAccountSelect').addEventListener('change', function() {
+      var id = this.value;
+      if (!id) return;
+      var found = supplierBanks.find(function(b) { return String(b._id) === String(id); });
+      if (found) fillBankFields(found);
+    });
+
+    document.getElementById('salesContractForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var editingId = document.getElementById('scEditingId').value;
+      var paymentTerms = document.getElementById('scPaymentTerms').value;
+      var contractTerms = document.getElementById('scContractTerms').value;
+
+      if (paymentTerms === 'CAD') {
+        var cad = parseInt(document.getElementById('scCadDays').value, 10);
+        if (!cad || cad < 1) { alert('Enter the number of days for CAD payment terms.'); return; }
+      }
+      if (paymentTerms === 'Custom' && !document.getElementById('scPaymentTermsCustom').value.trim()) {
+        alert('Enter custom payment terms.'); return;
+      }
+      if (contractTerms === 'Custom' && !document.getElementById('scContractTermsCustom').value.trim()) {
+        alert('Enter custom sales contract terms.'); return;
+      }
+
+      var lines = collectProductLinesJson();
+      if (!lines.length || lines.some(function(l) { return !l.productId || !l.quantity || !l.price; })) {
+        alert('Complete all product lines (product, quantity, price).');
+        return;
+      }
+
+      var fd = new FormData();
+      fd.append('supplierId', document.getElementById('scSupplier').value);
+      fd.append('originCountry', document.getElementById('scOriginCountry').value.trim());
+      fd.append('contractNumber', document.getElementById('scContractNumber').value.trim());
+      fd.append('contractDate', document.getElementById('scContractDate').value);
+      fd.append('shipmentType', document.getElementById('scShipmentType').value);
+      fd.append('priceCurrency', document.getElementById('scPriceCurrency').value);
+      fd.append('contractTerms', contractTerms);
+      fd.append('contractTermsCustom', document.getElementById('scContractTermsCustom').value.trim());
+      fd.append('paymentTerms', paymentTerms);
+      fd.append('paymentTermsCustom', document.getElementById('scPaymentTermsCustom').value.trim());
+      if (paymentTerms === 'CAD') fd.append('cadDays', document.getElementById('scCadDays').value);
+      fd.append('deliveryTime', document.getElementById('scDeliveryTime').value.trim());
+      fd.append('brandName', document.getElementById('scBrandName').value.trim());
+      fd.append('portOfShipment', document.getElementById('scPortOfShipment').value.trim());
+      fd.append('portOfDischarge', document.getElementById('scPortOfDischarge').value.trim());
+      fd.append('supplierCommissionPerMt', document.getElementById('scSupplierCommission').value);
+      fd.append('supplierCommissionCurrency', document.getElementById('scPriceCurrency').value);
+      fd.append('specialInstructions', document.getElementById('scSpecialInstructions').value.trim());
+      fd.append('bankName', document.getElementById('scBankName').value.trim());
+      fd.append('swiftCode', document.getElementById('scSwiftCode').value.trim());
+      fd.append('accountNumber', document.getElementById('scAccountNumber').value.trim());
+      fd.append('bankAddress', document.getElementById('scBankAddress').value.trim());
+      var bankSel = document.getElementById('scBankAccountSelect').value;
+      if (bankSel) fd.append('supplierBankAccountId', bankSel);
+      fd.append('productLines', JSON.stringify(lines));
+
+      if (editingId && existingContractFile) {
+        var newContractFile = document.getElementById('scContractFile').files;
+        fd.append('keepContractFile', (newContractFile && newContractFile[0]) ? 'false' : 'true');
+      }
+      var contractFileInput = document.getElementById('scContractFile');
+      if (contractFileInput.files && contractFileInput.files[0]) {
+        fd.append('contractFile', contractFileInput.files[0]);
+      }
+
+      if (!fd.get('supplierId')) { alert('Select a supplier.'); return; }
+
+      var url = editingId ? '/api/sales-contracts/' + editingId : '/api/sales-contracts';
+      var res = await fetch(url, { method: editingId ? 'PUT' : 'POST', body: fd });
+      var result = await res.json();
+      if (!res.ok) { alert(result.error || 'Save failed'); return; }
+      var savedId = (result.contract && result.contract._id) || result._id || editingId;
+      resetForm();
+      closeScForm();
+      loadContracts();
+      if (window.triToast) triToast(editingId ? 'Contract updated' : 'Sales contract saved', 'success');
+      if (savedId && confirm('Create indent for this contract?')) {
+        window.location.href = 'indent.html?contract=' + encodeURIComponent(savedId) + '&new=1';
+      }
+    });
+
+    function openScForm() {
+      document.getElementById('salesContractFormWrap').classList.remove('is-collapsed');
+      document.getElementById('toggleFormBtn').textContent = 'Close form';
+    }
+    function closeScForm() {
+      document.getElementById('salesContractFormWrap').classList.add('is-collapsed');
+      document.getElementById('toggleFormBtn').innerHTML = '<span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>New sales contract';
+    }
+    document.getElementById('toggleFormBtn').addEventListener('click', function() {
+      var wrap = document.getElementById('salesContractFormWrap');
+      if (wrap.classList.contains('is-collapsed')) openScForm();
+      else { resetForm(); closeScForm(); }
+    });
+
+    window.triAuthReady.then(async function(user) {
+      if (!user) return;
+      TriForm.initCountryPicker(document.getElementById('scOriginCountry'));
+      supplierSelectApi = TriForm.initSearchableSelect(document.getElementById('scSupplier'), {
+        placeholder: 'Select supplier',
+        searchPlaceholder: 'Search suppliers…',
+        showEmptyOption: true,
+      });
+      currencySelectApi = TriForm.initSearchableSelect(document.getElementById('scPriceCurrency'), {
+        placeholder: 'Select currency',
+        searchPlaceholder: 'Search currency…',
+      });
+      document.getElementById('scContractDate').value = new Date().toISOString().slice(0, 10);
+      toggleConditionals();
+      addProductLine();
+      await Promise.all([loadSuppliers(), loadProducts(), loadCurrencies()]);
+      updateCurrencyDisplay();
+      loadContracts();
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('new') === '1') openScForm();
+    });
+
+    document.getElementById('logoutLink').addEventListener('click', async function(e) {
+      e.preventDefault();
+      try { await fetch('/logout', { method: 'POST' }); } catch (_) {}
+      window.location.href = '/login.html';
+    });
+  </script>
+</body>
+</html>
