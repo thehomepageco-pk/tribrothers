@@ -3997,3 +3997,61 @@ th.checkbox-col input {
     margin-top: 8px;
   }
 }
+
+/* —— Entity CSV / AI import —— */
+.entity-import-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.entity-import-section h3 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.entity-import-help {
+  margin: 8px 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.entity-import-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  font-size: 0.78rem;
+}
+
+.entity-import-columns code {
+  white-space: normal;
+  word-break: break-word;
+  font-size: 0.72rem;
+  color: var(--text);
+}
+
+.entity-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.entity-import-details {
+  margin-top: 8px;
+  font-size: 0.8rem;
+}
+
+.entity-import-details ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
+}

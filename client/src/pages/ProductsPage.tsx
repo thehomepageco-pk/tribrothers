@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { Link, useSearchParams } from 'react-router-dom'
 import { useUrlSearch } from '@/hooks/useUrlSearch'
 import { api, apiForm, ApiError } from '@/api/client'
+import { EntityImportPanel } from '@/components/EntityImportPanel'
 import { RowActionsMenu } from '@/components/RowActionsMenu'
 import { Info } from '@/components/ui/Info'
 import { Modal } from '@/components/ui/Modal'
@@ -415,6 +416,7 @@ export default function ProductsPage() {
           </div>
           {canEdit ? (
             <div className="toolbar-actions">
+              <EntityImportPanel type="products" onDone={() => void load()} />
               <button
                 type="button"
                 className="btn toolbar-cta"

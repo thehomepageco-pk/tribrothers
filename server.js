@@ -744,6 +744,7 @@ app.put('/api/me/password', async (req, res) => {
 // Tasks + notifications (dashboard assign-work)
 app.use('/api', tasksNotificationsRouter);
 app.use('/api', require('./routes/access-requests'));
+app.use('/api', require('./routes/import'));
 
 // Authenticated file downloads
 app.get('/uploads/:filename', requireAuth, (req, res) => {
