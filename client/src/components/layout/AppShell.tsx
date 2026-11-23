@@ -27,6 +27,8 @@ import {
   Camera,
   Unlock,
   ShieldAlert,
+  PanelLeftOpen,
+  PanelLeftClose,
 } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/context/AuthContext'
@@ -142,6 +144,13 @@ export function AppShell() {
   const { toast } = useToast()
   const qc = useQueryClient()
   const [railOpen, setRailOpen] = useState(false)
+  const [railExpanded, setRailExpanded] = useState(() => {
+    try {
+      return localStorage.getItem('tri.railExpanded') === '1'
+    } catch {
+      return false
+    }
+  })
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [hits, setHits] = useState<SearchHit[]>([])
@@ -184,6 +193,14 @@ export function AppShell() {
   useEffect(() => {
     document.body.classList.remove('login-page', 'app-layout', 'sidebar-open')
   }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('tri.railExpanded', railExpanded ? '1' : '0')
+    } catch {
+      /* ignore */
+    }
+  }, [railExpanded])
 
   useEffect(() => {
     function onNeedUnlock(e: Event) {
@@ -383,7 +400,9 @@ export function AppShell() {
   }
 
   return (
-    <div className={`soft-shell${railOpen ? ' is-drawer-open' : ''}${scrolled ? ' is-scrolled' : ''}`}>
+    <div
+      className={`soft-shell${railOpen ? ' is-drawer-open' : ''}${railExpanded ? ' is-rail-expanded' : ''}${scrolled ? ' is-scrolled' : ''}`}
+    >
       <header className={`soft-topbar${scrolled ? ' is-scrolled' : ''}`}>
         <button
           type="button"
@@ -683,6 +702,17 @@ export function AppShell() {
             <X size={18} />
           </button>
         </div>
+        <button
+          type="button"
+          className="soft-rail-expand soft-rail-link"
+          aria-label={railExpanded ? 'Collapse menu' : 'Expand menu'}
+          aria-expanded={railExpanded}
+          title={railExpanded ? 'Collapse menu' : 'Expand menu'}
+          onClick={() => setRailExpanded((v) => !v)}
+        >
+          {railExpanded ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+          <span className="soft-rail-label">{railExpanded ? 'Collapse' : 'Expand'}</span>
+        </button>
         {railItems.map((item) => {
           const Icon = item.icon
           return (

@@ -162,6 +162,7 @@ img {
   grid-template-areas:
     "topbar topbar"
     "rail main";
+  transition: grid-template-columns 0.22s var(--ease);
 }
 
 .soft-topbar {
@@ -277,8 +278,9 @@ img {
   position: sticky;
   top: calc(var(--topbar-h) + var(--top-bar-gap) + 8px);
   height: calc(100vh - var(--topbar-h) - var(--top-bar-gap) - 24px);
-  width: calc(var(--rail-w) - 10px);
-  margin: 0 0 12px 10px;
+  width: auto;
+  min-width: 0;
+  margin: 0 8px 12px 8px;
   padding: 12px 6px;
   display: flex;
   flex-direction: column;
@@ -292,12 +294,8 @@ img {
   -webkit-backdrop-filter: blur(16px) saturate(1.15);
   overflow-x: hidden;
   overflow-y: auto;
-  z-index: 80;
-  transition:
-    width 0.2s var(--ease),
-    padding 0.2s var(--ease),
-    background 0.2s var(--ease),
-    box-shadow 0.2s var(--ease);
+  z-index: 40;
+  transition: padding 0.22s var(--ease), background 0.22s var(--ease);
 }
 
 .soft-rail-link {
@@ -313,6 +311,11 @@ img {
   padding: 0 12px;
   color: var(--text-secondary);
   position: relative;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
   transition: background 0.15s var(--ease), color 0.15s var(--ease);
 }
 
@@ -333,9 +336,14 @@ img {
   flex-shrink: 0;
 }
 
-/* Hide floating tip tooltips — labels show on rail expand instead */
+/* Labels replace floating tooltips when the rail is expanded */
 .soft-rail-link[data-tip]::after {
   display: none;
+}
+
+.soft-rail-expand {
+  display: none;
+  margin-bottom: 4px;
 }
 
 .soft-rail-spacer {
@@ -352,10 +360,24 @@ img {
   margin: 0;
 }
 
-/* Desktop: expand labels only while the pointer is over the rail */
+/* Desktop: click-to-expand only — never expand on hover (avoids overlapping content) */
 @media (min-width: 961px) {
+  .soft-shell.is-rail-expanded {
+    grid-template-columns: var(--rail-expanded-w) 1fr;
+  }
+
+  .soft-rail-expand {
+    display: flex;
+  }
+
+  .soft-shell.is-rail-expanded .soft-rail {
+    padding: 12px 8px;
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  /* Collapsed: labels fully gone — hover must not reveal them */
   .soft-rail-label {
-    display: inline;
+    display: none !important;
     flex: 1;
     min-width: 0;
     font-size: 0.8125rem;
@@ -365,20 +387,15 @@ img {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s var(--ease);
   }
 
+  .soft-shell.is-rail-expanded .soft-rail-label {
+    display: inline !important;
+  }
+
+  /* Guard: hover must never widen the rail over page content */
   .soft-rail:hover {
-    width: var(--rail-expanded-w);
-    padding: 12px 8px;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: 10px 10px 32px rgba(16, 20, 26, 0.12);
-  }
-
-  .soft-rail:hover .soft-rail-label {
-    opacity: 1;
+    width: auto;
   }
 }
 
