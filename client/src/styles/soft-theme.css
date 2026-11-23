@@ -72,8 +72,8 @@
   --shadow-md: 0 8px 24px rgba(17, 24, 39, 0.06), 0 2px 6px rgba(17, 24, 39, 0.04);
   --shadow-lg: 0 16px 40px rgba(17, 24, 39, 0.08);
 
-  --rail-w: 64px;
-  --rail-expanded-w: 220px;
+  --rail-w: 72px;
+  --rail-expanded-w: 228px;
   --topbar-h: 52px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
@@ -281,11 +281,11 @@ img {
   width: auto;
   min-width: 0;
   margin: 0 8px 12px 8px;
-  padding: 12px 6px;
+  padding: 10px 0;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  gap: 4px;
+  align-items: center;
+  gap: 2px;
   border-radius: 18px;
   background: var(--bg-rail);
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -295,20 +295,21 @@ img {
   overflow-x: hidden;
   overflow-y: auto;
   z-index: 40;
-  transition: padding 0.22s var(--ease), background 0.22s var(--ease);
+  transition: padding 0.22s var(--ease), background 0.22s var(--ease), align-items 0.22s var(--ease);
 }
 
 .soft-rail-link {
-  width: 100%;
-  height: 42px;
-  min-height: 42px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   flex-shrink: 0;
-  border-radius: 12px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  padding: 0 12px;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
   color: var(--text-secondary);
   position: relative;
   border: none;
@@ -316,7 +317,8 @@ img {
   cursor: pointer;
   font: inherit;
   text-align: left;
-  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+  box-sizing: border-box;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease), border-radius 0.22s var(--ease), width 0.22s var(--ease);
 }
 
 .soft-rail-link:hover {
@@ -334,6 +336,7 @@ img {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  display: block;
 }
 
 /* Labels replace floating tooltips when the rail is expanded */
@@ -343,12 +346,13 @@ img {
 
 .soft-rail-expand {
   display: none;
-  margin-bottom: 4px;
+  margin: 0 0 6px;
 }
 
 .soft-rail-spacer {
   flex: 1;
   min-height: 8px;
+  width: 100%;
 }
 
 .soft-main {
@@ -370,11 +374,6 @@ img {
     display: flex;
   }
 
-  .soft-shell.is-rail-expanded .soft-rail {
-    padding: 12px 8px;
-    background: rgba(255, 255, 255, 0.72);
-  }
-
   /* Collapsed: labels fully gone — hover must not reveal them */
   .soft-rail-label {
     display: none !important;
@@ -387,6 +386,23 @@ img {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .soft-shell.is-rail-expanded .soft-rail {
+    align-items: stretch;
+    padding: 12px 8px;
+    background: rgba(255, 255, 255, 0.72);
+  }
+
+  .soft-shell.is-rail-expanded .soft-rail-link {
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    min-height: 42px;
+    border-radius: 12px;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 0 12px;
   }
 
   .soft-shell.is-rail-expanded .soft-rail-label {
