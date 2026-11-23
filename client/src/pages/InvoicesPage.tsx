@@ -536,32 +536,35 @@ export default function InvoicesPage() {
         </div>
       )}
 
-      <div className="products-toolbar">
-        <input
-          type="search"
-          placeholder="Invoice #, client, contract, shipment…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          aria-label="Filter by status"
-          style={{
-            height: 38,
-            borderRadius: 10,
-            border: '1px solid var(--border-default)',
-            background: 'var(--bg-elevated)',
-            padding: '0 12px',
-          }}
-        >
-          <option value="">All statuses</option>
-          {INVOICE_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+      <div className="products-toolbar list-toolbar">
+        <div className="toolbar-row">
+          <div className="toolbar-group toolbar-search">
+            <label htmlFor="invoiceSearch">Search</label>
+            <input
+              id="invoiceSearch"
+              type="search"
+              placeholder="Invoice #, client, contract, shipment…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="toolbar-group toolbar-compact">
+            <label htmlFor="invoiceStatusFilter">Status</label>
+            <select
+              id="invoiceStatusFilter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label="Filter by status"
+            >
+              <option value="">All statuses</option>
+              {INVOICE_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       {loading ? (

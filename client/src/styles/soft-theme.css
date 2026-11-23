@@ -2262,7 +2262,7 @@ th.checkbox-col input {
   flex-direction: column;
   gap: 4px;
   min-width: 160px;
-  flex: 1;
+  flex: 1 1 160px; /* grow horizontally on desktop; never stretch tall on mobile */
 }
 
 .toolbar-group label {
@@ -2554,10 +2554,18 @@ th.checkbox-col input {
 
   .toolbar-row {
     flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
 
   .toolbar-group {
+    flex: 0 0 auto;
     min-width: 0;
+    width: 100%;
+  }
+
+  .toolbar-actions {
+    margin-left: 0;
     width: 100%;
   }
 
@@ -3526,7 +3534,7 @@ th.checkbox-col input {
   margin-top: 2px;
 }
 
-/* —— Unified form / toolbar / control alignment —— */
+/* —— Unified form / toolbar / control alignment (desktop-first) —— */
 :root {
   --control-h: 40px;
   --control-radius: 12px;
@@ -3558,15 +3566,24 @@ th.checkbox-col input {
 .soft-main .toolbar-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
+  flex: 1 1 160px;
+}
+
+.soft-main .toolbar-group.toolbar-compact {
+  flex: 0 1 180px;
+}
+
+.soft-main .toolbar-group.toolbar-search {
+  flex: 2 1 220px;
 }
 
 .soft-main .toolbar-group label,
 .soft-main .field > label,
-.soft-main .form-container label:not(.checkbox-row):not(.access-action-item) {
+.soft-main .form-container label:not(.checkbox-row):not(.access-action-item):not(.client-checkbox-item):not(.select-all-row) {
   display: block;
-  margin: 0;
+  margin: 0 0 4px;
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -3579,6 +3596,8 @@ th.checkbox-col input {
 .soft-main .list-toolbar input[type='search'],
 .soft-main .list-toolbar input[type='text'],
 .soft-main .list-toolbar select,
+.soft-main .products-toolbar > input,
+.soft-main .products-toolbar > select,
 .soft-main .filter-bar input:not([type='checkbox']):not([type='radio']),
 .soft-main .filter-bar select,
 .soft-main .field input:not([type='checkbox']):not([type='radio']),
@@ -3615,7 +3634,7 @@ th.checkbox-col input {
 .soft-main .inv-form-row textarea {
   width: 100%;
   box-sizing: border-box;
-  min-height: 96px;
+  min-height: 88px;
   height: auto;
   margin: 0;
   padding: 10px 12px;
@@ -3639,10 +3658,12 @@ th.checkbox-col input {
   gap: 8px;
 }
 
-.soft-main .toolbar-actions {
-  align-items: flex-end;
-  margin-left: auto;
-  flex-shrink: 0;
+@media (min-width: 961px) {
+  .soft-main .toolbar-actions {
+    align-items: flex-end;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
 }
 
 .soft-main .toolbar-actions .btn,
@@ -3677,14 +3698,6 @@ th.checkbox-col input {
   opacity: 0.4;
 }
 
-.soft-main .form-container .form-row,
-.soft-main .sc-form-row,
-.soft-main .ind-form-row,
-.soft-main .sh-form-row,
-.soft-main .inv-form-row {
-  align-items: start;
-}
-
 .soft-main .form-container .form-row > div,
 .soft-main .sc-form-row > div,
 .soft-main .ind-form-row > div,
@@ -3693,29 +3706,258 @@ th.checkbox-col input {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .soft-main .form-container .form-row > div > label,
 .soft-main .sc-form-row > div > label,
 .soft-main .ind-form-row > div > label,
 .soft-main .sh-form-row > div > label,
-.soft-main .inv-form-row > div > label {
+.soft-main .inv-form-row > div > label,
+.soft-main .quotation-client-box > label {
   margin: 0;
 }
 
+/* —— Mobile density + alignment overhaul —— */
 @media (max-width: 960px) {
-  .soft-main .toolbar-actions {
-    margin-left: 0;
-    width: 100%;
+  :root {
+    --control-h: 44px;
+    --top-bar-gap: max(6px, env(safe-area-inset-top, 0px));
+    --top-bar-inset: max(8px, env(safe-area-inset-left, 0px));
   }
 
+  .soft-main {
+    padding:
+      8px
+      max(10px, env(safe-area-inset-right, 0px))
+      max(28px, calc(16px + env(safe-area-inset-bottom, 0px)))
+      max(10px, env(safe-area-inset-left, 0px)) !important;
+  }
+
+  .soft-topbar {
+    margin-left: max(8px, env(safe-area-inset-left, 0px));
+    margin-right: max(8px, env(safe-area-inset-right, 0px));
+    gap: 8px;
+    padding: 0 8px 0 6px;
+  }
+
+  .page-header {
+    margin-bottom: 10px !important;
+    gap: 8px !important;
+  }
+
+  .page-header h1 {
+    font-size: 1.25rem !important;
+    line-height: 1.2;
+  }
+
+  .page-lede {
+    margin-top: 2px !important;
+    font-size: 0.78rem;
+    max-width: none;
+  }
+
+  .page-actions,
+  .soft-main .page-actions,
+  .soft-main .header-actions {
+    width: 100%;
+    margin: 0;
+  }
+
+  .page-actions .btn,
+  .soft-main .page-actions .btn {
+    width: 100%;
+    min-height: var(--control-h);
+    height: var(--control-h);
+  }
+
+  .products-toolbar,
+  .suppliers-toolbar,
+  .clients-toolbar,
+  .list-toolbar,
+  .soft-main .list-toolbar,
+  .soft-main .products-toolbar,
+  .soft-main .suppliers-toolbar,
+  .soft-main .clients-toolbar,
+  .soft-main .quotes-toolbar,
+  .soft-main .sales-toolbar,
+  .soft-main .com-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 10px !important;
+    margin-bottom: 10px !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .toolbar-row,
+  .soft-main .toolbar-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  .toolbar-group,
+  .soft-main .toolbar-group,
+  .soft-main .toolbar-group.toolbar-compact,
+  .soft-main .toolbar-group.toolbar-search {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    gap: 4px !important;
+  }
+
+  .toolbar-actions,
+  .soft-main .toolbar-actions {
+    display: flex !important;
+    margin: 4px 0 0 !important;
+    width: 100% !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+
+  .toolbar-actions .btn,
+  .toolbar-actions .toolbar-cta,
   .soft-main .toolbar-actions .btn,
   .soft-main .toolbar-actions .toolbar-cta,
-  .soft-main .page-actions .btn,
   .soft-main .form-actions .btn {
+    width: 100%;
     flex: 1 1 auto;
-    min-height: 44px;
-    height: 44px;
+    min-height: var(--control-h);
+    height: var(--control-h);
+  }
+
+  .products-toolbar > input,
+  .products-toolbar > select,
+  .products-toolbar input:not([type='checkbox']):not([type='radio']),
+  .products-toolbar select,
+  .list-toolbar input:not([type='checkbox']):not([type='radio']),
+  .list-toolbar select,
+  .toolbar-group input:not([type='checkbox']):not([type='radio']),
+  .toolbar-group select {
+    width: 100% !important;
+    max-width: 100% !important;
+    align-self: stretch !important;
+    min-height: var(--control-h) !important;
+    height: var(--control-h) !important;
+  }
+
+  .bulk-actions,
+  .soft-main .bulk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: stretch;
+    margin-bottom: 10px;
+    padding: 0;
+  }
+
+  .bulk-actions .btn,
+  .bulk-actions .btn-secondary,
+  .soft-main .bulk-actions .btn {
+    flex: 1 1 calc(33.33% - 6px);
+    min-width: 96px;
+    margin: 0;
+  }
+
+  .selected-count {
+    width: 100% !important;
+    text-align: left !important;
+    margin: 0 !important;
+    padding: 0 2px;
+  }
+
+  .form-container {
+    padding: 12px !important;
+    margin-bottom: 12px;
+  }
+
+  .form-container .form-row,
+  .sc-form-row,
+  .ind-form-row,
+  .sh-form-row,
+  .inv-form-row,
+  .form-row-2,
+  .soft-main .form-container .form-row,
+  .soft-main .sc-form-row,
+  .soft-main .ind-form-row,
+  .soft-main .sh-form-row,
+  .soft-main .inv-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .form-container .form-row > div > label,
+  .form-container > form > label,
+  .quotation-client-box > label,
+  .sc-form-row > div > label,
+  .ind-form-row > div > label,
+  .sh-form-row > div > label,
+  .inv-form-row > div > label,
+  .soft-main .form-container label:not(.checkbox-row):not(.access-action-item):not(.client-checkbox-item):not(.select-all-row) {
+    margin-top: 0 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .quotation-client-box,
+  .client-select-wrap {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .client-select-wrap {
+    max-height: 200px;
+  }
+
+  .kpi-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px !important;
+    margin-bottom: 10px;
+  }
+
+  .kpi-card {
+    padding: 12px !important;
+    min-height: 0 !important;
+  }
+
+  .table-wrap,
+  .products-table-wrap,
+  .suppliers-table-wrap,
+  .clients-table-wrap {
+    margin-top: 0;
+    min-height: 0 !important;
+  }
+
+  .table-wrap tbody tr.mobile-empty-row td,
+  table.data tbody tr.mobile-empty-row td,
+  .empty-state,
+  td.empty-state {
+    padding: 14px 12px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    text-align: left !important;
+  }
+
+  .dash-inbox,
+  .sugar-assign-workspace,
+  .dash-ops,
+  .card,
+  .panel {
+    padding: 12px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .soft-main .form-actions {
+    width: 100%;
+    margin-top: 8px;
   }
 }
