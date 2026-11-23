@@ -52,7 +52,6 @@ export function AccessUnlockPanel({
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
 
-  const [unlockOpen, setUnlockOpen] = useState(false)
   const [adminUser, setAdminUser] = useState('')
   const [adminPass, setAdminPass] = useState('')
   const [unlockMins, setUnlockMins] = useState(15)
@@ -233,56 +232,49 @@ export function AccessUnlockPanel({
       <div className="form-section">
         <div className="form-section-title">2. Admin unlock on this machine</div>
         <p className="form-hint">
-          Admin enters their password. Only the selected page and options unlock, then the timer ends and access is
-          removed.
+          Admin enters username + password and picks how long access lasts. Only the selected page and options unlock;
+          when the timer ends, access is removed automatically.
         </p>
-        {!unlockOpen ? (
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => setUnlockOpen(true)}>
-            Unlock with admin password
-          </button>
-        ) : (
-          <div className="form-grid">
-            <div className="field">
-              <label htmlFor="ul-user">Admin username</label>
-              <input
-                id="ul-user"
-                name="admin-unlock-user"
-                value={adminUser}
-                onChange={(e) => setAdminUser(e.target.value)}
-                autoComplete="off"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="ul-pass">Admin password</label>
-              <input
-                id="ul-pass"
-                name="admin-unlock-pass"
-                type="password"
-                value={adminPass}
-                onChange={(e) => setAdminPass(e.target.value)}
-                autoComplete="new-password"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="ul-mins">Minutes</label>
-              <select id="ul-mins" value={unlockMins} onChange={(e) => setUnlockMins(Number(e.target.value))}>
-                {UNLOCK_DURATIONS.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-actions span-2">
-              <button type="button" className="btn btn-sm" disabled={unlocking} onClick={() => void doUnlock()}>
-                {unlocking ? 'Unlocking…' : 'Unlock selected scope'}
-              </button>
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setUnlockOpen(false)}>
-                Cancel
-              </button>
-            </div>
+        <div className="form-grid">
+          <div className="field">
+            <label htmlFor="ul-user">Admin username</label>
+            <input
+              id="ul-user"
+              name="admin-unlock-user"
+              value={adminUser}
+              onChange={(e) => setAdminUser(e.target.value)}
+              autoComplete="off"
+              placeholder="Admin username"
+            />
           </div>
-        )}
+          <div className="field">
+            <label htmlFor="ul-pass">Admin password</label>
+            <input
+              id="ul-pass"
+              name="admin-unlock-pass"
+              type="password"
+              value={adminPass}
+              onChange={(e) => setAdminPass(e.target.value)}
+              autoComplete="new-password"
+              placeholder="Admin password"
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="ul-mins">Time limit</label>
+            <select id="ul-mins" value={unlockMins} onChange={(e) => setUnlockMins(Number(e.target.value))}>
+              {UNLOCK_DURATIONS.map((m) => (
+                <option key={m} value={m}>
+                  {m} minutes
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-actions span-2">
+            <button type="button" className="btn btn-sm" disabled={unlocking} onClick={() => void doUnlock()}>
+              {unlocking ? 'Unlocking…' : 'Unlock for selected time'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   )

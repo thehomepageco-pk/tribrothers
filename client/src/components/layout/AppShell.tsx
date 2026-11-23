@@ -505,6 +505,23 @@ export function AppShell() {
             </Link>
           )}
 
+          {!isAdmin ? (
+            <button
+              type="button"
+              className={`soft-icon-btn soft-access-btn${timedActive ? ' is-active' : ''}`}
+              aria-label={timedActive ? 'Manage timed access' : 'Request or unlock access'}
+              title={timedActive ? 'Manage timed access' : 'Request or unlock access'}
+              onClick={() => {
+                setAccessModal({ open: true, permission: 'canEdit' })
+                setNotifOpen(false)
+                setProfileOpen(false)
+                setSearchOpen(false)
+              }}
+            >
+              {timedActive ? <Unlock size={17} /> : <ShieldAlert size={17} />}
+            </button>
+          ) : null}
+
           <div ref={notifRef} className="soft-pop-wrap">
             <button
               type="button"
@@ -744,6 +761,21 @@ export function AppShell() {
           )
         })}
         <div className="soft-rail-spacer" />
+        {!isAdmin ? (
+          <button
+            type="button"
+            className="soft-rail-link"
+            data-tip={timedActive ? 'Manage access' : 'Request access'}
+            aria-label={timedActive ? 'Manage timed access' : 'Request or unlock access'}
+            onClick={() => {
+              setRailOpen(false)
+              setAccessModal({ open: true, permission: 'canEdit' })
+            }}
+          >
+            {timedActive ? <Unlock size={18} /> : <ShieldAlert size={18} />}
+            <span className="soft-rail-label">{timedActive ? 'Manage access' : 'Request access'}</span>
+          </button>
+        ) : null}
         <button
           type="button"
           className="soft-rail-link"
@@ -761,9 +793,12 @@ export function AppShell() {
 
       <main className="soft-main">
         <TimedAccessBanner />
-        {!isAdmin && !canEdit && !timedActive ? (
+        {!isAdmin && !timedActive ? (
           <div className="staff-access-nudge">
-            <span>Need to edit or open a locked page?</span>
+            <div className="staff-access-nudge-copy">
+              <strong>Need restricted access?</strong>
+              <span>Ask an admin to approve a timed request, or unlock this device with their password.</span>
+            </div>
             <button
               type="button"
               className="btn btn-secondary btn-sm"
@@ -875,6 +910,7 @@ export function AppShell() {
       {accessModal.open ? (
         <Modal
           title="Request or unlock access"
+          large
           onClose={() => setAccessModal((s) => ({ ...s, open: false }))}
         >
           <AccessUnlockPanel
