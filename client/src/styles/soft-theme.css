@@ -279,11 +279,11 @@ img {
   height: calc(100vh - var(--topbar-h) - var(--top-bar-gap) - 24px);
   width: calc(var(--rail-w) - 10px);
   margin: 0 0 12px 10px;
-  padding: 14px 8px;
+  padding: 12px 6px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  align-items: stretch;
+  gap: 4px;
   border-radius: 18px;
   background: var(--bg-rail);
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -292,32 +292,28 @@ img {
   -webkit-backdrop-filter: blur(16px) saturate(1.15);
   overflow-x: hidden;
   overflow-y: auto;
-  z-index: 90;
+  z-index: 80;
   transition:
-    width 0.22s var(--ease),
-    padding 0.22s var(--ease),
-    align-items 0.22s var(--ease),
-    box-shadow 0.22s var(--ease),
-    background 0.22s var(--ease);
+    width 0.2s var(--ease),
+    padding 0.2s var(--ease),
+    background 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
 }
 
 .soft-rail-link {
-  width: 42px;
+  width: 100%;
   height: 42px;
+  min-height: 42px;
   flex-shrink: 0;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 12px;
   color: var(--text-secondary);
   position: relative;
-  transition:
-    background 0.15s var(--ease),
-    color 0.15s var(--ease),
-    transform 0.15s var(--ease),
-    width 0.22s var(--ease),
-    border-radius 0.22s var(--ease),
-    padding 0.22s var(--ease),
-    gap 0.22s var(--ease);
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
 }
 
 .soft-rail-link:hover {
@@ -337,32 +333,14 @@ img {
   flex-shrink: 0;
 }
 
+/* Hide floating tip tooltips — labels show on rail expand instead */
 .soft-rail-link[data-tip]::after {
-  content: attr(data-tip);
-  position: absolute;
-  left: calc(100% + 10px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--text);
-  color: #fff;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 5px 9px;
-  border-radius: 8px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s var(--ease);
-  z-index: 60;
-}
-
-.soft-rail-link:hover::after,
-.soft-rail-link:focus-visible::after {
-  opacity: 1;
+  display: none;
 }
 
 .soft-rail-spacer {
   flex: 1;
+  min-height: 8px;
 }
 
 .soft-main {
@@ -374,33 +352,12 @@ img {
   margin: 0;
 }
 
-/* Desktop: hover / keyboard focus expands rail with page names */
+/* Desktop: expand labels only while the pointer is over the rail */
 @media (min-width: 961px) {
-  .soft-rail:hover,
-  .soft-rail:focus-within {
-    width: var(--rail-expanded-w);
-    align-items: stretch;
-    padding: 14px 10px;
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 12px 8px 36px rgba(16, 20, 26, 0.12);
-  }
-
-  .soft-rail:hover .soft-rail-link,
-  .soft-rail:focus-within .soft-rail-link {
-    width: 100%;
-    height: 42px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 12px;
-    padding: 0 12px;
-    place-items: unset;
-  }
-
-  .soft-rail:hover .soft-rail-label,
-  .soft-rail:focus-within .soft-rail-label {
+  .soft-rail-label {
     display: inline;
+    flex: 1;
+    min-width: 0;
     font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: -0.01em;
@@ -408,11 +365,20 @@ img {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s var(--ease);
   }
 
-  .soft-rail:hover .soft-rail-link[data-tip]::after,
-  .soft-rail:focus-within .soft-rail-link[data-tip]::after {
-    display: none;
+  .soft-rail:hover {
+    width: var(--rail-expanded-w);
+    padding: 12px 8px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 10px 10px 32px rgba(16, 20, 26, 0.12);
+  }
+
+  .soft-rail:hover .soft-rail-label {
+    opacity: 1;
   }
 }
 
@@ -2475,6 +2441,8 @@ th.checkbox-col input {
 
   .soft-rail-label {
     display: inline;
+    opacity: 1;
+    pointer-events: auto;
     font-size: 0.9rem;
     font-weight: 600;
     color: inherit;
