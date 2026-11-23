@@ -151,6 +151,9 @@ export function AppShell() {
       return false
     }
   })
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(min-width: 961px)').matches : true,
+  )
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [hits, setHits] = useState<SearchHit[]>([])
@@ -248,6 +251,14 @@ export function AppShell() {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
+  }, [])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 961px)')
+    const apply = () => setIsDesktop(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
   }, [])
 
   const topItems = useMemo(
@@ -702,17 +713,19 @@ export function AppShell() {
             <X size={18} />
           </button>
         </div>
-        <button
-          type="button"
-          className="soft-rail-expand soft-rail-link"
-          aria-label={railExpanded ? 'Collapse menu' : 'Expand menu'}
-          aria-expanded={railExpanded}
-          title={railExpanded ? 'Collapse menu' : 'Expand menu'}
-          onClick={() => setRailExpanded((v) => !v)}
-        >
-          {railExpanded ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
-          <span className="soft-rail-label">{railExpanded ? 'Collapse' : 'Expand'}</span>
-        </button>
+        {isDesktop ? (
+          <button
+            type="button"
+            className="soft-rail-expand soft-rail-link"
+            aria-label={railExpanded ? 'Collapse menu' : 'Expand menu'}
+            aria-expanded={railExpanded}
+            title={railExpanded ? 'Collapse menu' : 'Expand menu'}
+            onClick={() => setRailExpanded((v) => !v)}
+          >
+            {railExpanded ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+            <span className="soft-rail-label">{railExpanded ? 'Collapse' : 'Expand'}</span>
+          </button>
+        ) : null}
         {railItems.map((item) => {
           const Icon = item.icon
           return (

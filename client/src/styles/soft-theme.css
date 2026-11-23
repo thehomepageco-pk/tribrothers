@@ -2468,14 +2468,21 @@ th.checkbox-col input {
     color: var(--text-secondary);
   }
 
+  /* Desktop-only control — must beat .soft-rail-link { display:flex } */
+  .soft-rail-expand,
+  .soft-rail-expand.soft-rail-link {
+    display: none !important;
+  }
+
   .soft-rail-link[data-tip]::after {
     display: none !important;
   }
 
   .soft-rail-label {
-    display: inline;
+    display: inline !important;
     opacity: 1;
     pointer-events: auto;
+    max-width: none;
     font-size: 0.9rem;
     font-weight: 600;
     color: inherit;
@@ -2797,6 +2804,24 @@ th.checkbox-col input {
     flex: 1 1 calc(50% - 4px);
     min-height: 44px;
     justify-content: center;
+  }
+
+  .dash-inbox-head,
+  .sugar-journey-head,
+  .dash-ops-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dash-inbox-actions {
+    width: 100%;
+  }
+
+  .dash-inbox-actions .btn,
+  .dash-inbox-actions .btn-secondary {
+    flex: 1 1 auto;
+    min-height: 44px;
+    height: 44px;
   }
 
   .dash-inbox-list {
@@ -3328,6 +3353,35 @@ th.checkbox-col input {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  flex-shrink: 0;
+}
+
+.dash-inbox-actions .btn,
+.dash-inbox-actions .btn-secondary,
+.dash-inbox-actions button {
+  visibility: visible !important;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-weight: 650;
+  font-size: 12px;
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+  border: 1px solid rgba(17, 24, 39, 0.28) !important;
+  box-shadow: none;
+  opacity: 1;
+}
+
+.dash-inbox-actions .btn:disabled,
+.dash-inbox-actions .btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dash-inbox-actions .btn:hover:not(:disabled),
+.dash-inbox-actions .btn-secondary:hover:not(:disabled) {
+  background: #e5e7eb !important;
 }
 
 /* Desktop: solid header when scrolled so content doesn’t show through glass */
@@ -3470,4 +3524,198 @@ th.checkbox-col input {
   font-size: 0.72rem;
   color: var(--text-muted);
   margin-top: 2px;
+}
+
+/* —— Unified form / toolbar / control alignment —— */
+:root {
+  --control-h: 40px;
+  --control-radius: 12px;
+}
+
+.soft-main .list-toolbar,
+.soft-main .products-toolbar,
+.soft-main .suppliers-toolbar,
+.soft-main .clients-toolbar,
+.soft-main .quotes-toolbar,
+.soft-main .sales-toolbar,
+.soft-main .com-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.soft-main .toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+  align-items: flex-end;
+}
+
+.soft-main .toolbar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.soft-main .toolbar-group label,
+.soft-main .field > label,
+.soft-main .form-container label:not(.checkbox-row):not(.access-action-item) {
+  display: block;
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.soft-main .toolbar-group input:not([type='checkbox']):not([type='radio']),
+.soft-main .toolbar-group select,
+.soft-main .list-toolbar input[type='search'],
+.soft-main .list-toolbar input[type='text'],
+.soft-main .list-toolbar select,
+.soft-main .filter-bar input:not([type='checkbox']):not([type='radio']),
+.soft-main .filter-bar select,
+.soft-main .field input:not([type='checkbox']):not([type='radio']),
+.soft-main .field select,
+.soft-main .form-container input:not([type='checkbox']):not([type='radio']),
+.soft-main .form-container select,
+.soft-main .sc-form-row input:not([type='checkbox']):not([type='radio']),
+.soft-main .sc-form-row select,
+.soft-main .ind-form-row input:not([type='checkbox']):not([type='radio']),
+.soft-main .ind-form-row select,
+.soft-main .sh-form-row input:not([type='checkbox']):not([type='radio']),
+.soft-main .sh-form-row select,
+.soft-main .inv-form-row input:not([type='checkbox']):not([type='radio']),
+.soft-main .inv-form-row select {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--control-h);
+  height: var(--control-h);
+  margin: 0;
+  padding: 0 12px;
+  border-radius: var(--control-radius);
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--text);
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.soft-main .field textarea,
+.soft-main .form-container textarea,
+.soft-main .sc-form-row textarea,
+.soft-main .ind-form-row textarea,
+.soft-main .sh-form-row textarea,
+.soft-main .inv-form-row textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 96px;
+  height: auto;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--control-radius);
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--text);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.soft-main .toolbar-actions,
+.soft-main .page-actions,
+.soft-main .header-actions,
+.soft-main .bulk-actions,
+.soft-main .form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.soft-main .toolbar-actions {
+  align-items: flex-end;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.soft-main .toolbar-actions .btn,
+.soft-main .toolbar-actions .toolbar-cta,
+.soft-main .list-toolbar .toolbar-actions .btn,
+.soft-main .page-actions .btn,
+.soft-main .header-actions .btn,
+.soft-main .form-actions .btn,
+.soft-main .bulk-actions .btn,
+.soft-main .bulk-actions .btn-secondary {
+  box-sizing: border-box;
+  height: var(--control-h);
+  min-height: var(--control-h);
+  padding: 0 16px;
+  border-radius: var(--control-radius);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  visibility: visible !important;
+}
+
+.soft-main .bulk-actions .btn,
+.soft-main .bulk-actions .btn-secondary,
+.soft-main .bulk-actions a.btn {
+  background: #fff !important;
+  color: #111827 !important;
+  border: 1px solid rgba(17, 24, 39, 0.22) !important;
+  opacity: 1;
+}
+
+.soft-main .bulk-actions .btn:disabled,
+.soft-main .bulk-actions a.btn.is-disabled {
+  opacity: 0.4;
+}
+
+.soft-main .form-container .form-row,
+.soft-main .sc-form-row,
+.soft-main .ind-form-row,
+.soft-main .sh-form-row,
+.soft-main .inv-form-row {
+  align-items: start;
+}
+
+.soft-main .form-container .form-row > div,
+.soft-main .sc-form-row > div,
+.soft-main .ind-form-row > div,
+.soft-main .sh-form-row > div,
+.soft-main .inv-form-row > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.soft-main .form-container .form-row > div > label,
+.soft-main .sc-form-row > div > label,
+.soft-main .ind-form-row > div > label,
+.soft-main .sh-form-row > div > label,
+.soft-main .inv-form-row > div > label {
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .soft-main .toolbar-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .soft-main .toolbar-actions .btn,
+  .soft-main .toolbar-actions .toolbar-cta,
+  .soft-main .page-actions .btn,
+  .soft-main .form-actions .btn {
+    flex: 1 1 auto;
+    min-height: 44px;
+    height: 44px;
+  }
 }
