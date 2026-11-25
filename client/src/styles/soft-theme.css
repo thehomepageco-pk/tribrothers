@@ -581,14 +581,45 @@ a.btn {
 .btn-secondary,
 .action-btn.secondary,
 a.btn-secondary {
-  background: #fff !important;
+  background: #f3f4f6 !important;
   color: #111827 !important;
-  border: 1px solid rgba(17, 24, 39, 0.22) !important;
+  border: 1px solid rgba(17, 24, 39, 0.28) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .btn-secondary:hover,
 a.btn-secondary:hover {
-  background: #f3f4f6 !important;
+  background: #e5e7eb !important;
+}
+
+.btn-sm.btn-secondary,
+.bulk-actions .btn-sm {
+  min-height: 34px;
+  height: 34px;
+  padding: 0 12px;
+  font-weight: 650;
+}
+
+/* High-contrast Import CTA in toolbars */
+.btn-import,
+button.btn-import {
+  background: #fff !important;
+  color: #111827 !important;
+  border: 1.5px solid #111827 !important;
+  box-shadow: none;
+  font-weight: 700;
+  height: var(--control-h, 40px);
+  min-height: var(--control-h, 40px);
+  padding: 0 16px;
+  border-radius: var(--control-radius, 12px);
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.btn-import:hover {
+  background: #111827 !important;
+  color: #fff !important;
 }
 
 .btn.is-disabled,
@@ -873,6 +904,106 @@ a.btn.is-disabled {
 
 .quotation-client-box .client-actions {
   margin-top: 4px;
+}
+
+.quotation-client-box .client-actions .action-btn,
+.quotation-client-box .client-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Quotation create form — stable stacked layout */
+#quotationFormWrap.form-container {
+  padding: 16px 18px 18px;
+}
+
+#quotationForm .form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  align-items: start;
+  margin-top: 0;
+}
+
+#quotationForm .form-row + .form-row {
+  margin-top: 14px;
+}
+
+#quotationForm .form-row > div,
+#quotationForm .quotation-client-box {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#quotationForm .form-row > div > label,
+#quotationForm .quotation-client-box > label {
+  margin: 0 !important;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+#quotationForm input:not([type='checkbox']),
+#quotationForm select,
+#quotationForm textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  padding: 0 12px;
+  background: #fff;
+}
+
+#quotationForm .quotation-client-search {
+  height: 40px;
+}
+
+#quotationForm .client-select-wrap {
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: #fff;
+}
+
+#quotationForm .email-check-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 12px;
+}
+
+#quotationForm .email-check-row label {
+  margin: 0 !important;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+#quotationForm #sendQuotationBtn {
+  margin-top: 4px;
+}
+
+@media (min-width: 960px) {
+  #quotationForm .form-row.quote-row-main {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  }
+
+  #quotationForm .form-row.quote-row-pricing {
+    grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  }
+
+  #quotationForm .form-row.quote-row-meta {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .panel-title {
@@ -1160,10 +1291,11 @@ a.kpi-card:hover {
 }
 
 .selected-count {
-  margin-left: auto;
+  margin-left: 8px;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .selected-count.has-selection {
@@ -1204,10 +1336,11 @@ table.data thead th,
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
-  background: transparent;
+  background: var(--bg, #f6f7f9);
   border: none;
   position: sticky;
   top: 0;
+  z-index: 1;
   white-space: nowrap;
 }
 
@@ -1375,13 +1508,14 @@ table.data tbody td:last-child,
   display: block;
 }
 
-/* —— Modal —— */
+/* —— Modal —— (ported to document.body; keep above topbar/rail/sticky th) */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(17, 24, 39, 0.45);
-  backdrop-filter: blur(8px);
-  z-index: 220;
+  background: rgba(17, 24, 39, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10000 !important;
   display: grid;
   place-items: center;
   padding: 20px;
@@ -1393,8 +1527,11 @@ table.data tbody td:last-child,
   overflow: auto;
   background: #fff;
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28);
   border: 1px solid var(--border);
+  position: relative;
+  z-index: 10001;
+  isolation: isolate;
 }
 
 .modal-lg {
@@ -1411,12 +1548,17 @@ table.data tbody td:last-child,
   position: sticky;
   top: 0;
   background: #fff;
-  z-index: 2;
+  z-index: 5;
+  isolation: isolate;
 }
 
 .modal-header h2 {
+  margin: 0;
   font-size: 15px;
   font-weight: 700;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
 }
 
 .modal-close-btn {
@@ -3170,15 +3312,16 @@ th.checkbox-col input {
 .bulk-actions .btn,
 .bulk-actions .btn-secondary,
 .bulk-actions a.btn {
-  background: #fff !important;
+  background: #f3f4f6 !important;
   color: #111827 !important;
-  border: 1px solid rgba(17, 24, 39, 0.22) !important;
-  opacity: 1;
+  border: 1px solid rgba(17, 24, 39, 0.3) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .bulk-actions .btn:disabled,
 .bulk-actions a.btn.is-disabled {
-  opacity: 0.4;
+  opacity: 0.45 !important;
 }
 
 /* —— Row actions menu —— */
@@ -3723,15 +3866,24 @@ th.checkbox-col input {
 .soft-main .bulk-actions .btn,
 .soft-main .bulk-actions .btn-secondary,
 .soft-main .bulk-actions a.btn {
-  background: #fff !important;
+  background: #f3f4f6 !important;
   color: #111827 !important;
-  border: 1px solid rgba(17, 24, 39, 0.22) !important;
-  opacity: 1;
+  border: 1px solid rgba(17, 24, 39, 0.3) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .soft-main .bulk-actions .btn:disabled,
 .soft-main .bulk-actions a.btn.is-disabled {
-  opacity: 0.4;
+  opacity: 0.45 !important;
+}
+
+.soft-main .toolbar-actions .btn-import,
+.soft-main .list-toolbar .toolbar-actions .btn-import {
+  background: #fff !important;
+  color: #111827 !important;
+  border: 1.5px solid #111827 !important;
+  font-weight: 700;
 }
 
 .soft-main .form-container .form-row > div,
@@ -4002,13 +4154,24 @@ th.checkbox-col input {
 .entity-import-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+  position: relative;
+  z-index: 1;
+  background: #fff;
+}
+
+.entity-import-section {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #fafbfc;
 }
 
 .entity-import-section h3 {
   margin: 0 0 6px;
   font-size: 0.95rem;
   font-weight: 700;
+  color: var(--text);
 }
 
 .entity-import-help {
@@ -4026,7 +4189,7 @@ th.checkbox-col input {
   margin: 10px 0;
   padding: 10px 12px;
   border-radius: 12px;
-  background: #f8fafc;
+  background: #fff;
   border: 1px solid var(--border);
   font-size: 0.78rem;
 }
@@ -4036,6 +4199,7 @@ th.checkbox-col input {
   word-break: break-word;
   font-size: 0.72rem;
   color: var(--text);
+  background: transparent;
 }
 
 .entity-import-actions {
@@ -4043,6 +4207,14 @@ th.checkbox-col input {
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+}
+
+.entity-import-actions .btn,
+.entity-import-actions a.btn {
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 40px;
+  height: 40px;
 }
 
 .entity-import-details {
@@ -4054,4 +4226,123 @@ th.checkbox-col input {
   margin: 8px 0 0;
   padding-left: 18px;
   color: var(--text-secondary);
+}
+
+/* Reports period breakdown cards */
+.period-breakdown {
+  margin: 8px 0 28px;
+}
+
+.period-breakdown-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+
+.period-breakdown-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 750;
+}
+
+.period-breakdown-head p {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.period-breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.period-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.period-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.period-card-top strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.period-card-top span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.period-card-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.period-metric {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.period-metric small {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.period-metric b {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.period-card-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: #eef2f7;
+  overflow: hidden;
+}
+
+.period-card-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb, #111827);
+  min-width: 0;
+}
+
+.period-breakdown-empty {
+  padding: 28px 18px;
+  text-align: center;
+  border-radius: 16px;
+  border: 1px dashed var(--border-strong);
+  background: #fff;
+  color: var(--text-secondary);
+}
+
+.period-breakdown-empty strong {
+  display: block;
+  color: var(--text);
+  margin-bottom: 4px;
 }

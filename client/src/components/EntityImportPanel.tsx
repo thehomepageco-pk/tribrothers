@@ -96,17 +96,17 @@ export function EntityImportPanel({
 
   return (
     <>
-      <button type="button" className="btn btn-secondary btn-sm" onClick={() => setOpen(true)}>
+      <button type="button" className="btn btn-import" onClick={() => setOpen(true)}>
         Import
       </button>
       {open ? (
         <Modal title={`Import ${label}`} large onClose={() => setOpen(false)}>
           <div className="entity-import-panel">
             <section className="entity-import-section">
-              <h3>CSV format required</h3>
+              <h3>1. CSV import</h3>
               <p className="form-hint">
-                Use the template below. Keep the header row exactly. One {type === 'products' ? 'product' : 'company'}{' '}
-                per row. Existing names are skipped.
+                Download the template, keep the header row, then upload your file. One{' '}
+                {type === 'products' ? 'product' : 'company'} per row. Existing names are skipped.
               </p>
               {format ? (
                 <>
@@ -116,20 +116,20 @@ export function EntityImportPanel({
                     ))}
                   </ul>
                   <div className="entity-import-columns">
-                    <strong>Columns</strong>
+                    <strong>Required columns</strong>
                     <code>{format.headers.join(', ')}</code>
                   </div>
                   <div className="entity-import-actions">
-                    <a className="btn btn-secondary btn-sm" href={`/api/import/template/${type}`} download>
+                    <a className="btn btn-secondary" href={`/api/import/template/${type}`} download>
                       Download CSV template
                     </a>
                     <button
                       type="button"
-                      className="btn btn-sm"
+                      className="btn"
                       disabled={busy !== null}
                       onClick={() => csvRef.current?.click()}
                     >
-                      {busy === 'csv' ? 'Importing…' : 'Upload CSV'}
+                      {busy === 'csv' ? 'Importing…' : 'Upload CSV file'}
                     </button>
                     <input
                       ref={csvRef}
@@ -147,15 +147,15 @@ export function EntityImportPanel({
 
             {aiEnabled ? (
               <section className="entity-import-section">
-                <h3>AI from PDF</h3>
+                <h3>2. AI from PDF</h3>
                 <p className="form-hint">
-                  Upload a PDF (visiting card sheet, company list, brochure text). AI extracts companies and contacts,
-                  then adds new {label}. Requires <code>OPENAI_API_KEY</code> on the server.
+                  Upload a PDF (company list, brochure, or contact sheet). AI extracts companies and contacts, then adds
+                  new {label}. Requires <code>OPENAI_API_KEY</code> on the server.
                 </p>
                 <div className="entity-import-actions">
                   <button
                     type="button"
-                    className="btn btn-sm"
+                    className="btn"
                     disabled={busy !== null}
                     onClick={() => pdfRef.current?.click()}
                   >
@@ -170,18 +170,13 @@ export function EntityImportPanel({
                   />
                 </div>
               </section>
-            ) : (
-              <section className="entity-import-section">
-                <h3>AI from PDF</h3>
-                <p className="form-hint">AI PDF import is available for clients and suppliers only — not products.</p>
-              </section>
-            )}
+            ) : null}
 
             {result ? (
               <section className="entity-import-section">
                 <h3>Result</h3>
                 <p className="form-hint">
-                  Created {result.created?.length || 0}
+                  Created <strong>{result.created?.length || 0}</strong>
                   {result.extracted != null ? ` · AI found ${result.extracted}` : ''}
                   {result.skipped?.length ? ` · Skipped ${result.skipped.length}` : ''}
                   {result.errors?.length ? ` · Errors ${result.errors.length}` : ''}

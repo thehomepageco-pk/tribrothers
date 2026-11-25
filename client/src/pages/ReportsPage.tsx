@@ -399,45 +399,91 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <h2 className="panel-title">Period breakdown</h2>
-      <div className="table-wrap" style={{ marginBottom: 24 }}>
-        <table>
-          <thead>
-            <tr>
-              <th>Period</th><th>Contracts</th><th>Contract value</th><th>Indents</th><th>Commission</th>
-              <th>Invoices</th><th>Invoiced</th><th>Payments</th><th>Revenue</th>
-            </tr>
-          </thead>
-          <tbody>
-            {series.length === 0 ? (
-              <tr><td colSpan={9} className="empty-state">{loading ? 'Loading…' : 'No data for this period'}</td></tr>
-            ) : (
-              series.map((r) => {
+      <section className="period-breakdown" aria-labelledby="period-breakdown-title">
+        <div className="period-breakdown-head">
+          <div>
+            <h2 id="period-breakdown-title">Period breakdown</h2>
+            <p>Month-by-month snapshot of contracts, commission, invoicing, and cash in.</p>
+          </div>
+        </div>
+        {series.length === 0 ? (
+          <div className="period-breakdown-empty">
+            <strong>{loading ? 'Loading…' : 'No periods to show'}</strong>
+            {loading ? null : 'Pick a different range above, or wait until activity lands in this window.'}
+          </div>
+        ) : (
+          <div className="period-breakdown-grid">
+            {(() => {
+              const enriched = series.map((r) => {
                 const contractValue = n(r.contractValue ?? (r as { contractsValue?: number }).contractsValue)
                 const commission = n(r.commission ?? (r as { commissionTotal?: number }).commissionTotal)
                 const invoiceRevenue = n(
-                  r.invoiceRevenue ?? (r as { invoiced?: number; invoicedTotal?: number }).invoiced ?? (r as { invoicedTotal?: number }).invoicedTotal,
+                  r.invoiceRevenue ??
+                    (r as { invoiced?: number; invoicedTotal?: number }).invoiced ??
+                    (r as { invoicedTotal?: number }).invoicedTotal,
                 )
                 const payments = n(r.payments ?? (r as { paymentsTotal?: number }).paymentsTotal)
                 const revenue = n(r.revenue) || invoiceRevenue + commission
+                return {
+                  key: r.key || r.label,
+                  label: r.label,
+                  contracts: n(r.contracts),
+                  contractValue,
+                  indents: n(r.indents),
+                  commission,
+                  invoices: n(r.invoices),
+                  invoiceRevenue,
+                  payments,
+                  revenue,
+                }
+              })
+              const maxRevenue = Math.max(...enriched.map((r) => r.revenue), 0)
+              return enriched.map((r) => {
+                const barPct = maxRevenue > 0 ? Math.max(4, Math.round((r.revenue / maxRevenue) * 100)) : 0
                 return (
-                  <tr key={r.key || r.label}>
-                    <td>{r.label}</td>
-                    <td>{n(r.contracts)}</td>
-                    <td>{money(contractValue)}</td>
-                    <td>{n(r.indents)}</td>
-                    <td>{money(commission)}</td>
-                    <td>{n(r.invoices)}</td>
-                    <td>{money(invoiceRevenue)}</td>
-                    <td>{money(payments)}</td>
-                    <td>{money(revenue)}</td>
-                  </tr>
+                  <article className="period-card" key={r.key}>
+                    <div className="period-card-top">
+                      <strong>{r.label}</strong>
+                      <span>{r.contracts + r.indents + r.invoices} deals</span>
+                    </div>
+                    <div className="period-card-metrics">
+                      <div className="period-metric">
+                        <small>Revenue</small>
+                        <b>{money(r.revenue)}</b>
+                      </div>
+                      <div className="period-metric">
+                        <small>Payments</small>
+                        <b>{money(r.payments)}</b>
+                      </div>
+                      <div className="period-metric">
+                        <small>Commission</small>
+                        <b>{money(r.commission)}</b>
+                      </div>
+                      <div className="period-metric">
+                        <small>Contract value</small>
+                        <b>{money(r.contractValue)}</b>
+                      </div>
+                      <div className="period-metric">
+                        <small>Indents</small>
+                        <b>{r.indents}</b>
+                      </div>
+                      <div className="period-metric">
+                        <small>Invoices</small>
+                        <b>
+                          {r.invoices} · {money(r.invoiceRevenue)}
+                        </b>
+                      </div>
+                    </div>
+                    <div className="period-card-bar" title={`Revenue share vs peak period`}>
+                      <span style={{ width: `${barPct}%` }} />
+                    </div>
+                  </article>
                 )
               })
-            )}
-          </tbody>
-        </table>
-      </div>
+            })()}
+          </div>
+        )}
+      </section>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16, marginBottom: 24 }}>
         <div className="card">

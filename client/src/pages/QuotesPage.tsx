@@ -652,7 +652,7 @@ export default function QuotesPage() {
         >
           <h2 style={{ marginBottom: 12 }}>Create Quotation</h2>
           <form id="quotationForm" onSubmit={onQuoteSubmit}>
-            <div className="form-row">
+            <div className="form-row quote-row-main">
               <div>
                 <label>Product</label>
                 <select
@@ -752,7 +752,7 @@ export default function QuotesPage() {
                 </small>
               </div>
             </div>
-            <div className="form-row" style={{ marginTop: 16 }}>
+            <div className="form-row quote-row-pricing">
               <div>
                 <label>Supplier–Product (optional cost reference)</label>
                 <select
@@ -814,7 +814,7 @@ export default function QuotesPage() {
                 />
               </div>
             </div>
-            <div className="form-row" style={{ marginTop: 16 }}>
+            <div className="form-row quote-row-meta">
               <div>
                 <label>HS Code</label>
                 <input
