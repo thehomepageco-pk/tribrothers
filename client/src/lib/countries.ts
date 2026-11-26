@@ -1,0 +1,168 @@
+export type CountryOption = { name: string; dial: string }
+
+/** Shared country list with international dial codes (used by CountryPicker). */
+export const COUNTRIES: CountryOption[] = [
+  { name: 'Afghanistan', dial: '+93' },
+  { name: 'Albania', dial: '+355' },
+  { name: 'Algeria', dial: '+213' },
+  { name: 'Andorra', dial: '+376' },
+  { name: 'Angola', dial: '+244' },
+  { name: 'Argentina', dial: '+54' },
+  { name: 'Armenia', dial: '+374' },
+  { name: 'Australia', dial: '+61' },
+  { name: 'Austria', dial: '+43' },
+  { name: 'Azerbaijan', dial: '+994' },
+  { name: 'Bahrain', dial: '+973' },
+  { name: 'Bangladesh', dial: '+880' },
+  { name: 'Belarus', dial: '+375' },
+  { name: 'Belgium', dial: '+32' },
+  { name: 'Belize', dial: '+501' },
+  { name: 'Benin', dial: '+229' },
+  { name: 'Bhutan', dial: '+975' },
+  { name: 'Bolivia', dial: '+591' },
+  { name: 'Bosnia and Herzegovina', dial: '+387' },
+  { name: 'Botswana', dial: '+267' },
+  { name: 'Brazil', dial: '+55' },
+  { name: 'Brunei', dial: '+673' },
+  { name: 'Bulgaria', dial: '+359' },
+  { name: 'Burkina Faso', dial: '+226' },
+  { name: 'Cambodia', dial: '+855' },
+  { name: 'Cameroon', dial: '+237' },
+  { name: 'Canada', dial: '+1' },
+  { name: 'Chile', dial: '+56' },
+  { name: 'China', dial: '+86' },
+  { name: 'Colombia', dial: '+57' },
+  { name: 'Costa Rica', dial: '+506' },
+  { name: 'Croatia', dial: '+385' },
+  { name: 'Cuba', dial: '+53' },
+  { name: 'Cyprus', dial: '+357' },
+  { name: 'Czech Republic', dial: '+420' },
+  { name: 'Denmark', dial: '+45' },
+  { name: 'Dominican Republic', dial: '+1' },
+  { name: 'Ecuador', dial: '+593' },
+  { name: 'Egypt', dial: '+20' },
+  { name: 'El Salvador', dial: '+503' },
+  { name: 'Estonia', dial: '+372' },
+  { name: 'Ethiopia', dial: '+251' },
+  { name: 'Finland', dial: '+358' },
+  { name: 'France', dial: '+33' },
+  { name: 'Georgia', dial: '+995' },
+  { name: 'Germany', dial: '+49' },
+  { name: 'Ghana', dial: '+233' },
+  { name: 'Greece', dial: '+30' },
+  { name: 'Guatemala', dial: '+502' },
+  { name: 'Hong Kong', dial: '+852' },
+  { name: 'Hungary', dial: '+36' },
+  { name: 'Iceland', dial: '+354' },
+  { name: 'India', dial: '+91' },
+  { name: 'Indonesia', dial: '+62' },
+  { name: 'Iran', dial: '+98' },
+  { name: 'Iraq', dial: '+964' },
+  { name: 'Ireland', dial: '+353' },
+  { name: 'Israel', dial: '+972' },
+  { name: 'Italy', dial: '+39' },
+  { name: 'Jamaica', dial: '+1' },
+  { name: 'Japan', dial: '+81' },
+  { name: 'Jordan', dial: '+962' },
+  { name: 'Kazakhstan', dial: '+7' },
+  { name: 'Kenya', dial: '+254' },
+  { name: 'Kuwait', dial: '+965' },
+  { name: 'Laos', dial: '+856' },
+  { name: 'Latvia', dial: '+371' },
+  { name: 'Lebanon', dial: '+961' },
+  { name: 'Libya', dial: '+218' },
+  { name: 'Lithuania', dial: '+370' },
+  { name: 'Luxembourg', dial: '+352' },
+  { name: 'Malaysia', dial: '+60' },
+  { name: 'Maldives', dial: '+960' },
+  { name: 'Malta', dial: '+356' },
+  { name: 'Mexico', dial: '+52' },
+  { name: 'Moldova', dial: '+373' },
+  { name: 'Monaco', dial: '+377' },
+  { name: 'Mongolia', dial: '+976' },
+  { name: 'Morocco', dial: '+212' },
+  { name: 'Myanmar', dial: '+95' },
+  { name: 'Nepal', dial: '+977' },
+  { name: 'Netherlands', dial: '+31' },
+  { name: 'New Zealand', dial: '+64' },
+  { name: 'Nigeria', dial: '+234' },
+  { name: 'North Macedonia', dial: '+389' },
+  { name: 'Norway', dial: '+47' },
+  { name: 'Oman', dial: '+968' },
+  { name: 'Pakistan', dial: '+92' },
+  { name: 'Palestine', dial: '+970' },
+  { name: 'Panama', dial: '+507' },
+  { name: 'Paraguay', dial: '+595' },
+  { name: 'Peru', dial: '+51' },
+  { name: 'Philippines', dial: '+63' },
+  { name: 'Poland', dial: '+48' },
+  { name: 'Portugal', dial: '+351' },
+  { name: 'Qatar', dial: '+974' },
+  { name: 'Romania', dial: '+40' },
+  { name: 'Russia', dial: '+7' },
+  { name: 'Rwanda', dial: '+250' },
+  { name: 'Saudi Arabia', dial: '+966' },
+  { name: 'Senegal', dial: '+221' },
+  { name: 'Serbia', dial: '+381' },
+  { name: 'Singapore', dial: '+65' },
+  { name: 'Slovakia', dial: '+421' },
+  { name: 'Slovenia', dial: '+386' },
+  { name: 'South Africa', dial: '+27' },
+  { name: 'South Korea', dial: '+82' },
+  { name: 'Spain', dial: '+34' },
+  { name: 'Sri Lanka', dial: '+94' },
+  { name: 'Sudan', dial: '+249' },
+  { name: 'Sweden', dial: '+46' },
+  { name: 'Switzerland', dial: '+41' },
+  { name: 'Syria', dial: '+963' },
+  { name: 'Taiwan', dial: '+886' },
+  { name: 'Tanzania', dial: '+255' },
+  { name: 'Thailand', dial: '+66' },
+  { name: 'Tunisia', dial: '+216' },
+  { name: 'Turkey', dial: '+90' },
+  { name: 'Uganda', dial: '+256' },
+  { name: 'Ukraine', dial: '+380' },
+  { name: 'United Arab Emirates', dial: '+971' },
+  { name: 'United Kingdom', dial: '+44' },
+  { name: 'United States', dial: '+1' },
+  { name: 'Uruguay', dial: '+598' },
+  { name: 'Uzbekistan', dial: '+998' },
+  { name: 'Venezuela', dial: '+58' },
+  { name: 'Vietnam', dial: '+84' },
+  { name: 'Yemen', dial: '+967' },
+  { name: 'Zambia', dial: '+260' },
+  { name: 'Zimbabwe', dial: '+263' },
+]
+
+const dialByCountry = Object.fromEntries(COUNTRIES.map((c) => [c.name.toLowerCase(), c.dial]))
+
+export function getDialCode(countryName: string): string {
+  return dialByCountry[(countryName || '').trim().toLowerCase()] || ''
+}
+
+/** Prefix or replace leading +code on a phone field when country changes. */
+export function applyDialCode(value: string, dial: string): string {
+  if (!dial) return value
+  const v = (value || '').trim()
+  if (!v || v.startsWith('+')) {
+    if (!v || !v.startsWith(dial)) {
+      const rest = v.replace(/^\+\d+\s*/, '')
+      return dial + (rest ? ` ${rest}` : ' ')
+    }
+    return v
+  }
+  return `${dial} ${v}`
+}
+
+export function applyDialToContactPhones<T extends { tel?: string; mobile?: string; whatsapp?: string }>(
+  contact: T,
+  dial: string,
+): T {
+  if (!dial) return contact
+  return {
+    ...contact,
+    tel: applyDialCode(contact.tel || '', dial),
+    mobile: applyDialCode(contact.mobile || '', dial),
+    whatsapp: contact.whatsapp ? applyDialCode(contact.whatsapp, dial) : contact.whatsapp,
+  }
+}

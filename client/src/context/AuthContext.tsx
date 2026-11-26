@@ -127,9 +127,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const wait = Math.max(500, end - Date.now() + 250)
     const timeout = window.setTimeout(() => {
-      void refresh().then(() => {
+      void (async () => {
+        try {
+          await api('/api/auth/admin-override/clear', { method: 'POST' })
+        } catch {
+          /* still refresh */
+        }
+        await refresh()
         window.location.reload()
-      })
+      })()
     }, wait)
     const poll = window.setInterval(() => {
       void refresh()

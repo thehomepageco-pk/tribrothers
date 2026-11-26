@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { useSearchParams } from 'react-router-dom'
 import { useUrlSearch } from '@/hooks/useUrlSearch'
 import { api, ApiError } from '@/api/client'
+import { CountryPicker } from '@/components/CountryPicker'
 import { RowActionsMenu } from '@/components/RowActionsMenu'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
+import { applyDialCode } from '@/lib/countries'
 import { errorMessage, includesText, toNumber, unwrapList } from '@/lib/entity'
 import { formatDate, idOf, nameOf } from '@/lib/utils'
 import type { Client, Product, Supplier } from '@/types'
@@ -1085,11 +1087,19 @@ export default function QuotesPage() {
                 </div>
                 <div>
                   <label>Country</label>
-                  <input
-                    type="text"
+                  <CountryPicker
                     id="ncCountry"
                     value={ncForm.country}
-                    onChange={(e) => setNcForm({ ...ncForm, country: e.target.value })}
+                    onChange={(country) => setNcForm({ ...ncForm, country })}
+                    onSelect={(country, dial) =>
+                      setNcForm((f) => ({
+                        ...f,
+                        country,
+                        tel: applyDialCode(f.tel, dial),
+                        mobile: applyDialCode(f.mobile, dial),
+                        whatsapp: f.whatsapp ? applyDialCode(f.whatsapp, dial) : f.whatsapp,
+                      }))
+                    }
                   />
                 </div>
               </div>

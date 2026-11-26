@@ -572,7 +572,8 @@ app.post('/api/auth/admin-override/clear', async (req, res) => {
     if (!req.session || !req.session.isAuthenticated) {
       return res.status(401).json({ error: 'Authentication required' });
     }
-    const wasActive = !!req.session.adminOverrideUntil;
+    const wasOverride = !!req.session.adminOverrideUntil;
+    const wasTemp = !!req.session.tempAccessUntil;
     delete req.session.adminOverrideUntil;
     delete req.session.adminOverrideBy;
     delete req.session.adminOverrideGrantedAt;
@@ -582,12 +583,39 @@ app.post('/api/auth/admin-override/clear', async (req, res) => {
     delete req.session.adminOverrideCanEdit;
     delete req.session.adminOverrideCanDelete;
     delete req.session.adminOverrideCanEmail;
-    if (wasActive) {
+    delete req.session.tempAccessUntil;
+    delete req.session.tempCanEdit;
+    delete req.session.tempCanEmail;
+    delete req.session.tempCanDelete;
+    delete req.session.tempPermission;
+    delete req.session.tempPageKey;
+    delete req.session.tempPages;
+
+    // Also clear DB-backed approved temp access so "Work done" / End access re-locks pages.
+    if (req.session.userId) {
+      await User.findByIdAndUpdate(req.session.userId, { $unset: { tempAccess: 1 } });
+      try {
+        const AccessRequest = require('./models/AccessRequest');
+        await AccessRequest.updateMany(
+          { requester: req.session.userId, status: 'approved' },
+          { $set: { status: 'expired' } },
+        );
+      } catch (_) {
+        /* optional */
+      }
+    }
+
+    if (wasOverride || wasTemp) {
       await logSessionEvent(req, 'ADMIN_OVERRIDE_LOCK', 'User', req.session.userId, {
         forUser: req.session.username,
+        clearedTempAccess: wasTemp,
       });
     }
-    res.json({ success: true, adminOverride: { active: false, expiresAt: null, remainingMs: 0 } });
+    res.json({
+      success: true,
+      adminOverride: { active: false, expiresAt: null, remainingMs: 0 },
+      tempAccess: { active: false, expiresAt: null, remainingMs: 0 },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

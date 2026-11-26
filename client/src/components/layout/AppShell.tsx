@@ -541,7 +541,7 @@ export function AppShell() {
               <div className="soft-dropdown soft-notif-dropdown">
                 <div className="soft-dropdown-head">
                   <strong>Notifications</strong>
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => void markAllRead()} disabled={!unread}>
+                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => void markAllRead()} disabled={!unread}>
                     Mark all read
                   </button>
                 </div>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useUrlSearch } from '@/hooks/useUrlSearch'
 import { api, apiForm } from '@/api/client'
+import { CountryPicker } from '@/components/CountryPicker'
 import { RowActionsMenu } from '@/components/RowActionsMenu'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
@@ -605,14 +606,13 @@ export default function SalesContractsPage() {
             </div>
             <div>
               <label htmlFor="scOriginCountry">Origin (country) *</label>
-              <input
-                type="text"
+              <CountryPicker
                 id="scOriginCountry"
                 required
-                autoComplete="off"
-                placeholder="Country of origin"
+                placeholder="Search country of origin…"
                 value={form.originCountry}
-                onChange={(e) => setField('originCountry', e.target.value)}
+                onChange={(country) => setField('originCountry', country)}
+                onSelect={(country) => setField('originCountry', country)}
               />
             </div>
             <div>

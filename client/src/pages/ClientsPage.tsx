@@ -3,6 +3,11 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useUrlSearch } from '@/hooks/useUrlSearch'
 import { api, apiForm, ApiError } from '@/api/client'
 import { ContactsEditor, emptyContact } from '@/components/ContactsEditor'
+import { CountryPicker } from '@/components/CountryPicker'
+import {
+  ProductAttachmentDrafts,
+  type DraftProductLink,
+} from '@/components/EntityLinkDrafts'
 import { EntityImportPanel } from '@/components/EntityImportPanel'
 import { RowActionsMenu } from '@/components/RowActionsMenu'
 import { Info } from '@/components/ui/Info'
@@ -12,6 +17,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { useSort } from '@/hooks/useSort'
 import { useSelection } from '@/hooks/useSelection'
+import { applyDialCode, applyDialToContactPhones } from '@/lib/countries'
 import {
   cleanContacts,
   compareValues,
@@ -118,6 +124,8 @@ export default function ClientsPage() {
   const [ntnFile, setNtnFile] = useState<File | null>(null)
   const [removeNtn, setRemoveNtn] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [productDrafts, setProductDrafts] = useState<DraftProductLink[]>([])
 
   const [detail, setDetail] = useState<Client | null>(null)
 
@@ -204,6 +212,7 @@ export default function ClientsPage() {
     setForm(EMPTY_FORM)
     setNtnFile(null)
     setRemoveNtn(false)
+    setProductDrafts([])
     setFormOpen(true)
   }
 
@@ -212,8 +221,53 @@ export default function ClientsPage() {
     setForm(formFromClient(c))
     setNtnFile(null)
     setRemoveNtn(false)
+    setProductDrafts([])
     setFormOpen(true)
   }, [])
+
+  useEffect(() => {
+    if (!formOpen || !canEdit) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const data = await api<unknown>('/api/products')
+        if (!cancelled) setAllProducts(unwrapList<Product>(data))
+      } catch {
+        if (!cancelled) setAllProducts([])
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [formOpen, canEdit])
+
+  function onCountrySelect(country: string, dial: string) {
+    setForm((f) => ({
+      ...f,
+      country,
+      tel: applyDialCode(f.tel, dial),
+      mobile: applyDialCode(f.mobile, dial),
+      whatsapp: f.whatsapp ? applyDialCode(f.whatsapp, dial) : f.whatsapp,
+      contacts: f.contacts.map((c) => applyDialToContactPhones(c, dial)),
+    }))
+  }
+
+  async function saveProductDrafts(clientId: string) {
+    for (const d of productDrafts) {
+      try {
+        await api('/api/product-clients', {
+          method: 'POST',
+          body: JSON.stringify({
+            productId: d.productId,
+            clientId,
+            notes: d.notes.trim() || undefined,
+          }),
+        })
+      } catch {
+        /* skip duplicates / errors so create still succeeds */
+      }
+    }
+  }
 
   useEffect(() => {
     if (searchParams.get('new') !== '1' || loading) return
@@ -265,21 +319,26 @@ export default function ClientsPage() {
         await apiForm(`/api/clients/${editing._id}`, buildFormData(), 'PUT')
         toast('Client updated', 'success')
       } else {
+        let created: { client?: Client } | null = null
         try {
-          await apiForm('/api/clients', buildFormData(), 'POST')
+          created = await apiForm<{ client?: Client }>('/api/clients', buildFormData(), 'POST')
         } catch (err) {
           if (err instanceof ApiError && err.status === 409) {
             if (!window.confirm(`${err.message}. Create it anyway?`)) {
               setSaving(false)
               return
             }
-            await apiForm('/api/clients', buildFormData(true), 'POST')
+            created = await apiForm<{ client?: Client }>('/api/clients', buildFormData(true), 'POST')
           } else {
             throw err
           }
         }
+        if (created?.client?._id && productDrafts.length) {
+          await saveProductDrafts(created.client._id)
+        }
         toast('Client created', 'success')
       }
+      setProductDrafts([])
       setFormOpen(false)
       await load()
     } catch (err) {
@@ -455,16 +514,16 @@ export default function ClientsPage() {
           </div>
           <div className="field">
             <label htmlFor="clientCountry">Country</label>
-            <input
-              type="text"
-              name="country"
+            <CountryPicker
               id="clientCountry"
-              autoComplete="off"
+              name="country"
               value={form.country}
-              onChange={set('country')}
+              onChange={(country) => setForm({ ...form, country })}
+              onSelect={onCountrySelect}
             />
           </div>
         </div>
+        <p className="form-hint">Selecting a country fills the phone dial code automatically.</p>
 
         <div className="form-section">
           <div className="form-section-title">Contact person(s)</div>
@@ -563,6 +622,16 @@ export default function ClientsPage() {
           ) : null}
         </div>
 
+        {!editing ? (
+          <ProductAttachmentDrafts
+            products={allProducts}
+            drafts={productDrafts}
+            onChange={setProductDrafts}
+            disabled={saving || !canEdit}
+            title="Linked products (optional)"
+          />
+        ) : null}
+
         <div className="form-actions">
           <button type="submit" className="btn btn-sm" id="clientSubmitBtn" disabled={saving || !canEdit}>
             {saving ? 'Saving…' : editing ? 'Save client' : 'Save client'}
@@ -574,6 +643,7 @@ export default function ClientsPage() {
             onClick={() => {
               setFormOpen(false)
               setEditing(null)
+              setProductDrafts([])
             }}
           >
             Cancel

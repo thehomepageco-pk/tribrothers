@@ -2,6 +2,11 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { Link, useSearchParams } from 'react-router-dom'
 import { useUrlSearch } from '@/hooks/useUrlSearch'
 import { api, apiForm, ApiError } from '@/api/client'
+import {
+  ProductLinkDrafts,
+  type DraftClientLink,
+  type DraftSupplierLink,
+} from '@/components/EntityLinkDrafts'
 import { EntityImportPanel } from '@/components/EntityImportPanel'
 import { RowActionsMenu } from '@/components/RowActionsMenu'
 import { Info } from '@/components/ui/Info'
@@ -108,6 +113,10 @@ export default function ProductsPage() {
   const [newFiles, setNewFiles] = useState<File[]>([])
   const [removeDocs, setRemoveDocs] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
+  const [linkSuppliers, setLinkSuppliers] = useState<Supplier[]>([])
+  const [linkClients, setLinkClients] = useState<Client[]>([])
+  const [supplierDrafts, setSupplierDrafts] = useState<DraftSupplierLink[]>([])
+  const [clientDrafts, setClientDrafts] = useState<DraftClientLink[]>([])
 
   const [detail, setDetail] = useState<Product | null>(null)
 
@@ -196,6 +205,8 @@ export default function ProductsPage() {
     setNewCategory('')
     setNewFiles([])
     setRemoveDocs([])
+    setSupplierDrafts([])
+    setClientDrafts([])
     setFormOpen(true)
   }
 
@@ -205,6 +216,8 @@ export default function ProductsPage() {
     setNewCategory('')
     setNewFiles([])
     setRemoveDocs([])
+    setSupplierDrafts([])
+    setClientDrafts([])
     setFormOpen(true)
   }, [])
 
@@ -216,6 +229,66 @@ export default function ProductsPage() {
     next.delete('new')
     setSearchParams(next, { replace: true })
   }, [searchParams, canEdit, loading, setSearchParams, openCreate])
+
+  useEffect(() => {
+    if (!formOpen || !canEdit) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const [s, c] = await Promise.all([api<unknown>('/api/suppliers'), api<unknown>('/api/clients')])
+        if (!cancelled) {
+          setLinkSuppliers(unwrapList<Supplier>(s))
+          setLinkClients(unwrapList<Client>(c))
+        }
+      } catch {
+        if (!cancelled) {
+          setLinkSuppliers([])
+          setLinkClients([])
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [formOpen, canEdit])
+
+  async function saveLinkDrafts(productId: string) {
+    for (const d of supplierDrafts) {
+      try {
+        const fd = new FormData()
+        fd.append('productId', productId)
+        fd.append('supplierId', d.supplierId)
+        if (d.notes.trim()) fd.append('notes', d.notes.trim())
+        const res = await apiForm<{ link?: { _id?: string } }>('/api/supplier-products', fd, 'POST')
+        const hasPricing = d.supplierPrice !== '' || d.MOQ.trim() || d.leadTime.trim()
+        if (res?.link?._id && hasPricing) {
+          const put = new FormData()
+          if (d.supplierPrice !== '') put.append('supplierPrice', d.supplierPrice)
+          put.append('currency', d.currency.trim() || 'USD')
+          put.append('MOQ', d.MOQ.trim())
+          put.append('leadTime', d.leadTime.trim())
+          if (d.notes.trim()) put.append('notes', d.notes.trim())
+          await apiForm(`/api/supplier-products/${res.link._id}`, put, 'PUT')
+        }
+      } catch {
+        /* skip */
+      }
+    }
+    for (const d of clientDrafts) {
+      try {
+        await api('/api/product-clients', {
+          method: 'POST',
+          body: JSON.stringify({
+            productId,
+            clientId: d.clientId,
+            notes: d.notes.trim() || undefined,
+          }),
+        })
+      } catch {
+        /* skip */
+      }
+    }
+  }
 
   function toggleCategory(name: string) {
     setForm((f) => {
@@ -277,21 +350,27 @@ export default function ProductsPage() {
         await apiForm(`/api/products/${editing._id}`, buildFormData(), 'PUT')
         toast('Product updated', 'success')
       } else {
+        let created: { product?: Product } | null = null
         try {
-          await apiForm('/api/products', buildFormData(), 'POST')
+          created = await apiForm<{ product?: Product }>('/api/products', buildFormData(), 'POST')
         } catch (err) {
           if (err instanceof ApiError && err.status === 409) {
             if (!window.confirm(`${err.message}. Create it anyway?`)) {
               setSaving(false)
               return
             }
-            await apiForm('/api/products', buildFormData(true), 'POST')
+            created = await apiForm<{ product?: Product }>('/api/products', buildFormData(true), 'POST')
           } else {
             throw err
           }
         }
+        if (created?.product?._id && (supplierDrafts.length || clientDrafts.length)) {
+          await saveLinkDrafts(created.product._id)
+        }
         toast('Product created', 'success')
       }
+      setSupplierDrafts([])
+      setClientDrafts([])
       setFormOpen(false)
       await load()
     } catch (err) {
@@ -626,6 +705,18 @@ export default function ProductsPage() {
           ) : null}
           </div>
 
+          {!editing ? (
+            <ProductLinkDrafts
+              suppliers={linkSuppliers}
+              clients={linkClients}
+              supplierDrafts={supplierDrafts}
+              clientDrafts={clientDrafts}
+              onSupplierDrafts={setSupplierDrafts}
+              onClientDrafts={setClientDrafts}
+              disabled={saving || !canEdit}
+            />
+          ) : null}
+
           <div className="form-actions">
             <button type="submit" className="btn btn-sm" id="productSubmitBtn" disabled={saving || !canEdit}>
               {saving ? 'Saving…' : 'Save product'}
@@ -636,6 +727,8 @@ export default function ProductsPage() {
               id="productCancelEditBtn"
               disabled={saving}
               onClick={() => {
+                setSupplierDrafts([])
+                setClientDrafts([])
                 setFormOpen(false)
                 setEditing(null)
               }}

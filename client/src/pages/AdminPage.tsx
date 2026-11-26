@@ -268,7 +268,7 @@ export default function AdminPage() {
           onClose={() => setForm(null)}
           footer={
             <>
-              <button type="button" className="action-btn" onClick={() => setForm(null)}>
+              <button type="button" className="btn btn-secondary" onClick={() => setForm(null)}>
                 Cancel
               </button>
               <button type="submit" form="user-form" className="btn" disabled={save.isPending}>
@@ -398,7 +398,7 @@ export default function AdminPage() {
           onClose={() => setPwTarget(null)}
           footer={
             <>
-              <button type="button" className="action-btn" onClick={() => setPwTarget(null)}>
+              <button type="button" className="btn btn-secondary" onClick={() => setPwTarget(null)}>
                 Cancel
               </button>
               <button

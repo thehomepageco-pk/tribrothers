@@ -3,6 +3,11 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useUrlSearch } from '@/hooks/useUrlSearch'
 import { api, apiForm, ApiError } from '@/api/client'
 import { ContactsEditor, emptyContact } from '@/components/ContactsEditor'
+import { CountryPicker } from '@/components/CountryPicker'
+import {
+  ProductAttachmentDrafts,
+  type DraftProductLink,
+} from '@/components/EntityLinkDrafts'
 import { EntityImportPanel } from '@/components/EntityImportPanel'
 import { RowActionsMenu } from '@/components/RowActionsMenu'
 import { Info } from '@/components/ui/Info'
@@ -12,6 +17,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import { useSort } from '@/hooks/useSort'
 import { useSelection } from '@/hooks/useSelection'
+import { applyDialToContactPhones } from '@/lib/countries'
 import {
   cleanContacts,
   compareValues,
@@ -94,6 +100,8 @@ export default function SuppliersPage() {
   const [file, setFile] = useState<File | null>(null)
   const [removeFile, setRemoveFile] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [productDrafts, setProductDrafts] = useState<DraftProductLink[]>([])
 
   const [detail, setDetail] = useState<Supplier | null>(null)
 
@@ -165,6 +173,7 @@ export default function SuppliersPage() {
 
   function openCreate() {
     setEditing(null)
+    setProductDrafts([])
     setForm(EMPTY_FORM)
     setFile(null)
     setRemoveFile(false)
@@ -176,6 +185,7 @@ export default function SuppliersPage() {
     setForm(formFromSupplier(s))
     setFile(null)
     setRemoveFile(false)
+    setProductDrafts([])
     setFormOpen(true)
   }, [])
 
@@ -186,6 +196,54 @@ export default function SuppliersPage() {
     next.delete('new')
     setSearchParams(next, { replace: true })
   }, [searchParams, canEdit, loading, setSearchParams, openCreate])
+
+  useEffect(() => {
+    if (!formOpen || !canEdit) return
+    let cancelled = false
+    ;(async () => {
+      try {
+        const data = await api<unknown>('/api/products')
+        if (!cancelled) setAllProducts(unwrapList<Product>(data))
+      } catch {
+        if (!cancelled) setAllProducts([])
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [formOpen, canEdit])
+
+  function onCountrySelect(country: string, dial: string) {
+    setForm((f) => ({
+      ...f,
+      country,
+      contacts: f.contacts.map((c) => applyDialToContactPhones(c, dial)),
+    }))
+  }
+
+  async function saveProductDrafts(supplierId: string) {
+    for (const d of productDrafts) {
+      try {
+        const fd = new FormData()
+        fd.append('productId', d.productId)
+        fd.append('supplierId', supplierId)
+        if (d.notes.trim()) fd.append('notes', d.notes.trim())
+        const res = await apiForm<{ link?: { _id?: string } }>('/api/supplier-products', fd, 'POST')
+        const hasPricing = d.supplierPrice !== '' || d.MOQ.trim() || d.leadTime.trim()
+        if (res?.link?._id && hasPricing) {
+          const put = new FormData()
+          if (d.supplierPrice !== '') put.append('supplierPrice', d.supplierPrice)
+          put.append('currency', d.currency.trim() || 'USD')
+          put.append('MOQ', d.MOQ.trim())
+          put.append('leadTime', d.leadTime.trim())
+          if (d.notes.trim()) put.append('notes', d.notes.trim())
+          await apiForm(`/api/supplier-products/${res.link._id}`, put, 'PUT')
+        }
+      } catch {
+        /* skip duplicates */
+      }
+    }
+  }
 
   function buildFormData(skipDuplicateCheck = false) {
     const fd = new FormData()
@@ -216,21 +274,26 @@ export default function SuppliersPage() {
         await apiForm(`/api/suppliers/${editing._id}`, buildFormData(), 'PUT')
         toast('Supplier updated', 'success')
       } else {
+        let created: { supplier?: Supplier } | null = null
         try {
-          await apiForm('/api/suppliers', buildFormData(), 'POST')
+          created = await apiForm<{ supplier?: Supplier }>('/api/suppliers', buildFormData(), 'POST')
         } catch (err) {
           if (err instanceof ApiError && err.status === 409) {
             if (!window.confirm(`${err.message}. Create it anyway?`)) {
               setSaving(false)
               return
             }
-            await apiForm('/api/suppliers', buildFormData(true), 'POST')
+            created = await apiForm<{ supplier?: Supplier }>('/api/suppliers', buildFormData(true), 'POST')
           } else {
             throw err
           }
         }
+        if (created?.supplier?._id && productDrafts.length) {
+          await saveProductDrafts(created.supplier._id)
+        }
         toast('Supplier created', 'success')
       }
+      setProductDrafts([])
       setFormOpen(false)
       await load()
     } catch (err) {
@@ -403,17 +466,16 @@ export default function SuppliersPage() {
           </div>
           <div className="field">
             <label htmlFor="supplierCountry">Country</label>
-            <input
-              type="text"
-              name="country"
+            <CountryPicker
               id="supplierCountry"
-              autoComplete="off"
+              name="country"
               value={form.country}
-              onChange={(e) => setForm({ ...form, country: e.target.value })}
+              onChange={(country) => setForm({ ...form, country })}
+              onSelect={onCountrySelect}
             />
           </div>
         </div>
-        <p className="form-hint">Select country before adding contact phone numbers.</p>
+        <p className="form-hint">Select a country first — dial codes are applied to contact phone numbers.</p>
 
         <div className="form-section">
           <div className="form-section-title">Contact person(s)</div>
@@ -500,6 +562,17 @@ export default function SuppliersPage() {
           ) : null}
         </div>
 
+        {!editing ? (
+          <ProductAttachmentDrafts
+            products={allProducts}
+            drafts={productDrafts}
+            onChange={setProductDrafts}
+            showPricing
+            disabled={saving || !canEdit}
+            title="Linked products (optional)"
+          />
+        ) : null}
+
         <div className="form-actions">
           <button type="submit" className="btn btn-sm" id="supplierSubmitBtn" disabled={saving || !canEdit}>
             {saving ? 'Saving…' : 'Save supplier'}
@@ -512,6 +585,7 @@ export default function SuppliersPage() {
             onClick={() => {
               setFormOpen(false)
               setEditing(null)
+              setProductDrafts([])
             }}
           >
             Cancel
