@@ -116,8 +116,8 @@ const TEMPLATES = {
     ],
     help: [
       'Required: companyName',
-      'Use one row per contact person — same companyName on multiple rows adds extra contacts',
-      'If the company already exists, new contacts are merged (not skipped)',
+      'One company = one record. Repeat the same companyName on extra rows to add more contact people',
+      'View the company to see every contact person listed together',
     ],
   },
   suppliers: {
@@ -156,8 +156,8 @@ const TEMPLATES = {
     ],
     help: [
       'Required: companyName',
-      'Use one row per contact person — same companyName on multiple rows adds extra contacts',
-      'If the company already exists, new contacts are merged (not skipped)',
+      'One company = one supplier row. Repeat the same companyName on extra rows to add more contact people',
+      'View the supplier to see every contact person listed together',
     ],
   },
 };
@@ -266,41 +266,93 @@ async function importProducts(rows) {
   return { created, skipped, errors };
 }
 
+/**
+ * Collapse CSV rows with the same company into one company + many contact persons.
+ * First non-empty company fields win; all contact columns across rows are merged.
+ */
+function groupCompanyRows(rows, nameKeys) {
+  const groups = new Map();
+  for (let i = 0; i < rows.length; i += 1) {
+    const row = rows[i];
+    const line = i + 2;
+    const companyName = pick(row, ...nameKeys);
+    if (!companyName) {
+      if (!groups.has('__missing__')) groups.set('__missing__', { missing: true, items: [] });
+      groups.get('__missing__').items.push({ line, row });
+      continue;
+    }
+    const key = companyName.trim().toLowerCase();
+    if (!groups.has(key)) {
+      groups.set(key, {
+        companyName: companyName.trim(),
+        lines: [],
+        rows: [],
+        contacts: [],
+      });
+    }
+    const g = groups.get(key);
+    g.lines.push(line);
+    g.rows.push(row);
+    g.contacts.push(...contactFromRow(row));
+  }
+  return groups;
+}
+
+function firstPick(rows, ...keys) {
+  for (const row of rows) {
+    const v = pick(row, ...keys);
+    if (v) return v;
+  }
+  return '';
+}
+
 async function importClients(rows) {
   const created = [];
   const updated = [];
   const skipped = [];
   const errors = [];
-  for (let i = 0; i < rows.length; i += 1) {
-    const row = rows[i];
-    const line = i + 2;
-    try {
-      const companyName = pick(row, 'companyName', 'company', 'company name', 'client');
-      if (!companyName) {
-        skipped.push({ line, reason: 'Missing companyName' });
-        continue;
+  const groups = groupCompanyRows(rows, ['companyName', 'company', 'company name', 'client']);
+
+  for (const [key, g] of groups) {
+    if (key === '__missing__' || g.missing) {
+      for (const item of g.items || []) {
+        skipped.push({ line: item.line, reason: 'Missing companyName' });
       }
-      const contacts = contactFromRow(row);
-      const existing = await Client.findOne({ companyName: new RegExp(`^${escapeRegex(companyName)}$`, 'i') });
+      continue;
+    }
+    const line = g.lines[0];
+    try {
+      const { contacts: uniqueContacts } = mergeContacts([], g.contacts);
+      const existing = await Client.findOne({
+        companyName: new RegExp(`^${escapeRegex(g.companyName)}$`, 'i'),
+      });
       if (existing) {
-        const { contacts: merged, added } = mergeContacts(existing.contactPersons, contacts);
+        const { contacts: merged, added } = mergeContacts(existing.contactPersons, uniqueContacts);
         if (!added.length) {
-          skipped.push({ line, reason: `Client already exists (no new contacts): ${companyName}` });
+          skipped.push({
+            line,
+            reason: `Client already exists with these contacts: ${g.companyName}`,
+          });
           continue;
         }
-        existing.contactPersons = merged;
-        existing.country = fillIfEmpty(existing.country, pick(row, 'country'));
-        existing.city = fillIfEmpty(existing.city, pick(row, 'city'));
-        existing.province = fillIfEmpty(existing.province, pick(row, 'province'));
-        existing.address = fillIfEmpty(existing.address, pick(row, 'address'));
-        existing.postCode = fillIfEmpty(existing.postCode, pick(row, 'postCode', 'postal code', 'zip'));
-        existing.tel = fillIfEmpty(existing.tel, pick(row, 'tel', 'phone'));
-        existing.mobile = fillIfEmpty(existing.mobile, pick(row, 'mobile'));
-        existing.email = fillIfEmpty(existing.email, pick(row, 'email') || contacts[0]?.email || '');
-        existing.web = fillIfEmpty(existing.web, pick(row, 'web', 'website'));
-        existing.ntnNumber = fillIfEmpty(existing.ntnNumber, pick(row, 'ntnNumber', 'ntn', 'ntn #'));
-        existing.notes = fillIfEmpty(existing.notes, pick(row, 'notes', 'note'));
-        await existing.save();
+        const patch = {
+          contactPersons: merged,
+          country: fillIfEmpty(existing.country, firstPick(g.rows, 'country')),
+          city: fillIfEmpty(existing.city, firstPick(g.rows, 'city')),
+          province: fillIfEmpty(existing.province, firstPick(g.rows, 'province')),
+          address: fillIfEmpty(existing.address, firstPick(g.rows, 'address')),
+          postCode: fillIfEmpty(existing.postCode, firstPick(g.rows, 'postCode', 'postal code', 'zip')),
+          tel: fillIfEmpty(existing.tel, firstPick(g.rows, 'tel', 'phone')),
+          mobile: fillIfEmpty(existing.mobile, firstPick(g.rows, 'mobile')),
+          email: fillIfEmpty(
+            existing.email,
+            firstPick(g.rows, 'email') || uniqueContacts[0]?.email || '',
+          ),
+          web: fillIfEmpty(existing.web, firstPick(g.rows, 'web', 'website')),
+          ntnNumber: fillIfEmpty(existing.ntnNumber, firstPick(g.rows, 'ntnNumber', 'ntn', 'ntn #')),
+          notes: fillIfEmpty(existing.notes, firstPick(g.rows, 'notes', 'note')),
+        };
+        await Client.findByIdAndUpdate(existing._id, { $set: patch }, { new: true });
         updated.push({
           line,
           id: existing._id,
@@ -310,24 +362,31 @@ async function importClients(rows) {
         });
         continue;
       }
-      const email = pick(row, 'email') || contacts[0]?.email || '';
+
+      const email = firstPick(g.rows, 'email') || uniqueContacts[0]?.email || '';
       const doc = await Client.create({
-        companyName,
-        country: pick(row, 'country'),
-        city: pick(row, 'city'),
-        province: pick(row, 'province'),
-        address: pick(row, 'address'),
-        postCode: pick(row, 'postCode', 'postal code', 'zip'),
-        tel: pick(row, 'tel', 'phone'),
-        mobile: pick(row, 'mobile'),
+        companyName: g.companyName,
+        country: firstPick(g.rows, 'country'),
+        city: firstPick(g.rows, 'city'),
+        province: firstPick(g.rows, 'province'),
+        address: firstPick(g.rows, 'address'),
+        postCode: firstPick(g.rows, 'postCode', 'postal code', 'zip'),
+        tel: firstPick(g.rows, 'tel', 'phone'),
+        mobile: firstPick(g.rows, 'mobile'),
         email,
-        web: pick(row, 'web', 'website'),
-        ntnNumber: pick(row, 'ntnNumber', 'ntn', 'ntn #'),
-        notes: pick(row, 'notes', 'note'),
-        contactPersons: contacts,
+        web: firstPick(g.rows, 'web', 'website'),
+        ntnNumber: firstPick(g.rows, 'ntnNumber', 'ntn', 'ntn #'),
+        notes: firstPick(g.rows, 'notes', 'note'),
+        contactPersons: uniqueContacts,
         showAsNew: true,
       });
-      created.push({ line, id: doc._id, name: doc.companyName });
+      created.push({
+        line,
+        id: doc._id,
+        name: doc.companyName,
+        contactsAdded: uniqueContacts.length,
+        contact: uniqueContacts.map((c) => c.name || c.email).filter(Boolean).join(', '),
+      });
     } catch (err) {
       errors.push({ line, reason: err.message || 'Failed' });
     }
@@ -340,31 +399,40 @@ async function importSuppliers(rows) {
   const updated = [];
   const skipped = [];
   const errors = [];
-  for (let i = 0; i < rows.length; i += 1) {
-    const row = rows[i];
-    const line = i + 2;
-    try {
-      const companyName = pick(row, 'companyName', 'company', 'company name', 'supplier');
-      if (!companyName) {
-        skipped.push({ line, reason: 'Missing companyName' });
-        continue;
+  const groups = groupCompanyRows(rows, ['companyName', 'company', 'company name', 'supplier']);
+
+  for (const [key, g] of groups) {
+    if (key === '__missing__' || g.missing) {
+      for (const item of g.items || []) {
+        skipped.push({ line: item.line, reason: 'Missing companyName' });
       }
-      const contacts = contactFromRow(row);
-      const existing = await Supplier.findOne({ companyName: new RegExp(`^${escapeRegex(companyName)}$`, 'i') });
+      continue;
+    }
+    const line = g.lines[0];
+    try {
+      const { contacts: uniqueContacts } = mergeContacts([], g.contacts);
+      const existing = await Supplier.findOne({
+        companyName: new RegExp(`^${escapeRegex(g.companyName)}$`, 'i'),
+      });
       if (existing) {
-        const { contacts: merged, added } = mergeContacts(existing.contactPersons, contacts);
+        const { contacts: merged, added } = mergeContacts(existing.contactPersons, uniqueContacts);
         if (!added.length) {
-          skipped.push({ line, reason: `Supplier already exists (no new contacts): ${companyName}` });
+          skipped.push({
+            line,
+            reason: `Supplier already exists with these contacts: ${g.companyName}`,
+          });
           continue;
         }
-        existing.contactPersons = merged;
-        existing.country = fillIfEmpty(existing.country, pick(row, 'country'));
-        existing.city = fillIfEmpty(existing.city, pick(row, 'city'));
-        existing.province = fillIfEmpty(existing.province, pick(row, 'province'));
-        existing.address = fillIfEmpty(existing.address, pick(row, 'address'));
-        existing.postCode = fillIfEmpty(existing.postCode, pick(row, 'postCode', 'postal code', 'zip'));
-        existing.web = fillIfEmpty(existing.web, pick(row, 'web', 'website'));
-        await existing.save();
+        const patch = {
+          contactPersons: merged,
+          country: fillIfEmpty(existing.country, firstPick(g.rows, 'country')),
+          city: fillIfEmpty(existing.city, firstPick(g.rows, 'city')),
+          province: fillIfEmpty(existing.province, firstPick(g.rows, 'province')),
+          address: fillIfEmpty(existing.address, firstPick(g.rows, 'address')),
+          postCode: fillIfEmpty(existing.postCode, firstPick(g.rows, 'postCode', 'postal code', 'zip')),
+          web: fillIfEmpty(existing.web, firstPick(g.rows, 'web', 'website')),
+        };
+        await Supplier.findByIdAndUpdate(existing._id, { $set: patch }, { new: true });
         updated.push({
           line,
           id: existing._id,
@@ -374,18 +442,25 @@ async function importSuppliers(rows) {
         });
         continue;
       }
+
       const doc = await Supplier.create({
-        companyName,
-        country: pick(row, 'country'),
-        city: pick(row, 'city'),
-        province: pick(row, 'province'),
-        address: pick(row, 'address'),
-        postCode: pick(row, 'postCode', 'postal code', 'zip'),
-        web: pick(row, 'web', 'website'),
-        contactPersons: contacts,
+        companyName: g.companyName,
+        country: firstPick(g.rows, 'country'),
+        city: firstPick(g.rows, 'city'),
+        province: firstPick(g.rows, 'province'),
+        address: firstPick(g.rows, 'address'),
+        postCode: firstPick(g.rows, 'postCode', 'postal code', 'zip'),
+        web: firstPick(g.rows, 'web', 'website'),
+        contactPersons: uniqueContacts,
         showAsNew: true,
       });
-      created.push({ line, id: doc._id, name: doc.companyName });
+      created.push({
+        line,
+        id: doc._id,
+        name: doc.companyName,
+        contactsAdded: uniqueContacts.length,
+        contact: uniqueContacts.map((c) => c.name || c.email).filter(Boolean).join(', '),
+      });
     } catch (err) {
       errors.push({ line, reason: err.message || 'Failed' });
     }

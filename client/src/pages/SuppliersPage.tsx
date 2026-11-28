@@ -744,7 +744,7 @@ type LinkForm = {
 const EMPTY_LINK: LinkForm = { supplierPrice: '', currency: 'USD', MOQ: '', leadTime: '', notes: '' }
 
 function SupplierDetail({
-  supplier,
+  supplier: initial,
   onClose,
   onEdit,
 }: {
@@ -754,6 +754,7 @@ function SupplierDetail({
 }) {
   const { canEdit, canDelete, canEmail } = useAuth()
   const { toast } = useToast()
+  const [supplier, setSupplier] = useState(initial)
 
   const [links, setLinks] = useState<ProductLink[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -767,6 +768,25 @@ function SupplierDetail({
   const [editLink, setEditLink] = useState<ProductLink | null>(null)
   const [editForm, setEditForm] = useState<LinkForm>(EMPTY_LINK)
   const [editInfoFile, setEditInfoFile] = useState<File | null>(null)
+
+  useEffect(() => {
+    setSupplier(initial)
+  }, [initial])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const fresh = await api<Supplier>(`/api/suppliers/${initial._id}`)
+        if (!cancelled && fresh?._id) setSupplier(fresh)
+      } catch {
+        /* keep list snapshot */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [initial._id])
 
   const loadLinks = useCallback(async () => {
     setLoading(true)

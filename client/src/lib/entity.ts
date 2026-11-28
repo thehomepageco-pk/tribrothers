@@ -42,10 +42,13 @@ export function includesText(haystack: unknown[], needle: string) {
 }
 
 export function contactsSummary(list?: ContactPerson[]) {
-  return (list || [])
+  const names = (list || [])
     .map((c) => c.name || c.email || '')
     .filter(Boolean)
-    .join(', ')
+  if (!names.length) return ''
+  if (names.length === 1) return names[0]
+  if (names.length <= 3) return names.join(', ')
+  return `${names.slice(0, 2).join(', ')} +${names.length - 2} more`
 }
 
 export function firstEmail(list?: ContactPerson[], fallback?: string) {

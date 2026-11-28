@@ -791,7 +791,7 @@ export default function ClientsPage() {
 }
 
 function ClientDetail({
-  client,
+  client: initial,
   onClose,
   onEdit,
 }: {
@@ -801,6 +801,7 @@ function ClientDetail({
 }) {
   const { canEdit, canDelete, canEmail } = useAuth()
   const { toast } = useToast()
+  const [client, setClient] = useState(initial)
 
   const [links, setLinks] = useState<ProductLink[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -810,6 +811,25 @@ function ClientDetail({
   const [busy, setBusy] = useState(false)
   const [editLink, setEditLink] = useState<ProductLink | null>(null)
   const [editNotes, setEditNotes] = useState('')
+
+  useEffect(() => {
+    setClient(initial)
+  }, [initial])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      try {
+        const fresh = await api<Client>(`/api/clients/${initial._id}`)
+        if (!cancelled && fresh?._id) setClient(fresh)
+      } catch {
+        /* keep list snapshot */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [initial._id])
 
   const loadLinks = useCallback(async () => {
     setLoading(true)
