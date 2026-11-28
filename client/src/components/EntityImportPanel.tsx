@@ -16,6 +16,7 @@ type FormatInfo = {
 type ImportResult = {
   message?: string
   created?: Array<{ line?: number; id?: string; name?: string }>
+  updated?: Array<{ line?: number; id?: string; name?: string; contactsAdded?: number; contact?: string }>
   skipped?: Array<{ line?: number; reason?: string }>
   errors?: Array<{ line?: number; reason?: string }>
   extracted?: number
@@ -177,10 +178,27 @@ export function EntityImportPanel({
                 <h3>Result</h3>
                 <p className="form-hint">
                   Created <strong>{result.created?.length || 0}</strong>
+                  {result.updated?.length
+                    ? ` · Contacts added on ${result.updated.length} existing`
+                    : ''}
                   {result.extracted != null ? ` · AI found ${result.extracted}` : ''}
                   {result.skipped?.length ? ` · Skipped ${result.skipped.length}` : ''}
                   {result.errors?.length ? ` · Errors ${result.errors.length}` : ''}
                 </p>
+                {result.updated?.length ? (
+                  <details className="entity-import-details">
+                    <summary>Contacts merged ({result.updated.length})</summary>
+                    <ul>
+                      {result.updated.slice(0, 40).map((s, i) => (
+                        <li key={`${s.line}-${i}`}>
+                          Line {s.line}: {s.name}
+                          {s.contact ? ` ← ${s.contact}` : ''}
+                          {s.contactsAdded ? ` (+${s.contactsAdded})` : ''}
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
                 {result.skipped?.length ? (
                   <details className="entity-import-details">
                     <summary>Skipped ({result.skipped.length})</summary>

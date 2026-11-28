@@ -116,8 +116,8 @@ const TEMPLATES = {
     ],
     help: [
       'Required: companyName',
-      'One row per company (add contact columns for the primary contact)',
-      'Duplicate company names are skipped',
+      'Use one row per contact person — same companyName on multiple rows adds extra contacts',
+      'If the company already exists, new contacts are merged (not skipped)',
     ],
   },
   suppliers: {
@@ -156,8 +156,8 @@ const TEMPLATES = {
     ],
     help: [
       'Required: companyName',
-      'One row per company (add contact columns for the primary contact)',
-      'Duplicate company names are skipped',
+      'Use one row per contact person — same companyName on multiple rows adds extra contacts',
+      'If the company already exists, new contacts are merged (not skipped)',
     ],
   },
 };
@@ -170,8 +170,54 @@ function contactFromRow(row) {
   const department = pick(row, 'contactDepartment', 'contact department', 'department');
   const whatsapp = pick(row, 'contactWhatsapp', 'contact whatsapp', 'whatsapp');
   const wechat = pick(row, 'contactWechat', 'contact wechat', 'wechat');
-  if (!name && !email) return [];
-  return [{ name: name || email, email, mobile, tel, department, whatsapp, wechat }];
+  if (!name && !email && !mobile && !tel) return [];
+  return [
+    {
+      name: name || email || mobile || tel,
+      email: email || '',
+      mobile: mobile || '',
+      tel: tel || '',
+      department: department || '',
+      whatsapp: whatsapp || '',
+      wechat: wechat || '',
+    },
+  ];
+}
+
+function contactKey(c) {
+  const email = String(c?.email || '')
+    .trim()
+    .toLowerCase();
+  if (email) return `e:${email}`;
+  const name = String(c?.name || '')
+    .trim()
+    .toLowerCase();
+  const mobile = String(c?.mobile || c?.tel || '')
+    .trim()
+    .toLowerCase();
+  if (name || mobile) return `n:${name}|${mobile}`;
+  return '';
+}
+
+/** Append contacts that are not already on the company (by email, or name+phone). */
+function mergeContacts(existingList, incoming) {
+  const list = Array.isArray(existingList) ? [...existingList] : [];
+  const seen = new Set(list.map(contactKey).filter(Boolean));
+  const added = [];
+  for (const c of incoming || []) {
+    const key = contactKey(c);
+    if (key && seen.has(key)) continue;
+    if (key) seen.add(key);
+    list.push(c);
+    added.push(c);
+  }
+  return { contacts: list, added };
+}
+
+function fillIfEmpty(current, next) {
+  const cur = String(current || '').trim();
+  if (cur) return cur;
+  return String(next || '').trim();
 }
 
 async function importProducts(rows) {
@@ -222,6 +268,7 @@ async function importProducts(rows) {
 
 async function importClients(rows) {
   const created = [];
+  const updated = [];
   const skipped = [];
   const errors = [];
   for (let i = 0; i < rows.length; i += 1) {
@@ -233,12 +280,36 @@ async function importClients(rows) {
         skipped.push({ line, reason: 'Missing companyName' });
         continue;
       }
+      const contacts = contactFromRow(row);
       const existing = await Client.findOne({ companyName: new RegExp(`^${escapeRegex(companyName)}$`, 'i') });
       if (existing) {
-        skipped.push({ line, reason: `Client already exists: ${companyName}` });
+        const { contacts: merged, added } = mergeContacts(existing.contactPersons, contacts);
+        if (!added.length) {
+          skipped.push({ line, reason: `Client already exists (no new contacts): ${companyName}` });
+          continue;
+        }
+        existing.contactPersons = merged;
+        existing.country = fillIfEmpty(existing.country, pick(row, 'country'));
+        existing.city = fillIfEmpty(existing.city, pick(row, 'city'));
+        existing.province = fillIfEmpty(existing.province, pick(row, 'province'));
+        existing.address = fillIfEmpty(existing.address, pick(row, 'address'));
+        existing.postCode = fillIfEmpty(existing.postCode, pick(row, 'postCode', 'postal code', 'zip'));
+        existing.tel = fillIfEmpty(existing.tel, pick(row, 'tel', 'phone'));
+        existing.mobile = fillIfEmpty(existing.mobile, pick(row, 'mobile'));
+        existing.email = fillIfEmpty(existing.email, pick(row, 'email') || contacts[0]?.email || '');
+        existing.web = fillIfEmpty(existing.web, pick(row, 'web', 'website'));
+        existing.ntnNumber = fillIfEmpty(existing.ntnNumber, pick(row, 'ntnNumber', 'ntn', 'ntn #'));
+        existing.notes = fillIfEmpty(existing.notes, pick(row, 'notes', 'note'));
+        await existing.save();
+        updated.push({
+          line,
+          id: existing._id,
+          name: existing.companyName,
+          contactsAdded: added.length,
+          contact: added.map((c) => c.name || c.email).filter(Boolean).join(', '),
+        });
         continue;
       }
-      const contacts = contactFromRow(row);
       const email = pick(row, 'email') || contacts[0]?.email || '';
       const doc = await Client.create({
         companyName,
@@ -261,11 +332,12 @@ async function importClients(rows) {
       errors.push({ line, reason: err.message || 'Failed' });
     }
   }
-  return { created, skipped, errors };
+  return { created, updated, skipped, errors };
 }
 
 async function importSuppliers(rows) {
   const created = [];
+  const updated = [];
   const skipped = [];
   const errors = [];
   for (let i = 0; i < rows.length; i += 1) {
@@ -277,12 +349,31 @@ async function importSuppliers(rows) {
         skipped.push({ line, reason: 'Missing companyName' });
         continue;
       }
+      const contacts = contactFromRow(row);
       const existing = await Supplier.findOne({ companyName: new RegExp(`^${escapeRegex(companyName)}$`, 'i') });
       if (existing) {
-        skipped.push({ line, reason: `Supplier already exists: ${companyName}` });
+        const { contacts: merged, added } = mergeContacts(existing.contactPersons, contacts);
+        if (!added.length) {
+          skipped.push({ line, reason: `Supplier already exists (no new contacts): ${companyName}` });
+          continue;
+        }
+        existing.contactPersons = merged;
+        existing.country = fillIfEmpty(existing.country, pick(row, 'country'));
+        existing.city = fillIfEmpty(existing.city, pick(row, 'city'));
+        existing.province = fillIfEmpty(existing.province, pick(row, 'province'));
+        existing.address = fillIfEmpty(existing.address, pick(row, 'address'));
+        existing.postCode = fillIfEmpty(existing.postCode, pick(row, 'postCode', 'postal code', 'zip'));
+        existing.web = fillIfEmpty(existing.web, pick(row, 'web', 'website'));
+        await existing.save();
+        updated.push({
+          line,
+          id: existing._id,
+          name: existing.companyName,
+          contactsAdded: added.length,
+          contact: added.map((c) => c.name || c.email).filter(Boolean).join(', '),
+        });
         continue;
       }
-      const contacts = contactFromRow(row);
       const doc = await Supplier.create({
         companyName,
         country: pick(row, 'country'),
@@ -299,52 +390,61 @@ async function importSuppliers(rows) {
       errors.push({ line, reason: err.message || 'Failed' });
     }
   }
-  return { created, skipped, errors };
+  return { created, updated, skipped, errors };
+}
+
+function aiRecordsToRows(type, records) {
+  const rows = [];
+  for (const r of records || []) {
+    const companyName = r.companyName;
+    if (!companyName) continue;
+    const contacts = Array.isArray(r.contacts) && r.contacts.length
+      ? r.contacts
+      : [{ name: '', email: r.email || '', mobile: r.mobile || '', tel: r.tel || '' }];
+    contacts.forEach((c, idx) => {
+      const base =
+        type === 'clients'
+          ? {
+              companyName,
+              country: idx === 0 ? r.country : '',
+              city: idx === 0 ? r.city : '',
+              province: idx === 0 ? r.province : '',
+              address: idx === 0 ? r.address : '',
+              postCode: idx === 0 ? r.postCode : '',
+              tel: idx === 0 ? r.tel : '',
+              mobile: idx === 0 ? r.mobile : '',
+              email: idx === 0 ? r.email : '',
+              web: idx === 0 ? r.web : '',
+              notes: idx === 0 ? r.notes : '',
+            }
+          : {
+              companyName,
+              country: idx === 0 ? r.country : '',
+              city: idx === 0 ? r.city : '',
+              province: idx === 0 ? r.province : '',
+              address: idx === 0 ? r.address : '',
+              postCode: idx === 0 ? r.postCode : '',
+              web: idx === 0 ? r.web : '',
+            };
+      rows.push({
+        ...base,
+        contactName: c?.name || '',
+        contactEmail: c?.email || (idx === 0 ? r.email : '') || '',
+        contactMobile: c?.mobile || '',
+        contactTel: c?.tel || '',
+        contactDepartment: c?.department || '',
+        contactWhatsapp: c?.whatsapp || '',
+        contactWechat: c?.wechat || '',
+      });
+    });
+  }
+  return rows;
 }
 
 async function createFromAiRecords(type, records) {
-  if (type === 'clients') {
-    return importClients(
-      records.map((r) => ({
-        companyName: r.companyName,
-        country: r.country,
-        city: r.city,
-        province: r.province,
-        address: r.address,
-        postCode: r.postCode,
-        tel: r.tel,
-        mobile: r.mobile,
-        email: r.email,
-        web: r.web,
-        notes: r.notes,
-        contactName: r.contacts?.[0]?.name || '',
-        contactEmail: r.contacts?.[0]?.email || r.email || '',
-        contactMobile: r.contacts?.[0]?.mobile || '',
-        contactTel: r.contacts?.[0]?.tel || '',
-        contactDepartment: r.contacts?.[0]?.department || '',
-        contactWhatsapp: r.contacts?.[0]?.whatsapp || '',
-        contactWechat: r.contacts?.[0]?.wechat || '',
-      })),
-    );
-  }
-  return importSuppliers(
-    records.map((r) => ({
-      companyName: r.companyName,
-      country: r.country,
-      city: r.city,
-      province: r.province,
-      address: r.address,
-      postCode: r.postCode,
-      web: r.web,
-      contactName: r.contacts?.[0]?.name || '',
-      contactEmail: r.contacts?.[0]?.email || r.email || '',
-      contactMobile: r.contacts?.[0]?.mobile || '',
-      contactTel: r.contacts?.[0]?.tel || '',
-      contactDepartment: r.contacts?.[0]?.department || '',
-      contactWhatsapp: r.contacts?.[0]?.whatsapp || '',
-      contactWechat: r.contacts?.[0]?.wechat || '',
-    })),
-  );
+  const rows = aiRecordsToRows(type, records);
+  if (type === 'clients') return importClients(rows);
+  return importSuppliers(rows);
 }
 
 function num(v) {
@@ -403,8 +503,11 @@ router.post('/import/csv/:type', canEdit, importUpload.single('file'), async (re
     if (type === 'products') result = await importProducts(rows);
     else if (type === 'clients') result = await importClients(rows);
     else result = await importSuppliers(rows);
+    const updatedCount = result.updated?.length || 0;
+    const parts = [`Imported ${result.created.length} ${type}`];
+    if (updatedCount) parts.push(`added contacts on ${updatedCount} existing`);
     res.json({
-      message: `Imported ${result.created.length} ${type}`,
+      message: parts.join(' · '),
       ...result,
     });
   } catch (err) {
@@ -432,8 +535,11 @@ router.post('/import/ai/:type', canEdit, importUpload.single('file'), async (req
       return res.status(422).json({ error: 'AI did not find any companies in this PDF', records: [] });
     }
     const result = await createFromAiRecords(type, records);
+    const updatedCount = result.updated?.length || 0;
+    const parts = [`AI imported ${result.created.length} ${type}`];
+    if (updatedCount) parts.push(`added contacts on ${updatedCount} existing`);
     res.json({
-      message: `AI imported ${result.created.length} ${type}`,
+      message: parts.join(' · '),
       extracted: records.length,
       preview: records.slice(0, 20),
       ...result,
