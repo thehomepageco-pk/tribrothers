@@ -156,18 +156,24 @@ export default function SuppliersPage() {
 
   const selection = useSelection(filtered)
 
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+
   async function deleteSelected() {
-    if (!selection.count) return
+    if (!selection.count || bulkDeleting) return
     if (!window.confirm(`Delete ${selection.count} selected supplier(s)? This cannot be undone.`)) return
+    setBulkDeleting(true)
     try {
-      for (const id of selection.selectedIds) {
-        await api(`/api/suppliers/${id}`, { method: 'DELETE' })
-      }
-      toast(`Deleted ${selection.count} supplier(s)`, 'success')
+      const res = await api<{ deleted?: number; message?: string }>('/api/suppliers/bulk-delete', {
+        method: 'POST',
+        body: JSON.stringify({ ids: selection.selectedIds }),
+      })
+      toast(res.message || `Deleted ${res.deleted ?? selection.count} supplier(s)`, 'success')
       selection.clear()
       await load()
     } catch (err) {
       toast(errorMessage(err, 'Bulk delete failed'), 'error')
+    } finally {
+      setBulkDeleting(false)
     }
   }
 
@@ -420,10 +426,10 @@ export default function SuppliersPage() {
         <button
           type="button"
           className="btn btn-secondary btn-sm"
-          disabled={!canDelete || selection.count === 0}
+          disabled={!canDelete || selection.count === 0 || bulkDeleting}
           onClick={() => void deleteSelected()}
         >
-          Delete
+          {bulkDeleting ? 'Deleting…' : 'Delete'}
         </button>
         <Link
           className={`btn btn-secondary btn-sm${canEmail && selection.count ? '' : ' is-disabled'}`}

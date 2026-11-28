@@ -1551,11 +1551,38 @@ app.post('/api/suppliers', canEdit, upload.single('productSpecsFile'), async (re
   }
 });
 
+function normalizeBulkIds(raw) {
+  const list = Array.isArray(raw) ? raw : [];
+  return [...new Set(list.map((id) => String(id || '').trim()).filter(Boolean))];
+}
+
+// BULK DELETE suppliers (one round-trip; cleans product links)
+app.post('/api/suppliers/bulk-delete', canDelete, async (req, res) => {
+  try {
+    const ids = normalizeBulkIds(req.body?.ids);
+    if (!ids.length) return res.status(400).json({ error: 'No suppliers selected' });
+    const result = await Supplier.deleteMany({ _id: { $in: ids } });
+    await SupplierProduct.deleteMany({ supplierId: { $in: ids } });
+    await logSessionEvent(req, 'BULK_DELETE_SUPPLIER', 'Supplier', null, {
+      count: result.deletedCount,
+      requested: ids.length,
+    });
+    res.json({
+      message: `Deleted ${result.deletedCount} supplier(s)`,
+      deleted: result.deletedCount,
+    });
+  } catch (err) {
+    console.error('❌ Error bulk-deleting suppliers:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // DELETE supplier
 app.delete('/api/suppliers/:id', canDelete, async (req, res) => {
   try {
     const supplier = await Supplier.findByIdAndDelete(req.params.id);
     if (supplier) {
+      await SupplierProduct.deleteMany({ supplierId: supplier._id });
       await logSessionEvent(req, 'DELETE_SUPPLIER', 'Supplier', supplier._id, {
         companyName: supplier.companyName,
       });
@@ -2200,10 +2227,34 @@ app.post('/api/products/:id/duplicate', canEdit, async (req, res) => {
 });
 
 // DELETE product
+// BULK DELETE products (one round-trip; cleans supplier/client links)
+app.post('/api/products/bulk-delete', canDelete, async (req, res) => {
+  try {
+    const ids = normalizeBulkIds(req.body?.ids);
+    if (!ids.length) return res.status(400).json({ error: 'No products selected' });
+    const result = await Product.deleteMany({ _id: { $in: ids } });
+    await SupplierProduct.deleteMany({ productId: { $in: ids } });
+    await ProductClient.deleteMany({ productId: { $in: ids } });
+    await logSessionEvent(req, 'BULK_DELETE_PRODUCT', 'Product', null, {
+      count: result.deletedCount,
+      requested: ids.length,
+    });
+    res.json({
+      message: `Deleted ${result.deletedCount} product(s)`,
+      deleted: result.deletedCount,
+    });
+  } catch (err) {
+    console.error('❌ Error bulk-deleting products:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/products/:id', canDelete, async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
     if (!deletedProduct) return res.status(404).json({ error: 'Product not found' });
+    await SupplierProduct.deleteMany({ productId: deletedProduct._id });
+    await ProductClient.deleteMany({ productId: deletedProduct._id });
     await logSessionEvent(req, 'DELETE_PRODUCT', 'Product', deletedProduct._id, {
       name: deletedProduct.name,
       category: deletedProduct.category,
@@ -2505,10 +2556,32 @@ app.get('/api/clients/:id/products', async (req, res) => {
   }
 });
 
+// BULK DELETE clients (one round-trip; cleans product links)
+app.post('/api/clients/bulk-delete', canDelete, async (req, res) => {
+  try {
+    const ids = normalizeBulkIds(req.body?.ids);
+    if (!ids.length) return res.status(400).json({ error: 'No clients selected' });
+    const result = await Client.deleteMany({ _id: { $in: ids } });
+    await ProductClient.deleteMany({ clientId: { $in: ids } });
+    await logSessionEvent(req, 'BULK_DELETE_CLIENT', 'Client', null, {
+      count: result.deletedCount,
+      requested: ids.length,
+    });
+    res.json({
+      message: `Deleted ${result.deletedCount} client(s)`,
+      deleted: result.deletedCount,
+    });
+  } catch (err) {
+    console.error('❌ Error bulk-deleting clients:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.delete('/api/clients/:id', canDelete, async (req, res) => {
   try {
     const deletedClient = await Client.findByIdAndDelete(req.params.id);
     if (!deletedClient) return res.status(404).json({ error: 'Client not found' });
+    await ProductClient.deleteMany({ clientId: deletedClient._id });
     await logSessionEvent(req, 'DELETE_CLIENT', 'Client', deletedClient._id, {
       companyName: deletedClient.companyName,
       city: deletedClient.city,

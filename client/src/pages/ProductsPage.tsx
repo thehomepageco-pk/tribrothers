@@ -184,18 +184,24 @@ export default function ProductsPage() {
 
   const newCount = useMemo(() => products.filter((p) => p.showAsNew).length, [products])
 
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+
   async function deleteSelected() {
-    if (!selection.count) return
+    if (!selection.count || bulkDeleting) return
     if (!window.confirm(`Delete ${selection.count} selected product(s)? This cannot be undone.`)) return
+    setBulkDeleting(true)
     try {
-      for (const id of selection.selectedIds) {
-        await api(`/api/products/${id}`, { method: 'DELETE' })
-      }
-      toast(`Deleted ${selection.count} product(s)`, 'success')
+      const res = await api<{ deleted?: number; message?: string }>('/api/products/bulk-delete', {
+        method: 'POST',
+        body: JSON.stringify({ ids: selection.selectedIds }),
+      })
+      toast(res.message || `Deleted ${res.deleted ?? selection.count} product(s)`, 'success')
       selection.clear()
       await load()
     } catch (err) {
       toast(errorMessage(err, 'Bulk delete failed'), 'error')
+    } finally {
+      setBulkDeleting(false)
     }
   }
 
@@ -527,10 +533,10 @@ export default function ProductsPage() {
         <button
           type="button"
           className="btn btn-secondary btn-sm"
-          disabled={!canDelete || selection.count === 0}
+          disabled={!canDelete || selection.count === 0 || bulkDeleting}
           onClick={() => void deleteSelected()}
         >
-          Delete
+          {bulkDeleting ? 'Deleting…' : 'Delete'}
         </button>
         <div className={`selected-count${selection.count ? ' has-selection' : ''}`}>
           Selected: {selection.count}
