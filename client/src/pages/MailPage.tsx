@@ -167,9 +167,11 @@ export default function MailPage() {
     void loadAll()
   }, [loadAll])
 
-  // --- context (product- or recipient-scoped) ---
+  // --- context (product-scoped, or a single recipient deep-link) ---
+  // Bulk recipientIds from Clients/Suppliers Email must NOT collapse to the first ID.
   const contextProductId = urlProductIds[0] || ''
-  const contextRecipientId = urlRecipientIds[0] || ''
+  const contextRecipientId =
+    !contextProductId && urlRecipientIds.length === 1 ? urlRecipientIds[0] : ''
   useEffect(() => {
     if (!contextProductId && !(contextRecipientId && recipientType === urlType)) {
       setContext(null)
@@ -235,12 +237,13 @@ export default function MailPage() {
   const restrictIds = recipientType === urlType ? urlRecipientIds : []
 
   const baseRows = useMemo(() => {
-    let rows = linkedRows.length && onlyLinked ? linkedRows : allRows
+    // Bulk Email from Clients/Suppliers: always show every matching company from the full list.
+    // Do not use product-linked context (that was collapsing multi-select down to the first ID).
     if (restrictIds.length) {
       const set = new Set(restrictIds)
-      rows = rows.filter((r) => set.has(r.recipientId))
+      return allRows.filter((r) => set.has(r.recipientId))
     }
-    return rows
+    return linkedRows.length && onlyLinked ? linkedRows : allRows
   }, [linkedRows, allRows, onlyLinked, restrictIds])
 
   const visibleRows = useMemo(
@@ -248,38 +251,41 @@ export default function MailPage() {
     [baseRows, recipientSearch],
   )
 
-  // preselect from URL once recipient rows are available
-  const [preselected, setPreselected] = useState(false)
+  // Re-apply URL preselection whenever deep-link recipient IDs change
+  const restrictKey = restrictIds.join(',')
+  const [preselectedFor, setPreselectedFor] = useState<string | null>(null)
   useEffect(() => {
-    if (preselected || loading) return
+    if (loading) return
     if (recipientType !== urlType) return
+    const token = `${urlType}:${restrictKey}:${urlToEmail || ''}`
+    if (preselectedFor === token) return
     if (!restrictIds.length) {
-      setPreselected(true)
+      setPreselectedFor(token)
       return
     }
     if (!baseRows.length) return
-    const keys: string[] = []
+    let keys: string[] = []
     if (urlToEmail) {
       const hit = baseRows.find((r) => r.toEmail.toLowerCase() === urlToEmail.toLowerCase())
-      if (hit) keys.push(hit.key)
+      if (hit) keys = [hit.key]
     } else {
-      const seen = new Set<string>()
-      for (const r of baseRows) {
-        if (seen.has(r.recipientId)) continue
-        seen.add(r.recipientId)
-        keys.push(r.key)
-      }
+      // Select every contact/email row for the URL-selected companies
+      keys = baseRows.map((r) => r.key)
     }
     setSelected(keys)
-    setPreselected(true)
-  }, [preselected, loading, recipientType, urlType, restrictIds, baseRows, urlToEmail])
+    setRecipientType(urlType)
+    setPreselectedFor(token)
+  }, [loading, recipientType, urlType, restrictIds, restrictKey, baseRows, urlToEmail, preselectedFor])
+
+  // Keep changeRecipientType from fighting URL re-preselect on first paint
+  const markManualTypeChange = () => setPreselectedFor(`manual:${Date.now()}`)
 
   function changeRecipientType(next: RecipientType) {
     if (next === recipientType) return
+    markManualTypeChange()
     setRecipientType(next)
     setSelected([])
     setRecipientSearch('')
-    setPreselected(true)
   }
 
   function toggleRow(key: string) {
